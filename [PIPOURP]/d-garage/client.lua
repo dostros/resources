@@ -28,7 +28,11 @@ Citizen.CreateThread(function()
         if garagetype == "gang" then
             hashpnj = GetHashKey(Config.GaragePed[garagegang][1])
         elseif garagetype =='job' then
-            hashpnj = GetHashKey(Config.GaragePed[garagejob][1])
+            if GetHashKey(Config.GaragePed[garagejob][1]) then
+                hashpnj = GetHashKey(Config.GaragePed[garagejob][1])
+            else
+                hashpnj = GetHashKey("a_m_y_business_01")
+            end
         end
 
 

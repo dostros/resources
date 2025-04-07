@@ -181,4 +181,18 @@ QBShared.Jobs = {
 			['4'] = { name = 'Gouverneur', isboss = true, payment = 150 },
 		},
 	},
+
+	restaurant = {
+		label = 'Restaurant',
+		type = 'restaurant',
+		defaultDuty = false,
+		offDutyPay = false,
+		grades = {
+			['0'] = { name = 'Recruit', payment = 50 },
+			['1'] = { name = 'Novice', payment = 75 },
+			['2'] = { name = 'Experienced', payment = 100 },
+			['3'] = { name = 'Advanced', payment = 125 },
+			['4'] = { name = 'Chef', isboss = true, payment = 150 },
+		},
+	},
 }

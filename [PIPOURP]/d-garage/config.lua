@@ -18,6 +18,7 @@ Config.GaragePed = {
     police = {"s_m_y_cop_01"},
     government = {"cs_fbisuit_01"},
     timber = {"a_m_m_farmer_01"},
+    restaurant = {"a_m_y_business_01"},
 }
 
 Config.Garages = {
@@ -62,149 +63,132 @@ Config.Garages = {
         blipColor = 3,
         type = 'public',
     },
-    -- spanishave = {
-    --     label = 'Spanish Ave Parking',
-    --     takeVehicle = vector3(-1160.86, -741.41, 19.63),
-    --     spawnPoint = {
-    --         vector4(-1145.2, -745.42, 19.26, 108.22)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
+    spanishave = {
+        label = 'Spanish Ave Parking',
+        takeVehicle = vector4(-1159.46, -739.41, 19.89, 225.21),
+        spawnPoint = {
+            vector4(-1164.29, -748.7, 19.27, 37.22)
+        },
+        getinpoint = vector3(-1186.02, -742.5, 20.11),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
         
-    -- },
-    -- caears24 = {
-    --     label = 'Caears 24 Parking',
-    --     takeVehicle = vector3(69.84, 12.6, 68.96),
-    --     spawnPoint = {
-    --         vector4(60.8, 17.54, 68.82, 339.7)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
+    },
+    caears24 = {
+        label = 'Caears 24 Parking',
+        takeVehicle = vector4(67.72, 12.39, 69.21, 333.16),
+        spawnPoint = {
+            vector4(59.29, 27.21, 69.87, 246.28)
+        },
+        getinpoint = vector3(60.5, 17.41, 69.18),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
         
-    -- },
-    -- caears242 = {
-    --     label = 'Caears 24 Parking',
-    --     takeVehicle = vector3(-453.7, -786.78, 30.56),
-    --     spawnPoint = {
-    --         vector4(-472.39, -787.71, 30.14, 180.52)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
+    },
+    lagunapi = {
+        label = 'Laguna Parking',
+        takeVehicle = vector4(362.13, 297.74, 103.88, 332.79),
+        spawnPoint = {
+            vector4(378.87, 293.94, 103.2, 174.78)
+        },
+        getinpoint = vector3(360.09, 290.09, 103.5),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
         
-    -- },
-    -- lagunapi = {
-    --     label = 'Laguna Parking',
-    --     takeVehicle = vector3(364.37, 297.83, 103.49),
-    --     spawnPoint = {
-    --         vector4(375.09, 294.66, 102.86, 164.04)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
+    },
+    airportp = {
+        label = 'Airport Parking',
+        takeVehicle = vector4(-796.68, -2022.87, 9.17, 237.22),
+        spawnPoint = {
+            vector4(-776.4, -2024.69, 8.87, 237.28)
+        },
+        getinpoint = vector3(-779.31, -2039.54, 8.88),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
         
-    -- },
-    -- airportp = {
-    --     label = 'Airport Parking',
-    --     takeVehicle = vector3(-773.12, -2033.04, 8.88),
-    --     spawnPoint = {
-    --         vector4(-779.77, -2040.18, 8.47, 315.34)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
+    },
+    beachp = {
+        label = 'Beach Parking',
+        takeVehicle = vector4(-1184.91, -1510.02, 4.65, 307.14),
+        spawnPoint = {
+            vector4(-1188.14, -1487.95, 3.97, 124.06)
+        },
+        getinpoint = vector3(-1182.74, -1495.6, 4.38),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
         
-    -- },
-    -- beachp = {
-    --     label = 'Beach Parking',
-    --     takeVehicle = vector3(-1185.32, -1500.64, 4.38),
-    --     spawnPoint = {
-    --         vector4(-1188.14, -1487.95, 3.97, 124.06)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
+    },
+    themotorhotel = {
+        label = 'The Motor Hotel Parking',
+        takeVehicle = vector4(1141.13, 2664.6, 38.16, 97.18),
+        spawnPoint = {
+            vector4(1113.47, 2657.76, 38.0, 274.95)
+        },
+        getinpoint = vector3(1131.79, 2648.34, 38.0),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
         
-    -- },
-    -- themotorhotel = {
-    --     label = 'The Motor Hotel Parking',
-    --     takeVehicle = vector3(1137.77, 2663.54, 37.9),
-    --     spawnPoint = {
-    --         vector4(1127.7, 2647.84, 37.58, 1.41)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
+    },
+    liqourparking = {
+        label = 'Liqour Parking',
+        takeVehicle = vector4(902.66, 3642.86, 32.7, 91.92),
+        spawnPoint = {
+            vector4(890.11, 3659.89, 32.83, 182.42)
+        },
+        getinpoint = vector3(899.72, 3645.7, 32.76),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
         
-    -- },
-    -- liqourparking = {
-    --     label = 'Liqour Parking',
-    --     takeVehicle = vector3(883.99, 3649.67, 32.87),
-    --     spawnPoint = {
-    --         vector4(898.38, 3649.41, 32.36, 90.75)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
+    },
+    haanparking = {
+        label = 'Bell Farms Parking',
+        takeVehicle = vector4(57.0, 6394.93, 31.39, 218.77),
+        spawnPoint = {
+            vector4(62.15, 6403.41, 30.81, 211.38)
+        },
+        getinpoint = vector3(66.26, 6379.78, 31.24),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
         
-    -- },
-    -- shoreparking = {
-    --     label = 'Shore Parking',
-    --     takeVehicle = vector3(1737.03, 3718.88, 34.05),
-    --     spawnPoint = {
-    --         vector4(1725.4, 3716.78, 34.15, 20.54)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
+    },
+    dumbogarage = {
+        label = 'Dumbo Private Parking',
+        takeVehicle = vector4(160.1, -3227.21, 5.99, 270.63),
+        spawnPoint = {
+            vector4(166.8, -3236.18, 5.87, 269.36)
+        },
+        getinpoint = vector3(166.26, -3217.74, 5.88),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
         
-    -- },
-    -- haanparking = {
-    --     label = 'Bell Farms Parking',
-    --     takeVehicle = vector3(76.88, 6397.3, 31.23),
-    --     spawnPoint = {
-    --         vector4(62.15, 6403.41, 30.81, 211.38)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
-        
-    -- },
-    -- dumbogarage = {
-    --     label = 'Dumbo Private Parking',
-    --     takeVehicle = vector3(165.75, -3227.2, 5.89),
-    --     spawnPoint = {
-    --         vector4(168.34, -3236.1, 5.43, 272.05)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
-        
-    -- },
+    },
     pillboxgarage = {
         label = 'Pillbox Garage Parking',
         takeVehicle = vector4(214.0, -808.61, 31.00, 155.53),
@@ -223,32 +207,20 @@ Config.Garages = {
         type = 'public',
         
     },
-    -- grapeseedgarage = {
-    --     label = 'Grapeseed Parking',
-    --     takeVehicle = vector3(2552.68, 4671.8, 33.95),
-    --     spawnPoint = {
-    --         vector4(2550.17, 4681.96, 33.81, 17.05)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Public Parking',
-    --     blipNumber = 357,
-    --     blipColor = 3,
-    --     type = 'public',
+    grapeseedgarage = {
+        label = 'Grapeseed Parking',
+        takeVehicle = vector4(2551.06, 4668.99, 34.08, 10.06),
+        spawnPoint = {
+            vector4(2550.17, 4681.96, 33.81, 17.05)
+        },
+        getinpoint = vector3(2558.01, 4689.12, 33.96),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
         
-    -- },
-    -- depotLot = {
-    --     label = 'Depot Lot',
-    --     takeVehicle = vector3(401.76, -1632.57, 29.29),
-    --     spawnPoint = {
-    --         vector4(396.55, -1643.93, 28.88, 321.91)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Depot Lot',
-    --     blipNumber = 68,
-    --     blipColor = 3,
-    --     type = 'depot',
-        
-    -- },
+    },
     ballas = {
         label = 'Ballas',
         takeVehicle = vector4(109.18, -1952.87, 20.8, 85.64),
@@ -439,85 +411,34 @@ Config.Garages = {
     --     type = 'depot',
     --     category = "sea"
     -- },
-    -- rigdepot = {
-    --     label = 'Big Rig Depot',
-    --     takeVehicle = vector3(2334.42, 3118.62, 48.2),
-    --     spawnPoint = {
-    --         vector4(2324.57, 3117.79, 48.21, 4.05)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Big Rig Depot',
-    --     blipNumber = 68,
-    --     blipColor = 2,
-    --     type = 'depot',
-    --     category = "all"
-    -- },
-    -- dumborigparking = {
-    --     label = 'Dumbo Big Rig Parking',
-    --     takeVehicle = vector3(161.23, -3188.73, 5.97),
-    --     spawnPoint = {
-    --         vector4(167.0, -3203.89, 5.94, 271.27)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Big Rig Parking',
-    --     blipNumber = 357,
-    --     blipColor = 2,
-    --     type = 'public',
-    --     category = "all"
-    -- },
-    -- popsrigparking = {
-    --     label = 'Pop\'s Big Rig Parking',
-    --     takeVehicle = vector3(137.67, 6632.99, 31.67),
-    --     spawnPoint = {
-    --         vector4(127.69, 6605.84, 31.93, 223.67)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Big Rig Parking',
-    --     blipNumber = 357,
-    --     blipColor = 2,
-    --     type = 'public',
-    --     category = "all"
-    -- },
-    -- ronsrigparking = {
-    --     label = 'Ron\'s Big Rig Parking',
-    --     takeVehicle = vector3(-2529.37, 2342.67, 33.06),
-    --     spawnPoint = {
-    --         vector4(-2521.61, 2326.45, 33.13, 88.7)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Big Rig Parking',
-    --     blipNumber = 357,
-    --     blipColor = 2,
-    --     type = 'public',
-    --     category = "all"
-    -- },
-    -- ronsrigparking2 = {
-    --     label = 'Ron\'s Big Rig Parking',
-    --     takeVehicle = vector3(2561.67, 476.68, 108.49),
-    --     spawnPoint = {
-    --         vector4(2561.67, 476.68, 108.49, 177.86)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Big Rig Parking',
-    --     blipNumber = 357,
-    --     blipColor = 2,
-    --     type = 'public',
-    --     category = "all"
-    -- },
-    -- ronsrigparking3 = {
-    --     label = 'Ron\'s Big Rig Parking',
-    --     takeVehicle = vector3(-41.24, -2550.63, 6.01),
-    --     spawnPoint = {
-    --         vector4(-39.39, -2527.81, 6.08, 326.18)
-    --     },
-    --     showBlip = true,
-    --     blipName = 'Big Rig Parking',
-    --     blipNumber = 357,
-    --     blipColor = 2,
-    --     type = 'public',
-    --     category = "all"
-    -- },
-
+    ronsrigparking = {
+        label = 'Ron\'s Big Rig Parking',
+        takeVehicle = vector4(-2524.16, 2319.31, 33.22, 358.13),
+        spawnPoint = {
+            vector4(-2531.81, 2337.2, 33.06, 207.43)
+        },
+        getinpoint = vector3(-2524.12, 2343.63, 33.06),
+        showBlip = true,
+        blipName = 'Big Rig Parking',
+        blipNumber = 357,
+        blipColor = 2,
+        type = 'public',
+        category = "all"
+    },
+    ronsrigparking2 = {
+        label = 'Ron\'s Big Rig Parking',
+        takeVehicle = vector4(2591.88, 417.54, 108.46, 104.44),
+        spawnPoint = {
+            vector4(2576.84, 416.68, 108.46, 180.84)
+        },
+        getinpoint = vector3(2588.56, 409.6, 108.46),
+        showBlip = true,
+        blipName = 'Big Rig Parking',
+        blipNumber = 357,
+        blipColor = 2,
+        type = 'public',
+        category = "all"
+    },
     govgarage = {
         label = 'Government Parking',
         takeVehicle = vector4(-557.72, -165.86, 38.31, 21.58),
@@ -525,7 +446,7 @@ Config.Garages = {
             vector4(-558.7, -161.7, 38.17, 290.4)
         },
         getinpoint = vector3(-571.86, -167.74, 37.99),
-        showBlip = true,
+        showBlip = false,
         blipName = 'Gov Parking',
         blipNumber = 357,
         blipColor = 1,
@@ -541,7 +462,7 @@ Config.Garages = {
             vector4(-500.48, -237.98, 36.24, 212.79)
         },
         getinpoint = vector3(-505.41, -231.09, 36.43),
-        showBlip = true,
+        showBlip = false,
         blipName = 'Gov Helipad',
         blipNumber = 357,
         blipColor = 1,
@@ -549,22 +470,20 @@ Config.Garages = {
         job='government',
         category="air"
     },
-
-    -- restaurantgarage = {
-    --     label = 'Restaurant Parking',
-    --     takeVehicle = vector4(-1339.08, -1099.44, 6.72, 193.59),
-    --     spawnPoint = {
-    --         vector4(-1344.44, -1105.93, 5.53, 289.35)
-    --     },
-    --     showBlip = false,
-    --     blipName = 'Restaurant Parking',
-    --     blipNumber = 357,
-    --     blipColor = 2,
-    --     type = 'job', -- public, gang, job, depot
-    --     job='restaurant',
-        
-    -- },
-
+    restaurantgarage = {
+        label = 'Restaurant Parking',
+        takeVehicle = vector4(-1339.01, -1099.12, 6.74, 215.79),
+        spawnPoint = {
+            vector4(-1342.57, -1106.16, 5.84, 302.59)
+        },
+        getinpoint = vector3(-1351.72, -1111.22, 4.32),
+        showBlip = false,
+        blipName = 'Restaurant Parking',
+        blipNumber = 357,
+        blipColor = 2,
+        type = 'job', -- public, gang, job, depot
+        job='restaurant',
+    },
     timbergarage = {
         label = 'timber Parking',
         takeVehicle = vector4(-570.93, 5364.8, 70.2, 250.64),
