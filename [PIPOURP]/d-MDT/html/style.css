@@ -1,0 +1,51 @@
+body {
+    display: flex;
+    align-self: center;
+    justify-content: center;
+
+    margin-top: 150px;
+
+}
+
+
+
+#MDTMenu {
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    justify-content: center;
+
+    width: 65%;
+    height: 65%;
+    min-height: 1000px;
+    background: #3a3a3a;
+
+    border-radius: 13px;
+    border: 7px solid #555555;
+    box-shadow: black 10px 10px 15px;
+}
+
+iframe {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 98%;
+    width: 98%;
+    height: 990px;
+
+    margin: 15px;
+
+    border: 2px solid #555555;
+}
+
+#playbutton {
+    width: 60px;
+    height: 60px;
+    background-color: black;
+    clip-path: polygon(25% 20%, 75% 50%, 25% 80%);
+    cursor: pointer;
+    margin: auto;
+    margin-top: 0;
+    padding: 0;
+}
+

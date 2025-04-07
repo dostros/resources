@@ -1,0 +1,257 @@
+body {
+    display: flex;
+    justify-content:baseline;
+    align-items: center;
+    margin: 0;
+    margin-left: 5%;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    color: #e0e0e0;
+}
+
+.ContentforLockMenu {
+    background: #2c2c2c;
+    min-width: 600px;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#TabdoorSystemmenu {
+    display: none;
+    width: 70%;
+}
+
+#contenttabdoor {
+    width: 100%;
+    max-height: 500px;
+    overflow: scroll;
+}
+
+#contenttabdoor::-webkit-scrollbar {
+    width: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+    text-align: left;
+    background: #3a3a3a;
+    border-radius: 8px;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #4a4a4a;
+}
+
+th {
+    background-color: #4a4a4a;
+    color: #e0e0e0;
+    font-weight: bold;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background-color: #3a3a3a;
+}
+
+tr:hover {
+    background-color: #4a4a4a;
+}
+
+td {
+    text-align: center;
+}
+
+th:first-child {
+    border-top-left-radius: 8px;
+}
+
+th:last-child {
+    border-top-right-radius: 8px;
+}
+
+tr button {
+    width: 100px;
+    background-color: #5a5a5a;
+    color: #e0e0e0;
+}
+
+tr button:hover {
+    background-color: #6a6a6a;
+}
+
+tr button:active {
+    background-color: #7a7a7a;
+}
+
+.ContentforLockMenu header {
+    font-size: 24px;
+    font-weight: bold;
+    background: #4a4a4a;
+    color: #e0e0e0;
+    padding: 15px;
+    border-radius: 8px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#Choiceonglet {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: #2c2c2c;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    width: 15%;
+    border-radius: 8px;
+    margin: 10px;
+    padding: 10px;
+}
+
+#Choiceonglet button:hover {
+    background: #4a4a4a;
+    transition: background 0.3s;
+}
+
+#Choiceonglet button {
+    width: 100%;
+    height: 50px;
+    margin: 10px;
+    background: #3a3a3a;
+    color: #e0e0e0;
+}
+
+#contentonglet {
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #3a3a3a;
+    padding: 12px;
+    margin: 8px 0px;
+    width: 98%;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease-in-out;
+}
+
+.item:hover {
+    background: #4a4a4a;
+}
+
+label {
+    font-size: 14px;
+    font-weight: 500;
+    width: 40%;
+    text-align: left;
+}
+
+.item input {
+    display: flex;
+    margin-right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    border: 2px solid #5a5a5a;
+    background: #2c2c2c;
+    color: #e0e0e0;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s, background 0.3s;
+}
+
+.item input:focus {
+    border-color: #6a6a6a;
+    background: #3a3a3a;
+}
+
+button, select, textarea {
+    background: #4a4a4a;
+    color: #e0e0e0;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover, select:hover, textarea:hover {
+    background: #5a5a5a;
+}
+
+select, textarea {
+    width: 50%;
+    height: 35px;
+    text-align: center;
+    outline: none;
+}
+
+button {
+    width: 30%;
+    font-weight: bold;
+}
+
+#confirmation {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+#coords2, #angle2 {
+    display: none;
+}
+
+#coords2.visible, #angle2.visible {
+    display: flex;
+}
+
+/* Stylisation moderne de la checkbox */
+.inputclass[type="checkbox"] {
+    appearance: none;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #5a5a5a;
+    border-radius: 6px;
+    background: #2c2c2c;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    margin-right: 50px;
+}
+
+.inputclass[type="checkbox"]:checked {
+    background: #4a4a4a;
+    border-color: #5a5a5a;
+}
+
+.inputclass[type="checkbox"]::after {
+    content: '✔';
+    font-size: 16px;
+    font-weight: bold;
+    color: #e0e0e0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+}
+
+.inputclass[type="checkbox"]:checked::after {
+    display: block;
+}

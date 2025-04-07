@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.prod.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://cfx-nui-my-resource/production.js" async></script>
+    <title>Pipou Menu</title>
+</head>
+<body>
+    <div id="PipouMenu">
+        <div id="PipouTitleMenu">
+            PIPOU MENU
+        </div>
+
+        <!-- Main Menu -->
+        <div class="PipouContentMenu" id="PipouContentMenu1">
+            <div class="contentdiv"><button id="job-button">Métiers</button></div>
+            <div class="contentdiv"><button id="vehiclemenu-button">Véhicules</button></div>
+            <div class="contentdiv"><button id="">Next Feature</button></div>
+            <div class="contentdiv"><button id="">Next Feature</button></div>
+        </div>
+
+        <!-- Job Menu -->
+        <div class="PipouContentMenu" id="PipouContentMenu2" style="display: none;">
+            <div class="titlesubmenu">
+                <h2>Métiers</h2>
+                <button aria-label="Go back" class="backbutton"><img src="../html/backarrow.png"></button>
+            </div>
+            <div id="contentsubmenupipou2">
+                <!-- <div class="contentdiv jobchoice"><button id="restaurant">restaurant</button></div>
+                <div class="contentdiv jobchoice"><button id="Police">police</button></div>
+                <div class="contentdiv jobchoice"><button id="Gouvernement">government</button></div>
+                <div class="contentdiv jobchoice"><button id="Bucheron">bucheron</button></div> -->
+            </div>
+            
+        </div>
+
+        <!-- Vehicle Menu -->
+        <div class="PipouContentMenu" id="vehiclecontentmenu" style="display: none;">
+            <div class="titlesubmenu">
+                <h2>Véhicules</h2>
+                <button aria-label="Go back" class="backbutton"><img src="../html/backarrow.png"></button>
+            </div>
+            <div class="contentdiv"><button id="spawn_vehiclemenu">Spawn</button></div>
+            <div class="contentdiv"><button id="repare_vehiclemenu">Réparation</button></div>
+            <div class="contentdiv"><button id="mods_vehiclemenu">Modifications</button></div>
+            <div class="contentdiv"><button id="fullperf_vehiclemenu">Full Perf</button></div>
+        </div>
+
+        <!-- Mods Menu -->
+        <div class="PipouContentMenu" id="mods_vehiclecontentmenu" style="display: none;">
+            <div class="titlesubmenu">
+                <h2>Mods véhicules</h2>
+                <button aria-label="Go back" class="backbutton"><img src="../html/backarrow.png"></button>
+            </div>
+            <div class="contentdiv">
+                <label>Stickers</label>
+                <button id="minus_sticker">-</button>
+                <p id="number_sticker"></p>
+                <button id="plus_sticker">+</button>
+            </div>
+        </div>
+
+        <!-- Popup for Vehicle Spawn -->
+        <div id="vehiclePopupContainer" style="display: none;">
+            <div id="vehiclePopup">
+                <h2>Sélectionnez le modèle du véhicule</h2>
+                <select id="vehicleModelSelect">
+                    <option value="model1">Modèle 1</option>
+                    <option value="model2">Modèle 2</option>
+                    <option value="model3">Modèle 3</option>
+                </select>
+                <div class="popupButtons">
+                    <button id="vehiclePopupConfirm">Confirmer</button>
+                    <button id="vehiclePopupCancel">Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popup for Job Grade -->
+        <div id="popupContainer" style="display: none;">
+            <div id="popup">
+                <h2 id="popupTitle"></h2>
+                <input type="number" id="popupInput" placeholder="Entrez un nombre" />
+                <div class="popupButtons">
+                    <button id="popupConfirm">Confirmer</button>
+                    <button id="popupCancel">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

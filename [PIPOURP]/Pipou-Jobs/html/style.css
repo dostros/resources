@@ -1,0 +1,110 @@
+body {
+    color: #f1f1f1;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#PipouJobMenu {
+    background-color: #3a3a3a;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 1);
+    border-radius: 15px;
+    border: #c13f1d solid 3px;
+    width: 50%;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.header {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    background: #555;
+    color: #fff;
+    padding: 15px;
+    border-radius: 7px 7px 0 0;
+}
+
+.choice-tab-content ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    border-bottom: 2px solid #777;
+}
+
+.choice-tab-content li {
+    margin-right: 15px;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    color: #bbb;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.tab-button.active, .tab-button:hover {
+    color: #fff;
+    border-bottom: 2px solid #00bcd4;
+}
+
+.tab-content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: #444;
+    color: white;
+}
+
+thead {
+    background: #555;
+}
+
+td, th {
+    padding: 10px;
+    border-bottom: 1px solid #666;
+}
+
+button {
+    background: #ff5733;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background: #c13f1d;
+}
+
+button:active {
+    background: #d43b15;
+    transform: translateY(1px);
+}
+
+tr:hover {
+    background: #666;
+}

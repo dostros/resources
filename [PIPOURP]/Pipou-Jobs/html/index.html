@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.prod.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://cfx-nui-my-resource/production.js" async></script>
+    <title>Boss Menu - Sombre</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="PipouJobMenu">
+        <div class="header">BOSS MENU </div>
+        
+        <div class="choice-tab-content">
+            <ul>
+                <li><button data-target="annonces" class="tab-button">Annonces</button></li>
+                <li><button data-target="employes" class="tab-button active">Employés</button></li>
+                <li><button data-target="grade" class="tab-button">Grade</button></li>
+                <li><button data-target="banque" class="tab-button">Banque</button></li>
+            </ul>
+        </div>
+
+        <div class="tab-content">
+            <div id="annonces" class="tab-panel hidden">Gestion des Annonces</div>
+            <div id="employes" class="tab-panel active">
+                <h2>Gestion des Employés</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Grade</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Chris</td>
+                            <td>HTML tables</td>
+                            <td><button>Licencier</button></td>
+                        </tr>
+                        <tr>
+                            <td>Dennis</td>
+                            <td>Web accessibility</td>
+                            <td><button>Licencier</button></td>
+                        </tr>
+                        <tr>
+                            <td>Sarah</td>
+                            <td>JavaScript frameworks</td>
+                            <td><button>Licencier</button></td>
+                        </tr>
+                        <tr>
+                            <td>Karen</td>
+                            <td>Web performance</td>
+                            <td><button>Licencier</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="banque" class="tab-panel hidden">Gestion de la Banque</div>
+            <div id="grade" class="tab-panel hidden">Gestion des Grades</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

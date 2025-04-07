@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.prod.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://cfx-nui-my-resource/production.js" async></script>
+    <title>D-LockSystem</title>
+</head>
+<body>
+    <div id="Choiceonglet">
+        <button id="NewDoorPage">Nouvelle porte</button>
+        <button id="TabDoorPage">Listes des portes</button>
+        <!-- <button>Type de Porte</button>
+        <button>Coordonées</button>
+        <button>Statut</button>
+        <button>Angle</button>
+        <button>Job</button>
+        <button>Nom</button> -->
+    </div>
+    <div class="ContentforLockMenu" id="LockSystemMenu">
+        <header>Lock System</header>
+        <div id="contentonglet">
+            <div class="item" id="typedoor">
+                <label>Type de porte</label>
+                <select id="selecttypedoor" name="selectbasic" class="input-xlarge">
+                    <option value="simpledoor" id="simpledoor">Simple</option>
+                    <option value="doubledoor" id="doubledoor">Double</option>
+                    <option value="garagedoor" id="garagedoor">Garage</option>
+                </select>
+            </div>
+            <div class = "item" id="automaticchoice">
+                <label id="automaticlabel">Automatique</label>
+                <input class ='inputclass'type="checkbox" id="checkboxautomatic">
+            </div>
+            <div class = "item" id="coords1">
+                <label id="coords1label">x: 0.0, y: 0.0, z: 0.0</label>
+                <button class="coordsbutton" id="coords1button">Get Coords</button>
+            </div>
+            <div class = "item" id="coords2">
+                <label id="coords2label">x: 0.0, y: 0.0, z: 0.0</label>
+                <button class="coordsbutton" id="coords2button">Get Coords</button>
+            </div>
+            <div class="item" id="status">
+                <label>Statut par défaut</label>
+                <select id="selectstatusdoor" name="selectbasic" class="input-xlarge">
+                    <option value= "open" id="openstatusbydefault">Ouverte</option>
+                    <option value= "close" id="closestatusbydefault">Fermée</option>
+                </select>
+            </div>
+            
+            <div class="item" id="angle">
+                <label>Angle porte fermée</label>
+                <textarea class="chooseangle" id="angleentered" row = "1" cols="1" maxlength="7" minlength="1" placeholder="0" ></textarea>
+            </div>
+            <div class="item" id="angle2">
+                <label>Angle porte fermée</label>
+                <textarea class="chooseangle" id="angleentered2" row = "1" cols="1" maxlength="7" minlength="1" placeholder="0" ></textarea>
+            </div>
+            <div class="item" id="job">
+                <label>Job Nécessaire</label>
+                <textarea id="jobentered" row = "1" cols="1" maxlength="20" minlength="2" placeholder="job" ></textarea>
+            </div>
+            <div class="item" id="name">
+                <label>Nom</label>
+                <textarea id="nameentered" row = "1" cols="1" minlength="4" placeholder="porte" ></textarea>
+            </div>
+            <div class="item" id="confirmation">
+                <button>Confirmer</button>
+            </div>
+        </div>
+
+    </div>
+    <div class="ContentforLockMenu" id="TabdoorSystemmenu">
+        <header>Liste des Portes créées</header>
+        <div id="contenttabdoor">
+            <table id="doorTable">
+                <!-- <tr>
+                    <th>Nom de la Porte</th>
+                    <th>Emplacement</th>
+                    <th>Type de porte</th>
+                    <th>Automatique</th>
+                    <th>Statut</th>
+                    <th>Angle de fermeture</th>
+                    <th>Job</th>
+                    <th></th>
+                </tr> 
+                <tr>
+                    <td>Gouvernement entrée</td>
+                    <td>308.23, -789.45, 478.20</td>
+                    <td>DoubleDoor</td>
+                    <td>false</td>
+                    <td>Close</td>
+                    <td>120</td>
+                    <td>Gouvernement</td>
+                    <td><button>Supprimer</button></td>
+                </tr>
+                 -->
+            </table>
+        </div>
+            
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

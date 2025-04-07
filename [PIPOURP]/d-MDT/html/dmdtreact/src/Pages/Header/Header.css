@@ -1,0 +1,17 @@
+#AppHeader {
+    background: pink;
+
+    display: flex;
+    justify-content: end;
+    align-items: center;
+
+    width: 100%;
+    height: 100px;
+
+    background:#3a3f47;
+    color: #FFFFFF
+}
+
+#AppHeader img {
+    width: 100px;
+}

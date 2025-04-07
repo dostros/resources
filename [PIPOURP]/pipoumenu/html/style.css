@@ -1,0 +1,261 @@
+body {
+    display: flex;
+    justify-content: end;
+}
+
+button {
+    background: linear-gradient(to right, #4caf50, #81c784);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+#PipouMenu {
+    max-width: 20%;
+    width: 500px;
+    min-height: 500px;
+    opacity: 95%;
+    border: outset grey 2px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 2px black;
+}
+
+
+#PipouTitleMenu {
+    background: content-box radial-gradient(black, rgb(77, 72, 72));
+    height: 100px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: x-large;
+}
+
+.PipouContentMenu {
+    background: content-box radial-gradient(rgb(77, 72, 72), black);
+    min-width: 400px;
+    height: 600px;
+    color: grey;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: x-large;
+    overflow: scroll;
+}
+
+.PipouContentMenu::-webkit-scrollbar {
+    display: none;
+}
+.PipouContentMenu {
+    -ms-overflow-style: none; 
+    overflow: -moz-scrollbars-none; 
+}
+
+.PipouContentMenu img {
+    height: 50px;
+}
+
+.contentdiv {
+    border: 2px grey outset;
+    width: 99%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    margin: 5px;
+}
+
+.contentdiv button {
+    width: 100%;
+    height: 100%;
+    color: white;
+    font-size: x-large;
+    padding: 5px;
+}
+
+.titlesubmenu {
+    background: content-box radial-gradient(rgb(77, 72, 72), black);
+    color: white;
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+    height: 50px;
+    padding: 10px;
+    margin-left: 50px;
+}
+
+.titlesubmenu button {
+    margin: 0px;
+}
+
+#contentsubmenupipou2 {
+    width: 100%;
+    height: auto;
+}
+
+#mods_vehiclecontentmenu button {
+    max-width: 50px;
+    margin: 20px;
+}
+
+#mods_vehiclecontentmenu p {
+    min-width: 100px;
+    text-align: center;
+}
+
+/* Popup for vehicle model selection */
+#vehiclePopupContainer, #popupContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: white;
+}
+
+#vehiclePopup, #popup {
+    background: black;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 300px;
+    text-align: center;
+    border: 2px outset grey;
+    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.3), 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#vehiclePopup h2, #popup h2 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#vehiclePopup select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    border: 1px solid grey;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.popupButtons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.popupButtons button {
+    padding: 10px 20px;
+    cursor: pointer;
+    color: white;
+    background: grey;
+    border: 2px outset white;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background 0.3s, color 0.3s, transform 0.1s;
+}
+
+.popupButtons button:hover {
+    background: white;
+    color: black;
+}
+
+.popupButtons button:active {
+    transform: scale(0.95);
+}
+
+/* Popup Container */
+.popup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    margin: 20px auto;
+    width: 80%;
+    max-width: 500px;
+    background: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Popup Header */
+.popupHeader {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Popup Content */
+.popupContent {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* Responsivity for small screens */
+@media (max-width: 600px) {
+    #vehiclePopup, #popup {
+        width: 95%;
+    }
+
+    #vehiclePopup select, #popup input {
+        font-size: 14px;
+    }
+
+    .popupButtons button {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+}
+
+/* Responsivity for small screens */
+@media (max-width: 600px) {
+    .popup {
+        width: 95%;
+    }
+
+    .popup select, .popup input {
+        font-size: 14px;
+    }
+
+    .popupButtons button {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+}
+
+/* Accessibility Improvements */
+.popupButtons button:focus {
+    outline: 2px solid blue;
+    outline-offset: 2px;
+}
+
+/* Accessibility Improvements */
+.popupButtons button:focus {
+    outline: 2px solid blue;
+    outline-offset: 2px;
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+    <head>
+        <link href="style.css" rel="stylesheet" type="text/css"/>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.prod.js"></script>
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="https://cfx-nui-my-resource/production.js" async></script>
+    </head>
+
+    <body>
+        <div id="mainContainer">
+            <div id="header">
+                <h1>PIZZERIA</h1>
+            </div>
+            <div id="menu">
+                <div id="menuItems">
+                    <div class="menuItem" v-for="item in menuItems" :key="item.id">
+                        <h2>PIZZA MARGARITA</h2>
+                        <p>Une délicieuse pizza italienne</p>
+                        <p> <strong>2 farine et 1 tomate</strong></p>
+                        <div class="fabricationnumber">
+                            <div class="input-append">
+                            <input id="numberItem" name="numberItem" class="input-xlarge" placeholder="Nombre de pizza" type="text">
+                            <button id="make-food-margarita">Fabriquer</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="menuItem" v-for="item in menuItems" :key="item.id">
+                        <h2>PIZZA NAPOLITAINE</h2>
+                        <p>Une délicieuse pizza italienne</p>
+                        <p> <strong>2 farine et 1 tomate</strong></p>
+                        <div class="fabricationnumber">
+                            <div class="input-append">
+                            <input id="numberItem" name="numberItem" class="input-xlarge" placeholder="Nombre de pizza" type="text">
+                            <button>Fabriquer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <script src="script.js" type="text/javascript"></script>
+    </body>
+</html>
