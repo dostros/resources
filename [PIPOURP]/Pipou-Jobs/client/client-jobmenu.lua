@@ -70,12 +70,11 @@ Citizen.CreateThread(function()
                         event = "Test:Event",
                         icon = 'fas fa-example',
                         label = 'Ouvrir le Menu Patron',
-                        targeticon = 'fas fa-example',
+                        targeticon = 'fa-solid fa-laptop',
                         action = function(entity)
                             if IsPedAPlayer(entity) then return false end
                             local PlayerData = QBCore.Functions.GetPlayerData()
                             if PlayerData.job.isboss then
-                                print("j'ouvre menu")
                                 TriggerEvent('OpenBossMenu:event', joblabel, jobid)
                             else
                                 QBCore.Functions.Notify("Vous n'êtes pas le patron de ce job.", "error")
@@ -113,7 +112,7 @@ Citizen.CreateThread(function()
                         event = "Test:Event",
                         icon = 'fas fa-example',
                         label = 'Prendre son service',
-                        targeticon = 'fas fa-example',
+                        targeticon = 'fa-solid fa-money-check',
                         action = function(entity)
                             if IsPedAPlayer(entity) then return false end
                             print("je prend mon service gros")
@@ -179,4 +178,78 @@ RegisterNUICallback('getJobInfo', function(data, cb)
             print("Aucun résultat ou erreur de réception.")
         end
     end, playerjob)
+end)
+
+
+RegisterNUICallback('getBanqueInfo', function(data, cb)
+    local playerjob = data.JobId
+    
+
+    QBCore.Functions.TriggerCallback('Pipou-Jobs:server:getBanqueInfo', function(result)
+        if result then
+
+            SendNUIMessage({
+                type='ui:banqueinfo',
+                bankaccount = result,
+            })
+        else
+            print("Aucun résultat ou erreur de réception.")
+        end
+    end, playerjob)
+end)
+
+RegisterNUICallback('getGradeInfo', function(data, cb)
+    local playerjob = data.JobId
+    print("Job ID: " .. playerjob)
+
+    -- Accéder correctement aux informations du job
+    local job = QBCore.Shared.Jobs[tostring(playerjob)]
+
+    if job then
+        -- Vérifier que 'grades' existe avant de commencer la boucle
+        if job.grades then
+            local grades = {}
+            
+            -- Itérer sur les grades d'un job
+            for grade, info in pairs(job.grades) do
+                -- Vérifier si 'name' et 'payment' existent avant de les utiliser
+                local gradeName = info.name or "Nom non défini"  -- Si 'name' est nil, on utilise "Nom non défini"
+                
+                -- Vérifier si 'payment' existe, sinon, mettre une valeur par défaut
+                local payment = info.payment or "Non défini"  -- Si 'payment' est nil, on utilise "Non défini"
+                -- Ajouter à la liste des grades
+                table.insert(grades, {
+                    grade = grade,
+                    name = gradeName,
+                    payment = payment
+                })
+                
+                -- Debug pour afficher dans la console
+                print("Grade: " .. gradeName .. " - Paiement: " .. payment)
+            end
+
+            -- Trier les grades du plus haut au plus bas (en utilisant la clé numérique)
+            table.sort(grades, function(a, b)
+                return tonumber(a.grade) > tonumber(b.grade)  -- Trier du plus élevé au plus bas
+            end)
+
+            -- Envoi des informations triées au NUI
+            cb({
+                type = 'ui:gradeinfo',
+                grades = grades,
+            })
+        else
+            print("Aucun grade trouvé pour ce job.")
+            cb({
+                type = 'ui:gradeinfo',
+                grades = {} -- Si aucun grade n'est trouvé, renvoyer une liste vide
+            })
+        end
+    else
+        print("Job introuvable: " .. tostring(playerjob))
+        cb({
+            type = 'ui:gradeinfo',
+            grades = {} -- Si le job n'est pas trouvé, renvoyer une liste vide
+        })
+    end
 end)

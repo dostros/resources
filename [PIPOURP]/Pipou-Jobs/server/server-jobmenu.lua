@@ -20,3 +20,36 @@ QBCore.Functions.CreateCallback('Pipou-Jobs:server:getJobInfo', function(source,
     end)
 
 end)
+
+QBCore.Functions.CreateCallback('Pipou-Jobs:server:getBanqueInfo', function(source, cb, job)
+    local bankaccount = 0; 
+
+    MySQL.query('SELECT account_balance FROM bank_accounts WHERE account_name = ? AND account_type = ?', {job, "job"
+    }, function(response)
+
+
+        if  response[1] == nil then
+            print("Erreur de réception du montant de la banque.")
+            bankaccount = 'ERREUR'
+        else 
+            bankaccount = response[1].account_balance
+        end
+        
+        cb (bankaccount)
+    end)
+
+end)
+
+
+
+QBCore.Functions.CreateCallback('Pipou-Jobs:server:getGradeInfo', function(source, cb, jobname)
+    local gradeinfo = QBShared.Jobs[jobname]  
+
+    for grade, info in pairs(gradeinfo) do
+        print("Grade: " .. info.name .. " - Paiement: " .. info.payment)
+    end
+    
+    cb (gradeinfo)
+    
+    
+end)

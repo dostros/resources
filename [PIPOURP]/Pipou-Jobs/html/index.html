@@ -8,7 +8,7 @@
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script type="text/javascript" src="https://cfx-nui-my-resource/production.js" async></script>
-    <title>Boss Menu - Sombre</title>
+    <title>Boss Menu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -63,8 +63,36 @@
             <div id="banque" class="tab-panel hidden">
                 <h2>Compte en Banque d'entreprise</h2>
                 
+                <div class="compte-card">
+                    <h3>Solde actuel :</h3>
+                    <p id="banque-solde" class="compte-solde">Chargement...</p> <!-- Affichera le solde -->
+                    <button id="actualiser-solde" class="btn">Actualiser</button> <!-- Bouton d'actualisation -->
+                </div>
             </div>
-            <div id="grade" class="tab-panel hidden">Gestion des Grades</div>
+            <div id="grade" class="tab-panel hidden">
+                <h2>Gestion des Employés</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Grade</th>
+                            <th>Salaire</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Gouverneur</td>
+                            <td>500 $</td>
+                            <td><button>Modifier</button></td>
+                        </tr>
+                        <tr>
+                            <td>Adjoint</td>
+                            <td>400 $</td>
+                            <td><button>Modifier</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
