@@ -57,42 +57,68 @@ function updateEmployees() {
         }),
     })
     .then((response) => response.json())
-    .then((data) => {
-        console.log('Données des employés :', data);
-
-        // Mise à jour de l'interface utilisateur ici
-        const employeeTableBody = document.querySelector('#employes table tbody');
-        employeeTableBody.innerHTML = ''; // Réinitialiser la table avant d'ajouter les employés
-
-        // Ajouter les employés dans la table
-        data.forEach(emp => {
-            const row = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            nameCell.textContent = emp.name;  // Ajouter le nom de l'employé
-            const gradeCell = document.createElement('td');
-            gradeCell.textContent = emp.grade_name;  // Ajouter le grade de l'employé
-            const actionCell = document.createElement('td');
-            const fireButton = document.createElement('button');
-            fireButton.textContent = 'Licencier';
-
-            // Ajouter un événement pour "Licencier" (éventuellement en envoyant une action à Lua)
-            fireButton.addEventListener('click', function () {
-                showModal(`Voulez-vous vraiment licencier ${emp.name} ?`, () => {
-                    console.log(`${emp.name} a été licencié.`);
-                    // Ici, tu pourrais déclencher un événement vers Lua si besoin
-                    // fetch('https://Pipou-Jobs/fire', { ... })
-                });
-            });
-
-            actionCell.appendChild(fireButton);
-            row.appendChild(nameCell);
-            row.appendChild(gradeCell);
-            row.appendChild(actionCell);
-            employeeTableBody.appendChild(row);
-        });
-    })
     .catch((error) => console.error('Erreur lors de la récupération des employés :', error));
 }
+
+// Fonction showModal mise à jour pour accepter firstName, lastName et name
+function showModal(fullName, jobid) {
+
+    const overlay = document.createElement('div');
+    overlay.classList.add('modal-overlay');
+
+    const modal = document.createElement('div');
+    modal.classList.add('modal');
+
+    const title = document.createElement('h3');
+    title.textContent = `Voulez-vous vraiment licencier ${fullName} ?`;  // Utilisation du nom complet
+
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.classList.add('modal-buttons');
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = 'Confirmer';
+    confirmBtn.classList.add('confirm');
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Annuler';
+    cancelBtn.classList.add('cancel');
+
+    confirmBtn.onclick = () => {
+        console.log(`${fullName} a été licencié.`);
+    
+        // Envoi de l'information vers Lua pour traiter le licenciement
+        fetch('https://Pipou-Jobs/FireSomeone', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fullName: fullName,
+                jobname: jobid, 
+            })
+        }).then((response) => {
+            if (response.ok) {
+                console.log('Licenciement effectué pour :', fullName);
+            } else {
+                console.error('Erreur lors du licenciement');
+            }
+        });
+        document.body.removeChild(overlay);
+    };
+
+    cancelBtn.onclick = () => {
+        document.body.removeChild(overlay);
+    };
+
+    buttonsDiv.appendChild(confirmBtn);
+    buttonsDiv.appendChild(cancelBtn);
+    modal.appendChild(title);
+    modal.appendChild(buttonsDiv);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+}
+
+
 
 // Fonction pour récupérer les informations de la banque
 // Fonction pour récupérer et afficher le solde de la banque
@@ -131,40 +157,51 @@ function updateGrade() {
             })
             .then((response) => response.json())
             .then((data) => {
-            const grades = data.grades || [];
-            const gradeTableBody = document.querySelector('#grade table tbody');
-            gradeTableBody.innerHTML = ''; // Réinitialiser la table avant d'ajouter les grades
+                const grades = data.grades || [];
+                const gradeTableBody = document.querySelector('#grade table tbody');
+                gradeTableBody.innerHTML = ''; // Réinitialiser la table avant d'ajouter les grades
 
-            grades.forEach(grade => {
-                const row = document.createElement('tr');
-                const gradeCell = document.createElement('td');
-                gradeCell.textContent = grade.name; // Nom du grade
-                const salaryCell = document.createElement('td');
-                salaryCell.textContent = `${grade.payment} $`; // Salaire du grade
-                const actionCell = document.createElement('td');
-                const modifyButton = document.createElement('button');
-                modifyButton.textContent = 'Modifier';
+                grades.forEach(grade => {
+                    const row = document.createElement('tr');
+                    const gradeCell = document.createElement('td');
+                    gradeCell.textContent = grade.name; // Nom du grade
+                    const salaryCell = document.createElement('td');
+                    salaryCell.textContent = `${grade.payment} $`; // Salaire du grade
+                    const actionCell = document.createElement('td');
+                    const modifyButton = document.createElement('button');
+                    modifyButton.textContent = 'Modifier';
 
-                // Ajouter un événement pour modifier le grade
-                modifyButton.addEventListener('click', function () {
-                showModal(`Modifier le grade ${grade.name}`, () => {
-                    console.log(`Grade ${grade.name} modifié.`);
-                    // Ici, tu pourrais déclencher un événement vers Lua si besoin
-                });
-                });
+                    // Ajouter un événement pour modifier le grade
+                    modifyButton.addEventListener('click', function () {
+                    showEditGradeModal(grade,currentJobId), () => {
+                        console.log(`Grade ${grade.name} modifié.`);
+                        // Ici, tu pourrais déclencher un événement vers Lua si besoin
 
-                actionCell.appendChild(modifyButton);
-                row.appendChild(gradeCell);
-                row.appendChild(salaryCell);
-                row.appendChild(actionCell);
-                gradeTableBody.appendChild(row);
-            });
-        })
-        
-    .catch((error) => {
-        console.error('Erreur lors de la récupération des différents grade :', error);
-    });
-}
+                        fetch('https://Pipou-Jobs/modifyGrade', { method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                JobId: currentJobId,
+                                }), })   
+                            .then((response) => response.json())
+                            .then((data) => {
+                                console.log('Grade modifié :', data);
+                                // Mettre à jour l'affichage ou faire autre chose après la modification
+                            })
+                            .catch((error) => console.error('Erreur lors de la modification du grade :', error)); 
+                        };
+                    });
+
+                    actionCell.appendChild(modifyButton);
+                    row.appendChild(gradeCell);
+                    row.appendChild(salaryCell);
+                    row.appendChild(actionCell);
+                    gradeTableBody.appendChild(row);
+                }
+            );
+        }   
+)};
 
 // Fonction pour formater le solde comme une devise
 function formatCurrency(amount) {
@@ -232,23 +269,22 @@ window.addEventListener('message', (event) => {
         const jobLabel = event.data.joblabel;
         const employeeTableBody = document.querySelector('#employes table tbody');
         employeeTableBody.innerHTML = ''; // Réinitialiser la table
-
+    
         employeeList.forEach(emp => {
             const row = document.createElement('tr');
             const nameCell = document.createElement('td');
-            nameCell.textContent = emp.name;
+            nameCell.textContent = emp.name; // Afficher le nom de l'employé
             const gradeCell = document.createElement('td');
-            gradeCell.textContent = emp.grade_name;
+            gradeCell.textContent = emp.grade_name; // Afficher le grade de l'employé
             const actionCell = document.createElement('td');
             const fireButton = document.createElement('button');
             fireButton.textContent = 'Licencier';
-
+    
             fireButton.addEventListener('click', function () {
-                showModal(`Voulez-vous vraiment licencier ${emp.name} ?`, () => {
-                    console.log(`${emp.name} a été licencié.`);
-                });
+                // On passe les informations supplémentaires à la fonction showModal
+                showModal(emp.name, jobLabel)
             });
-
+    
             actionCell.appendChild(fireButton);
             row.appendChild(nameCell);
             row.appendChild(gradeCell);
@@ -256,6 +292,7 @@ window.addEventListener('message', (event) => {
             employeeTableBody.appendChild(row);
         });
     }
+    
 
     if (event.data.type === 'ui:banqueinfo') {
         const bankaccount = event.data.bankaccount;
@@ -267,13 +304,26 @@ window.addEventListener('message', (event) => {
 
 // Fermeture avec la touche ESC
 document.addEventListener('keyup', function (event) {
+    const activeElement = document.activeElement;
+    const isInputFocused = activeElement && (
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.isContentEditable
+    );
+
+    if (isInputFocused) return; // Ne rien faire si on est dans un champ texte
+
     if (event.key === 'Escape' || event.key === 'Backspace') {
         exit();
     }
 });
 
-// Fonction pour afficher un modal de confirmation
-function showModal(message, onConfirm) {
+
+
+
+
+// Fonction pour afficher un popup permettant de modifier le nom et le salaire d'un grade
+function showEditGradeModal(grade,currentJobId) {
     const overlay = document.createElement('div');
     overlay.classList.add('modal-overlay');
 
@@ -281,7 +331,22 @@ function showModal(message, onConfirm) {
     modal.classList.add('modal');
 
     const title = document.createElement('h3');
-    title.textContent = message;
+    title.textContent = `Modifier le grade : ${grade.name}`;
+
+    const form = document.createElement('form');
+    form.classList.add('modal-form');
+
+    const nameLabel = document.createElement('label');
+    nameLabel.textContent = 'Nom du grade :';
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = grade.name;
+
+    const salaryLabel = document.createElement('label');
+    salaryLabel.textContent = 'Salaire :';
+    const salaryInput = document.createElement('input');
+    salaryInput.type = 'number';
+    salaryInput.value = grade.payment;
 
     const buttonsDiv = document.createElement('div');
     buttonsDiv.classList.add('modal-buttons');
@@ -289,13 +354,31 @@ function showModal(message, onConfirm) {
     const confirmBtn = document.createElement('button');
     confirmBtn.textContent = 'Confirmer';
     confirmBtn.classList.add('confirm');
+    confirmBtn.type = 'button';
 
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = 'Annuler';
     cancelBtn.classList.add('cancel');
+    cancelBtn.type = 'button';
 
     confirmBtn.onclick = () => {
-        onConfirm();
+        const updatedGrade = {
+            jobName: currentJobId,  
+            gradeId: grade.grade,     
+            name: nameInput.value,
+            payment: parseFloat(salaryInput.value),
+        };
+    
+        fetch('https://Pipou-Jobs/editGrade', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedGrade),
+        }).then(() => {
+            console.log('Grade mis à jour envoyé au script Lua');
+        });
+    
         document.body.removeChild(overlay);
     };
 
@@ -303,9 +386,14 @@ function showModal(message, onConfirm) {
         document.body.removeChild(overlay);
     };
 
+    form.appendChild(nameLabel);
+    form.appendChild(nameInput);
+    form.appendChild(salaryLabel);
+    form.appendChild(salaryInput);
     buttonsDiv.appendChild(confirmBtn);
     buttonsDiv.appendChild(cancelBtn);
     modal.appendChild(title);
+    modal.appendChild(form);
     modal.appendChild(buttonsDiv);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);

@@ -165,15 +165,7 @@ RegisterNUICallback('getJobInfo', function(data, cb)
                 listemployee = result,
                 joblabel = playerjob,
             })
-
-
-            -- -- Affichage après tri
-            -- for _, emp in pairs(result) do
-            --     -- Vérification de l'existence de 'emp.grade.level'
-            --     local gradeNumber = emp.grade.level or emp.grade -- Si 'level' existe, on l'utilise, sinon on garde 'emp.grade'
-
-            --     print(("%s | Grade %s (%s)"):format(emp.name, gradeNumber, emp.grade_name))
-            -- end
+          
         else
             print("Aucun résultat ou erreur de réception.")
         end
@@ -252,4 +244,52 @@ RegisterNUICallback('getGradeInfo', function(data, cb)
             grades = {} -- Si le job n'est pas trouvé, renvoyer une liste vide
         })
     end
+end)
+
+
+RegisterNUICallback('editGrade', function(data, cb)
+    local jobName = data.jobName           -- ex: "police"
+    local gradeId = tostring(data.gradeId) -- ex: "2", attention c’est une STRING !
+    local newName = data.name              -- ex: "Lieutenant"
+    local newPayment = tonumber(data.payment)
+
+    print("Job:", jobName)
+    print("Grade ID:", gradeId)
+    print("Nouveau nom:", newName)
+    print("Nouveau salaire:", newPayment)
+
+    if QBCore.Shared.Jobs[jobName] and QBCore.Shared.Jobs[jobName].grades[gradeId] then
+        local grade = QBCore.Shared.Jobs[jobName].grades[gradeId]
+        grade.name = newName
+        grade.payment = newPayment
+
+        print("Grade mis à jour pour le job " .. jobName .. ", Grade: " .. gradeId .. ", Nom: " .. newName .. ", Paiement: " .. newPayment)
+    else
+        print("Grade ou Job introuvable.")
+    end
+
+    cb({})
+end)
+
+
+RegisterNuiCallback('FireSomeone', function(data, cb)
+    local playername = data.fullName
+    local jobname = data.jobname
+
+    print("Nom de l'employé:", playername)
+    print("Nom du job:", jobname)
+
+    -- Extraire le prénom et le nom à partir du `fullName`
+    local firstName, lastName = playername:match("^(%S+) (%S+)$")
+
+    print("1")
+    QBCore.Functions.TriggerCallback('Pipou-Jobs:server:Fireplayer', function(result)
+        if result then
+            QBCore.Functions.Notify("Vous avez licencié " .. playername .. " du job " .. jobname, "success")
+            
+        else
+            print("Aucun résultat ou erreur de réception.")
+        end
+    end, firstName, lastName, jobname)
+
 end)
