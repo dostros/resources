@@ -15,6 +15,7 @@ body {
     padding: 20px;
     opacity: 0.97;
     transition: transform 0.3s ease; /* Transition pour un effet d'animation */
+    /* border:#218838 4px solid; */
 }
 
 .GarageMenu__content {

@@ -149,10 +149,19 @@ function updateselectedlisternersforOutside () {
 
 document.addEventListener("DOMContentLoaded", function () {
     // Function to display or hide the UI based on a boolean value
-    function display(bool) {
+    function display(bool,garagetype) {
 
         if (bool) {
             $("body").show();
+            const garageMenu = document.getElementById('GarageMenu');
+            if (garagetype === 'gang') {
+                garageMenu.style.border = "#218838 3px solid"
+            }
+            else if (garagetype === 'job') {
+                garageMenu.style.border = "#c13f1d 3px solid"
+            }else {
+                garageMenu.style.border = "#010101 3px solid"
+            }
         } else {
             $("body").hide();
         }
@@ -205,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (item.type === 'ui') {
             garageopen = item.label
             garagejob = item.garagejob
-            display(item.status);
+            display(item.status,item.garagetype);
             GetGarageList (garageopen, garagejob);
 
         }

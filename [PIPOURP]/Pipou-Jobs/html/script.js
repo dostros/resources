@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    display(false)
+    //display(false)
 
     function exit () {
 
@@ -116,10 +116,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 fireButton.textContent = 'Licencier'; // Texte du bouton
     
                 // Ajouter un événement pour "Licencier" (éventuellement en envoyant une action à Lua)
-                fireButton.addEventListener('click', function() {
-                    console.log(`${emp.name} a été licencié.`); // Tu peux ici envoyer un message à Lua pour licencier l'employé
-                    // Par exemple : TriggerServerEvent('Pipou-Jobs:server:fireEmployee', emp.name);
+                fireButton.addEventListener('click', function () {
+                    showModal(`Voulez-vous vraiment licencier ${emp.name} ?`, () => {
+                        console.log(`${emp.name} a été licencié.`);
+                        // Ici, tu pourrais déclencher un événement vers Lua si besoin
+                        // fetch('https://Pipou-Jobs/fire', { ... })
+                    });
                 });
+                
     
                 // Ajouter les cellules à la ligne
                 actionCell.appendChild(fireButton);
@@ -146,9 +150,52 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    function showModal(message, onConfirm) {
+        // Créer les éléments
+        const overlay = document.createElement('div');
+        overlay.classList.add('modal-overlay');
+    
+        const modal = document.createElement('div');
+        modal.classList.add('modal');
+    
+        const title = document.createElement('h3');
+        title.textContent = message;
+    
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.classList.add('modal-buttons');
+    
+        const confirmBtn = document.createElement('button');
+        confirmBtn.textContent = 'Confirmer';
+        confirmBtn.classList.add('confirm');
+    
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Annuler';
+        cancelBtn.classList.add('cancel');
+    
+        // Événements
+        confirmBtn.onclick = () => {
+            onConfirm();
+            document.body.removeChild(overlay);
+        };
+    
+        cancelBtn.onclick = () => {
+            document.body.removeChild(overlay);
+        };
+    
+        // Assemble
+        buttonsDiv.appendChild(confirmBtn);
+        buttonsDiv.appendChild(cancelBtn);
+        modal.appendChild(title);
+        modal.appendChild(buttonsDiv);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+    }
+    
+
 
 
 
 
 
 });
+

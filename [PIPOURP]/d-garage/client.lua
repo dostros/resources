@@ -77,7 +77,7 @@ Citizen.CreateThread(function()
                     label = 'Ouvrir le garage',
                     targeticon = 'fa-solid fa-car',
                     action = function()
-                        TriggerEvent('d-garage:openGarage', namegarage,garagejob )
+                        TriggerEvent('d-garage:openGarage', namegarage,garagejob,garagetype )
                     end,
                     job = garagejob,
                     gang = garagegang
@@ -264,8 +264,8 @@ end)
 
 
 RegisterNetEvent('d-garage:openGarage')
-AddEventHandler("d-garage:openGarage", function(label, garagejob)
-    SetDisplay(not display, label, garagejob)
+AddEventHandler("d-garage:openGarage", function(label, garagejob,garagetype)
+    SetDisplay(not display, label, garagejob,garagetype)
 end)
 
 function DGarageGetIn(garagelabel, category,garagejob)
@@ -356,14 +356,15 @@ end
 
 -- OUVERTURE/FERMETURE DU MENU GARAGE
 
-function SetDisplay(bool, label, garagejob)
+function SetDisplay(bool, label, garagejob,garagetype)
     display= bool
     SetNuiFocus(bool, bool)
     SendNUIMessage({
         type='ui',
         status = bool,
         label = label,
-        garagejob = garagejob
+        garagejob = garagejob,
+        garagetype = garagetype,
     })
 
 end
