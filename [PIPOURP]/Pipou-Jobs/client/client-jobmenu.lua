@@ -192,7 +192,6 @@ end)
 
 RegisterNUICallback('getGradeInfo', function(data, cb)
     local playerjob = data.JobId
-    print("Job ID: " .. playerjob)
 
     -- Accéder correctement aux informations du job
     local job = QBCore.Shared.Jobs[tostring(playerjob)]
@@ -216,8 +215,6 @@ RegisterNUICallback('getGradeInfo', function(data, cb)
                     payment = payment
                 })
                 
-                -- Debug pour afficher dans la console
-                print("Grade: " .. gradeName .. " - Paiement: " .. payment)
             end
 
             -- Trier les grades du plus haut au plus bas (en utilisant la clé numérique)
@@ -253,10 +250,7 @@ RegisterNUICallback('editGrade', function(data, cb)
     local newName = data.name              -- ex: "Lieutenant"
     local newPayment = tonumber(data.payment)
 
-    print("Job:", jobName)
-    print("Grade ID:", gradeId)
-    print("Nouveau nom:", newName)
-    print("Nouveau salaire:", newPayment)
+
 
     if QBCore.Shared.Jobs[jobName] and QBCore.Shared.Jobs[jobName].grades[gradeId] then
         local grade = QBCore.Shared.Jobs[jobName].grades[gradeId]
@@ -276,13 +270,10 @@ RegisterNuiCallback('FireSomeone', function(data, cb)
     local playername = data.fullName
     local jobname = data.jobname
 
-    print("Nom de l'employé:", playername)
-    print("Nom du job:", jobname)
 
     -- Extraire le prénom et le nom à partir du `fullName`
     local firstName, lastName = playername:match("^(%S+) (%S+)$")
 
-    print("1")
     QBCore.Functions.TriggerCallback('Pipou-Jobs:server:Fireplayer', function(result)
         if result then
             QBCore.Functions.Notify("Vous avez licencié " .. playername .. " du job " .. jobname, "success")

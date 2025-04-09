@@ -42,35 +42,51 @@ end)
 
 
 
-RegisterNetEvent('Pipou-Jobs:server:Fireplayer', function(target)
-	local src = source
-	local Player = QBCore.Functions.GetPlayer(src)
-	local Employee = QBCore.Functions.GetPlayerByCitizenId(target) or QBCore.Functions.GetOfflinePlayerByCitizenId(target)
 
-	if not Player.PlayerData.job.isboss then
-		ExploitBan(src, 'FireEmployee Exploiting')
-		return
-	end
+QBCore.Functions.CreateCallback('Pipou-Jobs:server:Fireplayer', function(source, cb, firstName, lastName, jobname)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
 
-	if Employee then
-		if target == Player.PlayerData.citizenid then
-			TriggerClientEvent('QBCore:Notify', src, 'You can\'t fire yourself', 'error')
-			return
-		elseif Employee.PlayerData.job.grade.level > Player.PlayerData.job.grade.level then
-			TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
-			return
-		end
-		if Employee.Functions.SetJob('unemployed', '0') then
-			Employee.Functions.Save()
-			TriggerClientEvent('QBCore:Notify', src, 'Employee fired!', 'success')
-			TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Job Fire', 'red', Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. ' ' .. Employee.PlayerData.charinfo.lastname .. ' (' .. Player.PlayerData.job.name .. ')', false)
+    -- Vérifier si le joueur est bien le boss
+    if not Player.PlayerData.job.isboss then
+        ExploitBan(src, 'FireEmployee Exploiting')
+        return
+    end
 
-			if Employee.PlayerData.source then -- Player is online
-				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been fired! Good luck.', 'error')
-			end
-		else
-			TriggerClientEvent('QBCore:Notify', src, 'Error..', 'error')
-		end
-	end
-	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
+    -- Requête pour récupérer le citizenid
+	-- AND JSON_EXTRACT(job, "$.label") = ?
+    MySQL.query('SELECT citizenid FROM players WHERE JSON_EXTRACT(charinfo, "$.firstname") = ? AND JSON_EXTRACT(charinfo, "$.lastname") = ?', 
+    {firstName, lastName}, function(response)
+        if response[1] then
+            local citizenid = response[1].citizenid
+            local Employee = QBCore.Functions.GetPlayerByCitizenId(citizenid) or QBCore.Functions.GetOfflinePlayerByCitizenId(citizenid)
+            if Employee then
+                -- Vérifier si le joueur essaie de se virer lui-même
+                if citizenid == Player.PlayerData.citizenid then
+                    TriggerClientEvent('QBCore:Notify', src, 'You can\'t fire yourself', 'error')
+                    return
+                elseif Employee.PlayerData.job.grade.level > Player.PlayerData.job.grade.level then
+                    TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
+                    return
+                end
+
+                -- Modifier le job de l'employé
+                if Employee.Functions.SetJob('unemployed', '0') then
+                    Employee.Functions.Save()
+                    TriggerClientEvent('QBCore:Notify', src, 'Employee fired!', 'success')
+                    TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Job Fire', 'red', Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. ' ' .. Employee.PlayerData.charinfo.lastname .. ' (' .. Player.PlayerData.job.name .. ')', false)
+
+                    if Employee.PlayerData.source then -- Si le joueur est en ligne
+                        TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been fired! Good luck.', 'error')
+                    end
+                else
+                    TriggerClientEvent('QBCore:Notify', src, 'Error..', 'error')
+                end
+            else
+                TriggerClientEvent('QBCore:Notify', src, 'Employee not found.', 'error')
+            end
+        else
+            TriggerClientEvent('QBCore:Notify', src, 'No matching employee found.', 'error')
+        end
+    end)
 end)
