@@ -47,14 +47,12 @@ QBCore.Functions.CreateCallback('Pipou-Jobs:server:Fireplayer', function(source,
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
 
-    -- Vérifier si le joueur est bien le boss
     if not Player.PlayerData.job.isboss then
         ExploitBan(src, 'FireEmployee Exploiting')
         return
     end
 
     -- Requête pour récupérer le citizenid
-	-- AND JSON_EXTRACT(job, "$.label") = ?
     MySQL.query('SELECT citizenid FROM players WHERE JSON_EXTRACT(charinfo, "$.firstname") = ? AND JSON_EXTRACT(charinfo, "$.lastname") = ?', 
     {firstName, lastName}, function(response)
         if response[1] then

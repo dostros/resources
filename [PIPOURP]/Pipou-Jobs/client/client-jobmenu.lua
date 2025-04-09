@@ -271,7 +271,6 @@ RegisterNuiCallback('FireSomeone', function(data, cb)
     local jobname = data.jobname
 
 
-    -- Extraire le prénom et le nom à partir du `fullName`
     local firstName, lastName = playername:match("^(%S+) (%S+)$")
 
     QBCore.Functions.TriggerCallback('Pipou-Jobs:server:Fireplayer', function(result)
