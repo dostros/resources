@@ -7,6 +7,54 @@ body {
 
 }
 
+#buttonscreentablet {
+    display: flex;
+    align-items: baseline;
+    justify-content: baseline;
+    background-color: aqua;
+    background: url(./6322078.jpg) no-repeat center center fixed;
+    margin: 15px;
+    height: 98%;
+    width: 98%;
+    height: 990px;
+}
+
+#buttonscreentablet button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    border-radius: 5px;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-top: 100px;
+    margin-left: 100px;
+    min-height: 100px;
+    min-width: 100px;
+}
+
+#LSPD-MDT {
+    display: none;
+}
+
+#buttonscreentablet button:hover {
+    background-color: none;
+}
+
+#buttonscreentablet button:hover {
+    background-color: #555;
+}
+#buttonscreentablet img:active {
+    background-color: #333;
+    transform: translateY(2px);
+}
+#buttonscreentablet img:focus {
+    outline: none;
+}
+
 
 
 #MDTMenu {

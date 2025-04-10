@@ -47,8 +47,26 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+
+
+    const buttonmdtlspd = document.getElementById('buttonLSPD-MDT');
+    buttonmdtlspd.addEventListener('click', function () {
+        const LSPDMDT = document.getElementById('LSPD-MDT');
+        LSPDMDT.style.display = 'block';
+        const buttonscreentablet = document.getElementById('buttonscreentablet');
+        buttonscreentablet.style.display = 'none';
+    });
+
+    const playbutton = document.getElementById('playbutton');
+    playbutton.addEventListener('click', function () {
+        const LSPDMDT = document.getElementById('LSPD-MDT');
+        LSPDMDT.style.display = 'none';
+        const buttonscreentablet = document.getElementById('buttonscreentablet');
+        buttonscreentablet.style.display = 'block';
+    });
+
     
-        
+
 });
 
 

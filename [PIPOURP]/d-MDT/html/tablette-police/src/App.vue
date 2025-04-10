@@ -3,7 +3,7 @@
 
     <!-- Menu latéral -->
     <aside class="w-64 bg-teal-800 text-white p-6">
-      <h1 class="text-2xl font-bold text-center mb-8">📱 Tablette Police</h1>
+      <h1 class="text-2xl font-bold text-center mb-8"> <img src="./assets/LSPD.jpg" /> Tablette Police</h1>
 
       <nav class="flex flex-col space-y-4">
         <button 
@@ -20,10 +20,12 @@
     </aside>
 
     <!-- Contenu principal -->
-    <main class="flex-1 p-10 overflow-y-auto">
-      <div class="bg-white rounded-xl shadow-xl p-8 max-w-6xl mx-auto">
+    <main class="flex-1 p-10 overflow-y-auto ml-6">
+
+      <div class="w-full h-full px-10">
         <component :is="currentComponent" />
       </div>
+
     </main>
 
   </div>

@@ -1,5 +1,5 @@
 <template>
-    <div class="space-y-8">
+    <div id= "rapport-wrapper"class="space-y-8">
       <div>
         <label for="search" class="block text-xl font-semibold text-teal-200">🔍 Recherche par nom ou ID</label>
         <input v-model="search" 
@@ -60,6 +60,10 @@
   </script>
   
   <style scoped>
+  .rapport-wrapper {
+  width: 100%;
+  padding: 30px;
+  }
   /* Aucun style spécifique ici, tout est géré par Tailwind CSS */
   </style>
   
