@@ -1,5 +1,9 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
+RegisterNUICallback('exit', function(data, cb)
+    SetDisplay(false)
+end)
+
 RegisterNUICallback('getJobInfo', function(data, cb)
     local playerjob = data.JobId
     

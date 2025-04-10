@@ -1,50 +1,55 @@
 body {
     margin: 100px;
     display: flex;
-}
-
-.GarageMenu {
+    font-family: 'Poppins', sans-serif;
+    background: transparent;
+  }
+  
+  .GarageMenu {
     width: 100%;
     max-width: 1000px;
     min-height: 400px;
     max-height: 1100px;
-    background-color: #222222;
-    background: radial-gradient(#626369,#222222 );
+    background: radial-gradient(#2f2f2f, #1c1c1c);
     border-radius: 15px;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3); /* Ombre douce */
+    box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.5);
     padding: 20px;
-    opacity: 0.97;
-    transition: transform 0.3s ease; /* Transition pour un effet d'animation */
-    /* border:#218838 4px solid; */
-}
-
-.GarageMenu__content {
-    overflow: scroll;
+    opacity: 0.98;
+    transition: transform 0.3s ease;
+  }
+  
+  .GarageMenu__content {
+    overflow-y: auto;
     max-height: 750px;
-}
-
-.GarageMenu__content::-webkit-scrollbar {
-    width: 0; 
-    height: 0;
-}
-.GarageMenu__content::-webkit-scrollbar-thumb {
-    background: transparent;
-}
-
-.GarageMenu__header {
+    padding-right: 5px;
+  }
+  
+  .GarageMenu__content::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .GarageMenu__content::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+  }
+  
+  .GarageMenu__header {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
     height: 60px;
-    background: linear-gradient(135deg, #444444, #666666); /* Dégradé pour un look moderne */
-    border-radius: 15px 15px 15px 15px;
+    background: linear-gradient(135deg, #3a3a3a, #555);
+    border-radius: 15px;
     color: #ffffff;
-    font-family: 'Poppins', sans-serif;
     font-size: 24px;
-}
-
-.vehicle {
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+  
+  .vehicle {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -52,36 +57,37 @@ body {
     border-radius: 12px;
     margin: 15px 0;
     padding: 20px;
-    background-color: #333333;
+    background-color: #2b2b2b;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.vehicle:hover {
-    transform: translateY(-5px); /* Effet de levée au survol */
-    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2); /* Ombre douce sur le survol */
-}
-
-.vehicle h2,
-.vehicle h3 {
+  }
+  
+  .vehicle:hover {
+    transform: translateY(-4px);
+    box-shadow: 0px 12px 18px rgba(0, 0, 0, 0.3);
+  }
+  
+  .vehicle h2,
+  .vehicle h3 {
     margin: 8px;
-    font-family: 'Poppins', sans-serif;
     font-size: 18px;
-    color: #f5f5f5;
-}
-
-.vehicle h3 {
+    color: #e0e0e0;
+  }
+  
+  .vehicle h3 {
     margin-top: 5px;
     border: 1px solid #444;
     border-radius: 8px;
     padding: 8px;
-    background-color: #222222;
+    background-color: #1e1e1e;
     width: 200px;
     text-align: center;
-}
-
-.vehicle button {
-    background: #444;
-    border: 2px solid #666;
+  }
+  
+  .vehicle button,
+  .GarageMenu__button,
+  .GarageMenu__button_outside {
+    background: #3a3a3a;
+    border: 2px solid #5e5e5e;
     border-radius: 12px;
     width: 200px;
     height: 45px;
@@ -89,136 +95,197 @@ body {
     color: #ffffff;
     font-size: 16px;
     font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    justify-content: flex-end;
-}
-
-.vehicle button:hover {
-    background: #28a745;
-    color: #fff;
-    transform: scale(1.05); /* Léger agrandissement au survol */
-}
-
-.vehicle button:active {
-    background: #218838;
-    transform: scale(0.98); /* Effet rétréci à l'activation */
-}
-
-.vehicle_selecting {
+    transition: background-color 0.3s ease, transform 0.2s ease;
     display: flex;
-    justify-content: flex-end; /* Alignement à droite des éléments */
     align-items: center;
-    width: 100%; /* Assure que la largeur du conteneur est complète */
-    margin-top: 20px; /* Un peu d'espace au-dessus si nécessaire */
-}
-
-.vehicle_selecting button {
-    background: #444;
-    border: 2px solid #666;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .vehicle button:hover,
+  .GarageMenu__button:hover,
+  .GarageMenu__button_outside:hover {
+    background: #28a745;
+    transform: scale(1.05);
+  }
+  
+  .vehicle button:active,
+  .GarageMenu__button:active,
+  .GarageMenu__button_outside:active {
+    background: #218838;
+    transform: scale(0.98);
+  }
+  
+  .vehicle_selecting {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .vehicle_selecting button {
+    background: #3a3a3a;
+    border: 2px solid #5e5e5e;
     border-radius: 15px;
-    width: 100px; /* Taille fixe du bouton */
+    width: 100px;
     height: 100px;
     color: #ffffff;
     font-size: 16px;
     font-weight: bold;
     transition: background-color 0.3s ease;
-    margin-left: 20px; /* Ajout d'espace entre les boutons si plusieurs sont présents */
-}
-
-.vehicle_selecting button:hover {
+    margin-left: 20px;
+  }
+  
+  .vehicle_selecting button:hover {
     background: #28a745;
     color: #fff;
-}
-
-.vehicle_selecting button:active {
+  }
+  
+  .vehicle_selecting button:active {
     background: #218838;
-}
-
-.GarageMenu__button {
-    background: #444;
-    border: 2px solid #666;
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 12px;
-    padding: 10px 15px;
-    margin: 5px 0;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.GarageMenu__button:hover {
-    background: #28a745;
-    color: #fff;
-    transform: scale(1.05);
-}
-
-.GarageMenu__button:active {
-    background: #218838;
-    transform: scale(0.98);
-}
-
-.selected {
-    background: #28a745 !important;
-    color: white;
-}
-
-
-
-.vehicle_selecting img  {
+  }
+  
+  .vehicle_selecting img {
     width: 70px;
     height: 70px;
-}
-
-#choicelist {
+  }
+  
+  .GarageMenu__button i,
+  .choicelistbutton i {
+    margin-right: 8px;
+  }
+  
+  .selected {
+    background: #28a745 !important;
+    color: white;
+  }
+  
+  #choicelist {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-wrap: wrap;
     margin-top: 20px;
     margin-bottom: 20px;
-}
-
-
-
-.choicelistbutton 
-{
-    background: #444;
-    border: 2px solid #666;
+    gap: 10px;
+  }
+  
+  .choicelistbutton {
+    background: #3a3a3a;
+    border: 2px solid #5e5e5e;
     color: #fff;
-    font-size: 30px;
+    font-size: 20px;
     font-weight: bold;
     border-radius: 12px;
-    padding: 10px 15px;
-    margin-right: 30px ;
-    margin-left: 30px ;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-
-    width: 300px;
-}
-
-#choicelist button:hover {
+    padding: 12px 20px;
+    width: 260px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  #choicelist button:hover {
     background: #31b1b6;
-    color: #fff;
     transform: scale(1.05);
-}
-
-#choicelist button:active {
-    background: #31b1b6;
+  }
+  
+  #choicelist button:active {
+    background: #289ba1;
     transform: scale(0.98);
-}
-
-#listoutgarage 
-{
+  }
+  
+  .selectedchoice {
+    background: #31b1b6 !important;
+    color: white;
+  }
+  
+  #listoutgarage,
+  #othergarage {
     display: none;
-}
-
-#othergarage
-{
-    display: none;
-}
-
-
-
-
-.selectedchoice {
-    background: #31b1b6;
-}
+  }
+  
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .GarageMenu {
+      max-width: 90%;
+      margin: 60px auto;
+      padding: 15px;
+    }
+  
+    .vehicle h3 {
+      width: 160px;
+    }
+  
+    .choicelistbutton {
+      width: 220px;
+      font-size: 18px;
+    }
+  
+    .vehicle button {
+      width: 180px;
+      font-size: 14px;
+    }
+  
+    .vehicle_selecting button {
+      width: 80px;
+      height: 80px;
+    }
+  
+    .vehicle_selecting img {
+      width: 60px;
+      height: 60px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    body {
+      margin: 40px 10px;
+    }
+  
+    .GarageMenu {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+  
+    #choicelist {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .choicelistbutton {
+      width: 100%;
+      font-size: 16px;
+      margin: 8px 0;
+    }
+  
+    .vehicle {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .vehicle h3 {
+      width: 100%;
+      text-align: left;
+    }
+  
+    .vehicle button {
+      width: 100%;
+    }
+  
+    .vehicle_selecting {
+      justify-content: center;
+    }
+  
+    .vehicle_selecting button {
+      width: 70px;
+      height: 70px;
+    }
+  
+    .vehicle_selecting img {
+      width: 50px;
+      height: 50px;
+    }
+  }

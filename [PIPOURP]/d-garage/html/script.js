@@ -30,7 +30,7 @@ function GetGarageList (label,garagejob ) {
     })
         .then((response) => response.json())
         .then((data) => console.log(data))
-        .catch((error) => console.error('Error:', error));
+        
 }
 
 function GetOtherList (label, garagejob) {
@@ -49,7 +49,6 @@ function GetOtherList (label, garagejob) {
     })
         .then((response) => response.json())
         .then((data) => console.log(data))
-        .catch((error) => console.error('Error:', error));
 }   
 
 
@@ -69,7 +68,6 @@ function GetOutsideList (label, garagejob) {
     })
         .then((response) => response.json())
         .then((data) => console.log(data))
-        .catch((error) => console.error('Error:', error));
 }   
 
 
@@ -100,7 +98,6 @@ function updateselectedlisterners (currentgarage) {
             })
                 .then((response) => response.json())
                 .then((data) => console.log(data))
-                .catch((error) => console.error('Error:', error));
 
         })
     })
@@ -135,7 +132,6 @@ function updateselectedlisternersforOutside () {
         })
             .then((response) => response.json())
             // .then((data) => console.log(data))
-            .catch((error) => console.error('Error:', error));
 
 
 
@@ -204,7 +200,6 @@ document.addEventListener("DOMContentLoaded", function () {
         })
             .then((response) => response.json())
             .then((data) => console.log(data))
-            .catch((error) => console.error('Error:', error));
     }
 
     // Listen for messages from the server to show or hide the UI
@@ -399,8 +394,6 @@ document.addEventListener("DOMContentLoaded", function () {
             })
                 .then((response) => response.json())
                 .then((data) => console.log(data))
-                .catch((error) => console.error('Error:', error)
-            );
             exit();
             currentmodel = "";
             currentplate = "";

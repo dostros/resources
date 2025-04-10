@@ -15,9 +15,6 @@ function SetDisplay(bool, joblabel, jobid)
 
 end
 
-RegisterNUICallback('exit', function(data, cb)
-    SetDisplay(false)
-end)
 
 
 RegisterCommand("bossmenu", function()

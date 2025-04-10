@@ -1,72 +1,77 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="style.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.prod.js"></script>
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script type="text/javascript" src="https://cfx-nui-my-resource/production.js" async></script>
-    <title>Garage Menu</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="style.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script type="text/javascript" src="https://cfx-nui-my-resource/production.js" async></script>
+  <title>Garage Menu</title>
 </head>
 <body>
 
-    <div id= GarageMenu class="GarageMenu">
-        <div class="GarageMenu__header">
-            <h1>GARAGE MENU</h1>
-        </div>
-        <div id="choicelist">
-            <button id="garagelist" class="choicelistbutton selectedchoice">Garage</button>
-            <button id="othergaragelist" class="choicelistbutton">Autre Garage</button>
-            <button id="outlist" class="choicelistbutton" >Véhicules Sortis</button>
-        </div>
-        <div id="listactualgarage">
-            <div id="GarageMenu__content_actual"class="GarageMenu__content">
-                
-                <div class="vehicle">
-                    <h2>Modèle</h2> <h3>Jester</h3>
-                    <h2>Plaque</h2> <h3>2F2F</h3>
-                    <button class="GarageMenu__button">Sélectionner</button>
-                </div>
-            </div>
-            <div class="vehicle_selecting">
-                <button id= 'spawnbutton'><img src="./wheel.png" ></button>
-            </div>
-        </div>
-        <div id="othergarage">
-            <div id="GarageMenu__content_other"class="GarageMenu__content">
-                
-                <!-- <div class="vehicle">
-                    <h2>Modèle</h2> <h3>Zentorno</h3>
-                    <h2>Plaque</h2> <h3>666VNR</h3>
-                    <h2>Garage</h2> <h3>government</h3>
-
-                </div> -->
-            </div>
-        </div>
-
-        <div id="listoutgarage">
-            <div id="GarageMenu__content_outside"class="GarageMenu__content">
-                
-                <div class="vehicle">
-                    <h2>Modèle</h2> <h3>Jester</h3>
-                    <h2>Plaque</h2> <h3>2F2F</h3>
-                    <h2>Position</h2> <h3>0.0, 0.0, 0.0</h3>
-                    <button class="GarageMenu__button">Sélectionner</button>
-                </div>
-            </div>
-            <div class="vehicle_selecting">
-                <button id= 'confirmationbutton'><img src="./garage.svg" ></button>
-            </div>
-
-        </div>
-
+  <div id="GarageMenu" class="GarageMenu">
+    <div class="GarageMenu__header">
+      <h1>GARAGE MENU</h1>
     </div>
-    
 
+    <div id="choicelist">
+      <button id="garagelist" class="choicelistbutton selectedchoice">
+        <i class="fas fa-car-garage"></i> Garage
+      </button>
+      <button id="othergaragelist" class="choicelistbutton">
+        <i class="fas fa-warehouse"></i> Autre Garage
+      </button>
+      <button id="outlist" class="choicelistbutton">
+        <i class="fas fa-location-dot"></i> Véhicules Sortis
+      </button>
+    </div>
 
-    <script src="script.js"></script>
+    <div id="listactualgarage">
+      <div id="GarageMenu__content_actual" class="GarageMenu__content">
+        <div class="vehicle">
+          <h2>Modèle</h2> <h3>Jester</h3>
+          <h2>Plaque</h2> <h3>2F2F</h3>
+          <button class="GarageMenu__button">
+            <i class="fas fa-circle-check"></i> Sélectionner
+          </button>
+        </div>
+      </div>
+      <div class="vehicle_selecting">
+        <button id="spawnbutton">
+            <i class="fas fa-circle-chevron-right fa-2x"></i>
+        </button>
+      </div>
+    </div>
+
+    <div id="othergarage">
+      <div id="GarageMenu__content_other" class="GarageMenu__content">
+        <!-- Liste autre garage ici -->
+      </div>
+    </div>
+
+    <div id="listoutgarage">
+      <div id="GarageMenu__content_outside" class="GarageMenu__content">
+        <div class="vehicle">
+          <h2>Modèle</h2> <h3>Jester</h3>
+          <h2>Plaque</h2> <h3>2F2F</h3>
+          <h2>Position</h2> <h3>0.0, 0.0, 0.0</h3>
+          <button class="GarageMenu__button">
+            <i class="fas fa-circle-check"></i> Sélectionner
+          </button>
+        </div>
+      </div>
+      <div class="vehicle_selecting">
+        <button id="confirmationbutton">
+          <i class="fas fa-check-double fa-2x"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,38 @@
+-- local QBCore = exports['qb-core']:GetCoreObject()
+
+-- function CreateJobBlip(coords, name, sprite, color)
+--     local blip = AddBlipForCoord(coords)
+--     SetBlipSprite(blip, sprite)
+--     SetBlipDisplay(blip, 4)
+--     SetBlipScale(blip, 1.2)
+--     SetBlipColour(blip, color)
+--     SetBlipAsShortRange(blip, true)
+--     BeginTextCommandSetBlipName("STRING")
+--     AddTextComponentString(name)
+--     EndTextCommandSetBlipName(blip)
+-- end
+
+-- function AddInteractionZone(label, coords, icon, texteLabel, eventTrigger, job, actionFunc)
+--     exports['qb-target']:AddCircleZone(label, coords, 1.5, {
+--         name = label,
+--         useZ = true,
+--         debugPoly = false,
+--     }, {
+--         options = {
+--             {
+--                 num = 1,
+--                 type = "client",
+--                 event = eventTrigger,
+--                 icon = icon,
+--                 label = texteLabel,
+--                 targeticon = icon,
+--                 action = actionFunc,
+--                 job = job,
+--                 drawDistance = 10.0,
+--                 drawColor = {255, 255, 255, 255},
+--                 successDrawColor = {30, 144, 255, 255},
+--             }
+--         },
+--         distance = 2.5,
+--     })
+-- end

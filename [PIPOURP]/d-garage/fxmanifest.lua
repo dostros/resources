@@ -8,13 +8,14 @@ version '1.0.0'
 
 -- What to run
 client_scripts {
-    'client.lua',"config.lua", "client_vehicle_despawn.lua"
+    './client/**.lua',
+    'config.lua',
 }
 
 server_scripts {
-    'server.lua','@oxmysql/lib/MySQL.lua', "server_vehicle_despawn.lua"
+    '@oxmysql/lib/MySQL.lua',
+    'server/server.lua'
 }
-
 ui_page 'html/index.html'
 
 files {

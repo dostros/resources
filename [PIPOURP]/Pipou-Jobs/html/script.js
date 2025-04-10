@@ -20,65 +20,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelector(".tab-button.active").click();
 
-    document.getElementById('actualiser-solde').addEventListener('click', function () {
-        updateBanque();
-    });
+    document.getElementById('actualiser-solde').addEventListener('click', updateBanque);
 });
 
 let currentJobLabel = null;
 let currentJobId = null;
 
-function display(bool, joblabel, jobid) {
-    if (bool) {
-        document.body.style.display = 'flex';
-        document.getElementById("header-job").textContent = joblabel;
-        document.getElementById("footer-job-name").textContent = joblabel;
+function display(show, joblabel, jobid) {
+    document.body.style.display = show ? 'flex' : 'none';
+    if (show) {
         currentJobLabel = joblabel;
         currentJobId = jobid;
+        document.getElementById("header-job").textContent = joblabel;
+        document.getElementById("footer-job-name").textContent = joblabel;
         updateEmployees();
-    } else {
-        document.body.style.display = 'none';
     }
 }
 
 display(false);
 
 function exit() {
-    fetch('https://Pipou-Jobs/exit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-    });
+    postData('exit');
 }
 
 window.addEventListener('message', (event) => {
     const item = event.data;
 
-    if (item.type === 'ui') {
-        display(item.status, item.joblabel, item.jobid);
-    }
-
-    if (item.type === 'ui:jobinfo') {
-        const employeeList = item.listemployee;
-        const tbody = document.querySelector('#employes table tbody');
-        tbody.innerHTML = '';
-
-        employeeList.forEach(emp => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${emp.name}</td>
-                <td>${emp.grade_name}</td>
-                <td><button><i class="fas fa-user-slash"></i> Licencier</button></td>
-            `;
-            row.querySelector('button').addEventListener('click', () => {
-                showModal(emp.name, currentJobId);
-            });
-            tbody.appendChild(row);
-        });
-    }
-
-    if (item.type === 'ui:banqueinfo') {
-        document.getElementById('banque-solde').textContent = formatCurrency(item.bankaccount);
+    switch (item.type) {
+        case 'ui':
+            display(item.status, item.joblabel, item.jobid);
+            break;
+        case 'ui:jobinfo':
+            renderEmployees(item.listemployee);
+            break;
+        case 'ui:banqueinfo':
+            document.getElementById('banque-solde').textContent = formatCurrency(item.bankaccount);
+            break;
     }
 });
 
@@ -89,64 +66,81 @@ document.addEventListener('keyup', function (event) {
     }
 });
 
+// ========== FETCH UTILS ==========
+function postData(endpoint, data = {}) {
+    return fetch(`https://Pipou-Jobs/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+}
+
+// ========== EMPLOYES ==========
 function updateEmployees() {
     if (!currentJobId) return;
-    fetch('https://Pipou-Jobs/getJobInfo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ JobId: currentJobId })
-    });
+    postData('getJobInfo', { JobId: currentJobId });
 }
 
-function updateBanque() {
-    fetch('https://Pipou-Jobs/getBanqueInfo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ JobId: currentJobId })
-    });
-}
+function renderEmployees(employeeList) {
+    const tbody = document.querySelector('#employes table tbody');
+    tbody.innerHTML = '';
 
-function updateGrade() {
-    fetch('https://Pipou-Jobs/getGradeInfo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ JobId: currentJobId })
-    })
-    .then(res => res.json())
-    .then(data => {
-        const tbody = document.querySelector('#grade table tbody');
-        tbody.innerHTML = '';
-
-        data.grades.forEach(grade => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${grade.name}</td>
-                <td>${grade.payment} $</td>
-                <td><button><i class="fas fa-pen"></i> Modifier</button></td>
-            `;
-            row.querySelector('button').addEventListener('click', () => {
-                showEditGradeModal(grade, currentJobId);
+    employeeList.forEach(emp => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${emp.name}</td>
+            <td>${emp.grade_name}</td>
+            <td><button><i class="fas fa-user-slash"></i> Licencier</button></td>
+        `;
+        row.querySelector('button').addEventListener('click', () => {
+            showModal(`Voulez-vous vraiment licencier ${emp.name} ?`, () => {
+                postData('FireSomeone', {
+                    fullName: emp.name,
+                    jobname: currentJobId
+                });
             });
-            tbody.appendChild(row);
         });
+        tbody.appendChild(row);
     });
 }
 
-function formatCurrency(amount) {
-    return amount.toLocaleString('fr-FR', {
-        style: 'currency',
-        currency: 'EUR'
-    });
+// ========== BANQUE ==========
+function updateBanque() {
+    postData('getBanqueInfo', { JobId: currentJobId });
 }
 
-function showModal(fullName, jobid) {
+// ========== GRADES ==========
+function updateGrade() {
+    postData('getGradeInfo', { JobId: currentJobId })
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#grade table tbody');
+            tbody.innerHTML = '';
+
+            data.grades.forEach(grade => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${grade.name}</td>
+                    <td>${grade.payment} $</td>
+                    <td><button><i class="fas fa-pen"></i> Modifier</button></td>
+                `;
+                row.querySelector('button').addEventListener('click', () => {
+                    showEditGradeModal(grade);
+                });
+                tbody.appendChild(row);
+            });
+        });
+}
+
+// ========== MODALES ==========
+function showModal(message, onConfirm) {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
 
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `
-        <h3>Voulez-vous vraiment licencier ${fullName} ?</h3>
+        <h3>${message}</h3>
         <div class="modal-buttons">
             <button class="confirm">Confirmer</button>
             <button class="cancel">Annuler</button>
@@ -154,11 +148,7 @@ function showModal(fullName, jobid) {
     `;
 
     modal.querySelector('.confirm').addEventListener('click', () => {
-        fetch('https://Pipou-Jobs/FireSomeone', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fullName, jobname: jobid })
-        });
+        onConfirm();
         document.body.removeChild(overlay);
     });
 
@@ -170,13 +160,12 @@ function showModal(fullName, jobid) {
     document.body.appendChild(overlay);
 }
 
-function showEditGradeModal(grade, jobId) {
+function showEditGradeModal(grade) {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
 
     const modal = document.createElement('div');
     modal.className = 'modal';
-
     modal.innerHTML = `
         <h3>Modifier le grade : ${grade.name}</h3>
         <form class="modal-form">
@@ -193,17 +182,13 @@ function showEditGradeModal(grade, jobId) {
 
     modal.querySelector('.confirm').addEventListener('click', () => {
         const updatedGrade = {
-            jobName: jobId,
+            jobName: currentJobId,
             gradeId: grade.grade,
             name: document.getElementById('grade-name').value,
             payment: parseFloat(document.getElementById('grade-salaire').value),
         };
 
-        fetch('https://Pipou-Jobs/editGrade', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedGrade),
-        });
+        postData('editGrade', updatedGrade);
         document.body.removeChild(overlay);
     });
 
@@ -213,4 +198,12 @@ function showEditGradeModal(grade, jobId) {
 
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
+}
+
+// ========== FORMAT ==========
+function formatCurrency(amount) {
+    return amount.toLocaleString('fr-FR', {
+        style: 'currency',
+        currency: 'EUR'
+    });
 }
