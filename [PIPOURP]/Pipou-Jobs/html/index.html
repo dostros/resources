@@ -3,24 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.prod.js"></script>
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script type="text/javascript" src="https://cfx-nui-my-resource/production.js" async></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>Boss Menu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="PipouJobMenu">
-        <div class="header">BOSS MENU </div>
-        
+        <div class="header">BOSS MENU - <span id="header-job"></span></div>
+
         <div class="choice-tab-content">
             <ul>
-                <li><button data-target="annonces" class="tab-button">Annonces</button></li>
-                <li><button data-target="employes" class="tab-button active">Employés</button></li>
-                <li><button data-target="grade" class="tab-button">Grade</button></li>
-                <li><button data-target="banque" class="tab-button">Banque</button></li>
+                <li><button data-target="annonces" class="tab-button"><i class="fas fa-bullhorn"></i> Annonces</button></li>
+                <li><button data-target="employes" class="tab-button active"><i class="fas fa-users"></i> Employés</button></li>
+                <li><button data-target="grade" class="tab-button"><i class="fas fa-layer-group"></i> Grade</button></li>
+                <li><button data-target="banque" class="tab-button"><i class="fas fa-piggy-bank"></i> Banque</button></li>
             </ul>
         </div>
 
@@ -36,41 +33,19 @@
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>Chris</td>
-                            <td>HTML tables</td>
-                            <td><button>Licencier</button></td>
-                        </tr>
-                        <tr>
-                            <td>Dennis</td>
-                            <td>Web accessibility</td>
-                            <td><button>Licencier</button></td>
-                        </tr>
-                        <tr>
-                            <td>Sarah</td>
-                            <td>JavaScript frameworks</td>
-                            <td><button>Licencier</button></td>
-                        </tr>
-                        <tr>
-                            <td>Karen</td>
-                            <td>Web performance</td>
-                            <td><button>Licencier</button></td>
-                        </tr>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
             <div id="banque" class="tab-panel hidden">
                 <h2>Compte en Banque d'entreprise</h2>
-                
                 <div class="compte-card">
                     <h3>Solde actuel :</h3>
-                    <p id="banque-solde" class="compte-solde">Chargement...</p> <!-- Affichera le solde -->
-                    <button id="actualiser-solde" class="btn">Actualiser</button> <!-- Bouton d'actualisation -->
+                    <p id="banque-solde" class="compte-solde">Chargement...</p>
+                    <button id="actualiser-solde" class="btn"><i class="fas fa-sync-alt"></i> Actualiser</button>
                 </div>
             </div>
             <div id="grade" class="tab-panel hidden">
-                <h2>Gestion des Employés</h2>
+                <h2>Gestion des Grades</h2>
                 <table>
                     <thead>
                         <tr>
@@ -79,23 +54,15 @@
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>Gouverneur</td>
-                            <td>500 $</td>
-                            <td><button>Modifier</button></td>
-                        </tr>
-                        <tr>
-                            <td>Adjoint</td>
-                            <td>400 $</td>
-                            <td><button>Modifier</button></td>
-                        </tr>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
+
+        <div class="footer-bar">Connecté en tant que Patron : <span id="footer-job-name"></span></div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -14,7 +14,7 @@ function SetDisplay(bool, label)
     })
 end
 
-RegisterCommand("MDT", function()
+RegisterCommand("openmdt", function()
     SetDisplay(not display)
 end, false)
 
