@@ -14,7 +14,7 @@ function SetDisplay(bool, label)
     })
 end
 
-RegisterCommand("openmdt", function()
+RegisterCommand("tablette", function()
     SetDisplay(not display)
 end, false)
 

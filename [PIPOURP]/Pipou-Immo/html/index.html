@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.prod.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://cfx-nui-my-resource/production.js" async></script>
+    <title>Immo Menu</title>
+</head>
+<body>
+    <div id="menu">
+        <h1>Agence Immobilière</h1>
+        <button id="showProperties">📋 Voir propriétés</button>
+        <button id='sellProperty'>💸 Vendre propriété</button>
+        <button id='rentProperty'>📝 Louer propriété</button>
+        <button id='close'>❌ Fermer</button>
+    </div>
+
+    <div id="properties">
+        <h2>Propriétés</h2>
+        <ul id="propertyList"></ul>
+        <button class='backbutton'>🔙 Retour</button>
+    </div>
+
+    <div id="sellPropertyForm">
+        <h2>Vendre Propriété</h2>
+        <input type="text" id="propertyName" placeholder="Nom de la propriété">
+        <!-- <input type="number" id="propertyPrice" placeholder="Prix de la propriété"> -->
+        <div class="inputsetup"><label class="inputsetup-label">Porte d'Entrée</label><label id="label-inputsetupHouseDoor" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupHouseDoor">click</button></div>
+        <div class="inputsetup"><label class="inputsetup-label">Garage</label><label id="label-inputsetupGarageDoor" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupGarageDoor">click</button></div>        
+        <div class="inputsetup"><label class="inputsetup-label">Sortie de Garage</label><label id="label-inputsetupGarageOut" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupGarageOut">click</button></div>
+        <div class="inputsetup">
+            <label class="inputsetup-label">Type d'intérieur</label>
+            <select id="interiorType">
+                <option value="none">Type d'intérieur</option>
+                <option value="furnitured_midapart">Conteneur</option>
+                <option value="furnitured_midapart">Appartement T1</option>
+                <option value="modernhotel_shell">Chambre d'Hôtel</option>
+                <option value="shell_frankaunt">Appartement T2</option>
+                <option value="shell_garagem">Garage T1</option>
+                <option value="shell_lester">Appartement T3</option>
+                <option value="shell_michael">Villa espagnole</option>
+                <option value="shell_office1">Bureau T1</option>
+                <option value="shell_ranch">Maison Ranch</option>
+                <option value="shell_store1">Magasin T1</option>
+                <option value="shell_trailer">Mobile-home</option>
+                <option value="shell_trevor">Appartement T4</option>
+                <option value="shell_v16low">Studio</option>
+                <option value="shell_v16mid">Appartement T5</option>
+                <option value="shell_warehouse1">Hangar T1</option>
+                <option value="standardmotel_shell">Chambre de Motel</option>
+            </select>
+        </div>        
+        <input type="number" id="levelproperty" placeholder="Niveau d'étage">
+        <button id= 'confirmCreationofProperty'>✅ Confirmer</button>
+        <button class='backbutton'>🔙 Retour</button>
+    </div>
+
+
+    <div id="confirmationBox" style="display: none;">
+        <h2>Confirmer la création ?</h2>
+        <p>Es-tu sûr de vouloir créer cette propriété ?</p>
+        <div class="confirmation-buttons">
+            <button id="confirmYes">✅ Oui</button>
+            <button id="confirmNo">❌ Non</button>
+        </div>
+    </div>
+    
+
+    
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

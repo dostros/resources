@@ -63,6 +63,19 @@ Config.Garages = {
         blipColor = 3,
         type = 'public',
     },
+    divinparking = {
+        label = 'Divin Parking',
+        takeVehicle = vector4(101.25, -1073.55, 29.37, 73.33),
+        spawnPoint = {
+            vector4(111.74, -1080.35, 29.19, 346.44)
+        },
+        getinpoint = vector3(124.56, -1081.82, 29.19),
+        showBlip = true,
+        blipName = 'Public Parking',
+        blipNumber = 357,
+        blipColor = 3,
+        type = 'public',
+    },
     spanishave = {
         label = 'Spanish Ave Parking',
         takeVehicle = vector4(-1159.46, -739.41, 19.89, 225.21),

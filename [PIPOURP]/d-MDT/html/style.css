@@ -1,99 +1,135 @@
+/* Modern MDT Tablet Style – Clean, Flat, Tablet-Like for FiveM */
+
 body {
     display: flex;
-    align-self: center;
     justify-content: center;
-
-    margin-top: 150px;
-
-}
-
-#buttonscreentablet {
-    display: flex;
-    align-items: baseline;
-    justify-content: baseline;
-    background-color: aqua;
-    background: url(./6322078.jpg) no-repeat center center fixed;
-    margin: 15px;
-    height: 98%;
-    width: 98%;
-    height: 990px;
-}
-
-#buttonscreentablet button {
-    display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: black;
-    color: white;
-    font-size: 20px;
-    border-radius: 5px;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    margin-top: 100px;
-    margin-left: 100px;
-    min-height: 100px;
-    min-width: 100px;
-}
-
-#LSPD-MDT {
-    display: none;
-}
-
-#buttonscreentablet button:hover {
-    background-color: none;
-}
-
-#buttonscreentablet button:hover {
-    background-color: #555;
-}
-#buttonscreentablet img:active {
-    background-color: #333;
-    transform: translateY(2px);
-}
-#buttonscreentablet img:focus {
-    outline: none;
-}
-
-
-
-#MDTMenu {
+    height: 100vh;
+    margin: 0;
+    background: transparent;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  #MDTMenu {
     display: flex;
     flex-direction: column;
-    align-self: center;
+    align-items: center;
+    justify-content: flex-start;
+    width: 90%;
+    max-width: 1280px;
+    min-height: 800px;
+    background: rgba(34, 34, 34, 0.95);
+    border-radius: 18px;
+    border: 3px solid #444;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  
+  #buttonscreentablet {
+    display: flex;
     justify-content: center;
-
-    width: 65%;
-    height: 65%;
-    min-height: 1000px;
-    background: #3a3a3a;
-
-    border-radius: 13px;
-    border: 7px solid #555555;
-    box-shadow: black 10px 10px 15px;
-}
-
-iframe {
+    align-items: center;
+    background: url(./6322078.jpg) no-repeat center center;
+    background-size: cover;
+    width: 100%;
+    flex: 1;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    min-height: 200px;
+  }
+  
+  #buttonscreentablet button {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 98%;
-    width: 98%;
-    height: 990px;
-
-    margin: 15px;
-
-    border: 2px solid #555555;
-}
-
-#playbutton {
+    background-color: #000;
+    color: #fff;
+    font-size: 20px;
+    border-radius: 12px;
+    border: none;
+    padding: 15px 25px;
+    cursor: pointer;
+    min-width: 100px;
+    min-height: 100px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  #buttonscreentablet button:hover {
+    background-color: #222;
+    transform: scale(1.05);
+  }
+  
+  #buttonscreentablet button img {
+    max-width: 70px;
+    border-radius: 6px;
+  }
+  
+  #LSPD-MDT {
+    display: none;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  #playbutton {
     width: 60px;
     height: 60px;
-    background-color: black;
+    background-color: #111;
     clip-path: polygon(25% 20%, 75% 50%, 25% 80%);
     cursor: pointer;
-    margin: auto;
-    margin-top: 0;
-    padding: 0;
-}
-
+    margin-top: 10px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    animation: pulse 2.5s infinite;
+  }
+  
+  #playbutton:hover {
+    background-color: #28a745;
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.6);
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    #MDTMenu {
+      width: 95%;
+      min-height: 600px;
+      border-radius: 12px;
+    }
+  
+    #buttonscreentablet {
+      flex-direction: column;
+      padding: 15px;
+    }
+  
+    #buttonscreentablet button {
+      min-width: 80px;
+      min-height: 80px;
+      font-size: 16px;
+    }
+  
+    #buttonscreentablet button img {
+      max-width: 50px;
+    }
+  
+    #playbutton {
+      width: 50px;
+      height: 50px;
+    }
+  }

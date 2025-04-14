@@ -1,0 +1,274 @@
+/* Variables CSS pour une personnalisation facile */
+:root {
+    --primary-color: #3498db;
+    --primary-hover: #2980b9;
+    --primary-active: #1c598a;
+    --background-color: rgba(0, 0, 0, 0.6);
+    --card-background: #f4f4f4;
+    --text-color: #333;
+    --button-text-color: #fff;
+    --border-color: #3498db;
+    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    --border-radius: 12px;
+}
+
+/* Global styles */
+body {
+    background: var(--background-color);
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    color: var(--text-color);
+}
+
+/* Card styles for menus */
+#menu, #properties, #sellPropertyForm {
+    background: var(--card-background);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    text-align: center;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid var(--border-color);
+    box-shadow: var(--box-shadow);
+
+}
+
+#properties, #sellPropertyForm {
+
+display: none;
+}
+
+/* Button styles */
+button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin-top: 10px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: var(--button-text-color);
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+button:active {
+    background-color: var(--primary-active);
+    transform: translateY(0);
+}
+
+/* Form styles */
+#sellPropertyForm {
+    width: 70%;
+    padding: 20px;
+    margin: 10px 0;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+#sellPropertyForm input {
+    width: 95%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    font-size: 16px;
+}
+
+/* Input setup styles */
+.inputsetup {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    width: 100%;
+}
+
+.inputsetup-label, .inputsetup-check {
+    background: var(--primary-hover);
+    height: 50px;
+    width: 40%;
+    text-align: center;
+    color: var(--button-text-color);
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+}
+
+.inputsetup button {
+    width: 15%;
+    padding: 10px;
+    margin-left: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--primary-color);
+    color: var(--button-text-color);
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.inputsetup button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.inputsetup button:active {
+    background-color: var(--primary-active);
+    transform: translateY(0);
+}
+
+#interiorType {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    font-size: 16px;
+    background: var(--card-background);
+    color: var(--text-color);
+    appearance: none; /* désactive le style par défaut */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    text-align: center;
+}
+
+#interiorType:focus {
+    outline: none;
+    border-color: var(--primary-hover);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Styles for the menu */
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    #menu, #properties, #sellPropertyForm {
+        width: 90%;
+    }
+
+    button {
+        font-size: 16px;
+    }
+
+    #sellPropertyForm input, .inputsetup button {
+        font-size: 14px;
+    }
+}
+/* Responsive styles for smaller screens */
+@media (max-width: 480px) {
+    #menu, #properties, #sellPropertyForm {
+        width: 100%;
+        padding: 15px;
+    }
+
+    button {
+        font-size: 14px;
+    }
+
+    #sellPropertyForm input, .inputsetup button {
+        font-size: 12px;
+    }
+}
+/* Additional styles for the property list */
+#properties ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+#properties li {
+    background: var(--card-background);
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--box-shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#properties li h3 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--text-color);
+}
+#properties li p {
+    margin: 5px 0;
+    font-size: 16px;
+    color: var(--text-color);
+}
+#properties li button {
+    width: auto;
+    padding: 10px 15px;
+    font-size: 16px;
+    background-color: var(--primary-color);
+    color: var(--button-text-color);
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+#properties li button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+#properties li button:active {
+    background-color: var(--primary-active);
+    transform: translateY(0);
+}
+/* Styles for the property details */
+#propertyDetails {
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--box-shadow);
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+#confirmationBox {
+    background: var(--card-background);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    border: 3px solid var(--border-color);
+    box-shadow: var(--box-shadow);
+    text-align: center;
+    width: 400px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+#confirmationBox h2 {
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
