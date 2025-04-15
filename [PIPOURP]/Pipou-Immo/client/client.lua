@@ -1,43 +1,16 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-
 local spawnedShell = nil
+local createdZones = {}
+local cachedProperties = {}
+local IsInInstance = false
+local currentPropertyName = nil
+local isLightOn = true
 
-RegisterCommand("spawnappart", function(source, args)
-    local typeappart = args[1] -- Exemple : "shell_apartment"
+function GetInstanceZ(level)
+    return -100 - (level * 50)
+end
 
-    if not typeappart then
-        print("❌ Utilisation : /spawnappart nom_du_shell")
-        return
-    end
-
-    local model = GetHashKey(typeappart)
-    local coords = GetEntityCoords(PlayerPedId()) + vector3(0, 5, 0)
-
-    RequestModel(model)
-    while not HasModelLoaded(model) do
-        Wait(10)
-    end
-
-    local spawnedShell = CreateObject(model, coords.x, coords.y, coords.z, false, false, false)
-    SetEntityHeading(spawnedShell, 0.0)
-    FreezeEntityPosition(spawnedShell, true)
-
-    -- TP le joueur à l’intérieur du shell
-    local shellOffset = vector3(0.0, 0.0, 1.0) -- ajuste si besoin
-    SetEntityCoords(PlayerPedId(), coords + shellOffset)
-
-    print("✅ Shell spawné :", typeappart)
-end)
-
-
-
-RegisterCommand("removeappart", function()
-    if spawnedShell then
-        DeleteEntity(spawnedShell)
-        spawnedShell = nil
-    end
-end)
-
+-- 🏢 Affichage NUI
 function SetDisplay(bool, label)
     display = bool
     SetNuiFocus(bool, bool)
@@ -48,35 +21,110 @@ function SetDisplay(bool, label)
     })
 end
 
-
-
 RegisterCommand("agence", function()
     SetDisplay(not display)
 end, false)
 
-RegisterNUICallback('exit', function(data, cb)
+RegisterNUICallback('exit', function(_, cb)
     SetDisplay(false)
-end)
-
-RegisterNUICallback("showProperties", function(_, cb)
-    QBCore.Functions.Notify("Affichage des propriétés à venir...")
     cb("ok")
 end)
 
-RegisterNUICallback("sellProperty", function(_, cb)
-    QBCore.Functions.Notify("Vente de propriété à venir...")
-    cb("ok")
+-- 🔁 Charger toutes les propriétés à la connexion via QBCore Callback
+CreateThread(function()
+    QBCore.Functions.TriggerCallback('PipouImmo:server:getAllProperties', function(properties)
+        --print("📦 Propriétés chargées depuis la DB :", json.encode(properties, { indent = true }))
+        for _, prop in ipairs(properties) do
+            createHousePoint(prop.name, prop.coords)
+            cachedProperties[prop.name] = prop
+        end
+    end)
 end)
 
-RegisterNUICallback("rentProperty", function(_, cb)
-    QBCore.Functions.Notify("Location de propriété à venir...")
-    cb("ok")
+CreateThread(function()
+    Wait(2000)
+    local ped = PlayerPedId()
+    local coords = GetEntityCoords(ped)
+
+    if coords.z <= -100 then
+        QBCore.Functions.TriggerCallback('PipouImmo:server:getPropertyAtCoords', function(propData)
+            if not propData then
+                QBCore.Functions.Notify("🚨 Intérieur inconnu, déplacement vers un lieu sûr...", "error")
+                SetEntityCoords(ped, 200.0, -1000.0, 30.0) -- fallback safe zone
+                return
+            end
+
+            QBCore.Functions.Notify("⛔ Vous avez été replacé dans votre intérieur", "primary")
+
+            local shellModel = GetHashKey(propData.type)
+            RequestModel(shellModel)
+            while not HasModelLoaded(shellModel) do Wait(10) end
+
+            -- Recalcule les bonnes coordonnées de l'instance
+            local interiorZ = GetInstanceZ(propData.level or 1)
+            local shellCoords = vector3(propData.x, propData.y, interiorZ)
+
+            spawnedShell = CreateObject(shellModel, shellCoords.x, shellCoords.y, shellCoords.z, false, false, false)
+            SetEntityHeading(spawnedShell, 0.0)
+            FreezeEntityPosition(spawnedShell, true)
+
+            -- Application des offsets pour positionner correctement le joueur et la sortie
+            local shellConfig = Config.InteriorTypes[propData.type] or { diffx = 0.0, diffy = 0.0, diffz = 0.0 }
+            local playerSpawn = shellCoords + vector3(shellConfig.diffx, shellConfig.diffy, shellConfig.diffz + 1.0)
+            local exitZoneCenter = shellCoords + vector3(shellConfig.diffx, shellConfig.diffy, shellConfig.diffz)
+
+            SetEntityCoords(ped, playerSpawn)
+            createShellExitPoint(exitZoneCenter, propData.entrance)
+            IsInInstance = true
+
+        end, coords)
+    end
 end)
 
 
+
+-- 📍 Création d'une propriété
+RegisterNUICallback('Pipou-Immo-createProperty', function(data, cb)
+    local propertyName = data.propertyName
+    local propertyType = data.typeinterior
+    local level = tonumber(data.level) or 1
+    local Housecoords = data.coords1
+    local Garagecoords = data.coords2
+    local GarageOut = data.coords3
+
+    if not propertyName or not propertyType or not Housecoords or not Housecoords.x then
+        QBCore.Functions.Notify("❌ Données invalides ou incomplètes", "error")
+        cb({ success = false })
+        return
+    end
+
+    createHousePoint(propertyName, Housecoords)
+
+    local model = GetHashKey(propertyType)
+    RequestModel(model)
+    while not HasModelLoaded(model) do Wait(10) end
+
+    local instanceZ = GetInstanceZ(level)
+    local shellCoords = vector3(Housecoords.x, Housecoords.y, instanceZ)
+
+    spawnedShell = CreateObject(model, shellCoords.x, shellCoords.y, shellCoords.z, false, false, false)
+    SetEntityHeading(spawnedShell, 0.0)
+    FreezeEntityPosition(spawnedShell, true)
+
+    QBCore.Functions.TriggerCallback("PipouImmo:server:saveProperty", function(success)
+        if success then
+            QBCore.Functions.Notify("✅ Propriété enregistrée avec succès !", "success")
+            SetDisplay(false)
+            cb({ success = true })
+        else
+            QBCore.Functions.Notify("❌ Erreur lors de la sauvegarde", "error")
+            cb({ success = false })
+        end
+    end, propertyName, propertyType, level, Housecoords, Garagecoords, GarageOut)
+end)
+
+-- 🪯 Capture des coords depuis NUI
 RegisterNUICallback("Pipou-Immo-setPropertyCoords", function(data, cb)
-    print(data.propertyId)
-
     CreateThread(function()
         local waiting = true
         while waiting do
@@ -86,17 +134,11 @@ RegisterNUICallback("Pipou-Immo-setPropertyCoords", function(data, cb)
             DisplayHelpTextFromStringLabel(0, 0, 1, -1)
             if IsControlJustReleased(0, 38) then 
                 local playerCoords = GetEntityCoords(PlayerPedId())
-
-                -- Jouer un son
                 PlaySoundFrontend(-1, "SELECT", "HUD_LIQUOR_STORE_SOUNDSET", true)
+                QBCore.Functions.Notify("📍 Point placé : " .. playerCoords.x .. ", " .. playerCoords.y)
 
-                -- Afficher une notification avec les coordonnées
-                QBCore.Functions.Notify("Point placé aux coordonnées : " .. playerCoords.x .. ", " .. playerCoords.y .. ", " .. playerCoords.z)
-
-                waiting = false
-                SetDisplay(not display)
-                -- Envoi des coordonnées au serveur
-                SendNUIMessage ({
+                SetNuiFocus(true, true)
+                SendNUIMessage({
                     type = "setPropertyCoords",
                     propertyId = data.propertyId,
                     coords = {
@@ -105,135 +147,600 @@ RegisterNUICallback("Pipou-Immo-setPropertyCoords", function(data, cb)
                         z = playerCoords.z
                     }
                 })
+                waiting = false
             end
         end
     end)
 end)
 
-
-
-RegisterNUICallback('Pipou-Immo-createProperty', function(data, cb)
-    local propertyName = data.propertyName
-    local propertyType = data.typeinterior
-    local level = data.level or 0
-    local Housecoords = data.coords1
-    local Garagecoords = data.coords2
-    local GarageOut = data.coords3
-
-    -- ✅ Vérification des données
-    if not propertyName or not propertyType or not Housecoords or not Housecoords.x then
-        print("❌ Données manquantes ou invalides")
-        cb({ success = false, msg = "Données manquantes." })
+-- 👥 Attribution maison
+RegisterCommand("givehouse", function(source, args)
+    local targetId = tonumber(args[1]) or GetPlayerServerId(PlayerId())
+    local propertyName = args[2]
+    if not propertyName then
+        QBCore.Functions.Notify("Utilisation : /givehouse [id] [propertyName]", "error")
         return
     end
 
-    -- 🎄 Crée les arbres de Noël à titre décoratif
-    createHousePoint(Housecoords)
-    createGaragePoint(Garagecoords)
-    createOutGarage(GarageOut)
+    QBCore.Functions.TriggerCallback("PipouImmo:server:assignProperty", function(success, message)
+        if success then
+            QBCore.Functions.Notify(message, "success")
+        else
+            QBCore.Functions.Notify(message, "error")
+        end
+    end, targetId, propertyName)
+end)
 
-    -- 🏠 Spawn du shell d’intérieur à la porte d’entrée
-    local model = GetHashKey(propertyType)
+-- 🌟 Création zone d’entrée personnalisée
+function createHousePoint(propertyName, coords)
+    local zoneName = "housePoint_" .. propertyName:gsub("%s+", "")
+    if createdZones[zoneName] then return end
+    createdZones[zoneName] = true
 
-    RequestModel(model)
-    while not HasModelLoaded(model) do
-        Wait(10)
+    exports['qb-target']:AddCircleZone(zoneName, vector3(coords.x, coords.y, coords.z), 1.5, {
+        name = zoneName,
+        useZ = true, 
+        debugPoly = false,
+    }, {
+        options = {
+            {
+                type = "client",
+                event = "Pipou-Immo:enterHouse",
+                icon = "fas fa-door-open",
+                label = "Entrer dans la maison",
+                property = propertyName
+            }
+        },
+        distance = 2.5,
+    })
+end
+
+-- 🚪 Entrée dans la maison avec chargement du shell
+RegisterNetEvent('Pipou-Immo:enterHouse', function(data)
+    local propertyName = data.property
+    QBCore.Functions.TriggerCallback('PipouImmo:server:checkPropertyAccess', function(hasAccess, houseCoords, level, accessType)
+        if hasAccess and accessType ~= 'tenant' then
+            local interiorZ = GetInstanceZ(level)
+            local shellCoords = vector3(houseCoords.x, houseCoords.y, interiorZ)
+            local propData = cachedProperties[propertyName]
+            local modelName = propData and propData.type or "shell_apartment"
+            local model = GetHashKey(modelName)
+
+            local shellConfig = Config.InteriorTypes[modelName] or { diffx = 0.0, diffy = 0.0, diffz = 0.0 }
+
+            RequestModel(model)
+            while not HasModelLoaded(model) do Wait(10) end
+
+            spawnedShell = CreateObject(model, shellCoords.x, shellCoords.y, shellCoords.z, false, false, false)
+            SetEntityHeading(spawnedShell, 0.0)
+            FreezeEntityPosition(spawnedShell, true)
+
+            -- 🧍 TP joueur avec le bon décalage
+            local playerSpawn = shellCoords + vector3(shellConfig.diffx, shellConfig.diffy, shellConfig.diffz + 1.0)
+
+            DoScreenFadeOut(500)
+            Wait(600)
+            SetEntityCoords(PlayerPedId(), playerSpawn)
+            Wait(100)
+            DoScreenFadeIn(500)
+            IsInInstance = true
+            currentPropertyName = propertyName
+
+
+            -- 🚪 Créer le point de sortie à cet endroit
+            local exitZoneCenter = shellCoords + vector3(shellConfig.diffx, shellConfig.diffy, shellConfig.diffz)
+            createShellExitPoint(exitZoneCenter, houseCoords)
+
+
+        elseif hasAccess then
+            QBCore.Functions.Notify("🔒 Vous êtes locataire : l'accès est restreint.", "error")
+        else
+            QBCore.Functions.Notify("🚫 Vous n'avez pas de droit d'accès à cette propriété.", "error")
+        end
+    end, propertyName)
+end)
+
+-- 🚪 Sortie de la maison
+function createShellExitPoint(instanceCoords, returnCoords)
+    local exitName = "exit_shell_" .. math.random(1000, 9999)
+
+    exports['qb-target']:AddBoxZone(exitName, instanceCoords, 1.0, 1.0, {
+        name = exitName,
+        heading = 0,
+        debugPoly = false,
+        minZ = instanceCoords.z - 0.5,
+        maxZ = instanceCoords.z + 1.5
+    }, {
+        options = {
+            {
+                type = "client",
+                event = "Pipou-Immo:exitHouse",
+                icon = "fas fa-sign-out-alt",
+                label = "Sortir de la maison",
+                returnCoords = returnCoords,
+                zoneName = exitName -- pour pouvoir supprimer après
+            }
+        },
+        distance = 3.0
+    })
+end
+
+
+RegisterNetEvent('Pipou-Immo:exitHouse', function(data)
+    DoScreenFadeOut(500)
+    while not IsScreenFadedOut() do Wait(10) end
+
+    SetEntityCoords(PlayerPedId(), data.returnCoords.x, data.returnCoords.y, data.returnCoords.z)
+    Wait(100)
+    DoScreenFadeIn(500)
+
+    -- Supprimer le shell
+    if spawnedShell then
+        DeleteEntity(spawnedShell)
+        spawnedShell = nil
     end
 
-    local spawnedShell = CreateObject(model, Housecoords.x, Housecoords.y, Housecoords.z-5-5*level, false, false, false)
-    SetEntityHeading(spawnedShell, 0.0)
-    FreezeEntityPosition(spawnedShell, true)
+    -- Supprimer la zone de sortie
+    if data.zoneName then
+        exports['qb-target']:RemoveZone(data.zoneName)
+    end
 
-    -- ✅ Notification + fermeture de l'interface
-    QBCore.Functions.Notify("Propriété créée avec succès !", "success")
+    IsInInstance = false
+    currentPropertyName = nil
 
-    SetDisplay(false)
-
-    -- Optionnel : retour vers le NUI si tu veux
-    cb({ success = true })
 end)
 
 
-function createHousePoint (coords)
-    exports['qb-target']:AddBoxZone("housePoint", vector3(coords.x, coords.y, coords.z), 1.0, 1.0, {
-        name = "housePoint",
-        heading = 0,
-        debugPoly = false,
-        minZ = coords.z - 1.0,
-        maxZ = coords.z + 1.0,
-    }, {
-        options = {
-            {
-                type = "client",
-                event = "Pipou-Immo:enterHouse",
-                icon = "fas fa-home",
-                label = "Entrer dans la maison",
-            },
+
+-- 🧹 Nettoyage du shell
+RegisterCommand("removeappart", function()
+    if spawnedShell then
+        DeleteEntity(spawnedShell)
+        spawnedShell = nil
+    end
+end)
+
+-- 📦 Envoi des types d'intérieurs à la NUI
+RegisterNUICallback('Pipou-Immo-getinteriortypes', function(_, cb)
+    local formattedInteriorTypes = {}
+    for k, v in pairs(Config.InteriorTypes) do
+        table.insert(formattedInteriorTypes, {
+            name = k,
+            label = v.label,
+        })
+    end
+    table.sort(formattedInteriorTypes, function(a, b)
+        return a.label < b.label
+    end)
+    cb(formattedInteriorTypes)
+end)
+
+
+RegisterCommand('spawnshell', function(source, args)
+    local shellName = args[1] or "shell_apartment"
+    local shellModel = GetHashKey(shellName)
+
+    RequestModel(shellModel)
+    while not HasModelLoaded(shellModel) do Wait(10) end
+
+    local playerPed = PlayerPedId()
+    local playerCoords = GetEntityCoords(playerPed)
+    spawnedShell = CreateObject(shellModel, playerCoords.x, playerCoords.y, playerCoords.z - 1.0, false, false, false)
+    SetEntityHeading(spawnedShell, 0.0)
+    FreezeEntityPosition(spawnedShell, true)
+
+    QBCore.Functions.Notify("Shell spawned: " .. shellName, "success")
+end)    
+
+RegisterNetEvent('PipouImmo:client:addHouseEntryPoint', function(propertyName)
+    local prop = cachedProperties[propertyName]
+    if not prop then
+        QBCore.Functions.TriggerCallback('PipouImmo:server:getAllProperties', function(properties)
+            for _, p in ipairs(properties) do
+                cachedProperties[p.name] = p
+            end
+            if cachedProperties[propertyName] then
+                createHousePoint(propertyName, cachedProperties[propertyName].coords)
+                QBCore.Functions.Notify("📦 Propriété reçue : " .. propertyName, "success")
+            else
+                QBCore.Functions.Notify("❌ Erreur : impossible d’ajouter la propriété", "error")
+            end
+        end)
+    else
+        createHousePoint(propertyName, prop.coords)
+        QBCore.Functions.Notify("📦 Propriété reçue : " .. propertyName, "success")
+    end
+end)
+
+
+
+
+CreateThread(function()
+    while true do
+        Wait(0)
+
+        if IsInInstance and IsControlJustReleased(0, 38) then -- touche E
+            local menuData = {
+                {
+                    header = "Gestion immobilière",
+                    isMenuHeader = true,
+                },
+                {
+                    header = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
+                    txt = "Contrôle de la luminosité",
+                    params = {
+                        event = "Pipou-Immo:toggleLight",
+                        args = { number = 1 }
+                    }
+                },
+                {
+                    header = "Clefs de la maison",
+                    txt = "Gérer les clefs de la maison",
+                    params = {
+                        event = "Pipou-Immo:openKeyMenu",
+                        args = { number = 2 }
+                    }
+                },
+                {
+                    header = "Décorer la maison",
+                    txt = "Accéder au menu de décoration",
+                    params = {
+                        event = "",
+                        args = { number = 3 }
+                    }
+                },
+                {
+                    header = "Fermer le menu",
+                    txt = "Retourner au jeu",
+                    params = {
+                        event = "qb-menu:closeMenu"
+                    }
+                }
+            }
+
+            exports['qb-menu']:openMenu(menuData)
+        end
+    end
+end)
+
+RegisterNetEvent("Pipou-Immo:openKeyMenu", function()
+    local keyMenu = {
+        {
+            header = "🔑 Gestion des clefs",
+            isMenuHeader = true,
         },
-        distance = 2.0
-    })
+        {
+            header = "Donner une clef",
+            txt = "Donner une clef à un joueur proche",
+            params = {
+                event = "Pipou-Immo:giveKey"
+            }
+        },
+        {
+            header = "Retirer une clef",
+            txt = "Retirer une clef d’un joueur",
+            params = {
+                event = "Pipou-Immo:removeKey"
+            }
+        },
+        {
+            header = "👥 Voir les colocataires",
+            txt = "Voir la liste des personnes ayant accès",
+            params = {
+                event = "Pipou-Immo:showTenantList"
+            }
+        },
+        
+        {
+            header = "Ajouter un locataire",
+            txt = "Donner accès en tant que locataire",
+            params = {
+                event = "Pipou-Immo:addTenant"
+            }
+        },
+        {
+            header = "Retirer un colocataire",
+            txt = "Supprimer l'accès d’un joueur proche",
+            params = {
+                event = "Pipou-Immo:removeTenant"
+            }
+        },        
+        {
+            header = "Retour",
+            txt = "Retour au menu principal",
+            params = {
+                event = "Pipou-Immo:reopenMainMenu"
+            }
+        }
+    }
+
+    exports['qb-menu']:openMenu(keyMenu)
+end)
+
+
+
+
+RegisterNetEvent('Pipou-Immo:toggleLight', function()
+    SetShellLightState(not isLightOn)
+
+    QBCore.Functions.Notify(isLightOn and "💡 Lumière allumée" or "💡 Lumière éteinte", "primary")
+end)
+
+
+function SetShellLightState(state)
+    if spawnedShell and DoesEntityExist(spawnedShell) then
+        -- Activation de la lumière artificielle autour du shell
+        -- Cela simule un éclairage ON/OFF
+        if state then
+            SetArtificialLightsState(false)
+        else
+            SetArtificialLightsState(true)
+        end
+
+        isLightOn = state
+    end
 end
 
 
-function createGaragePoint (coords)
-    exports['qb-target']:AddBoxZone("GaragePoint", vector3(coords.x, coords.y, coords.z), 1.0, 1.0, {
-        name = "GaragePoint",
-        heading = 0,
-        debugPoly = false,
-        minZ = coords.z - 1.0,
-        maxZ = coords.z + 1.0,
-    }, {
-        options = {
-            {
-                type = "client",
-                event = "Pipou-Immo:enterHouse",
-                icon = "fas fa-home",
-                label = "Garage",
-            },
+RegisterNetEvent("Pipou-Immo:reopenMainMenu", function()
+    TriggerEvent("Pipou-Immo:openMainMenu")
+end)
+
+RegisterNetEvent("Pipou-Immo:openMainMenu", function()
+    -- Remets ici le même contenu que dans le menu principal
+    local menuData = {
+        {
+            header = "Gestion immobilière",
+            isMenuHeader = true,
         },
-        distance = 2.0
-    })
-end
+        {
+            header = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
+            txt = "Contrôle de la luminosité",
+            params = {
+                event = "Pipou-Immo:toggleLight"
+            }
+        },
+        {
+            header = "Clefs de la maison",
+            txt = "Gérer les clefs de la maison",
+            params = {
+                event = "Pipou-Immo:openKeyMenu"
+            }
+        },
+        {
+            header = "Décorer la maison",
+            txt = "Accéder au menu de décoration",
+            params = {
+                event = "Pipou-Immo:decorateMenu"
+            }
+        },
+        {
+            header = "Fermer le menu",
+            txt = "Retourner au jeu",
+            params = {
+                event = "qb-menu:closeMenu"
+            }
+        }
+    }
+
+    exports['qb-menu']:openMenu(menuData)
+end)
 
 
-function createOutGarage(coords)
-    
-    CreateThread(function()
-        while true do
-            Wait(0)
-            DrawMarker(36, coords.x, coords.y, coords.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0, 255, 0, 100, false, true, 2, nil, nil, false)
+RegisterNetEvent("Pipou-Immo:giveKey", function()
+    local playerPed = PlayerPedId()
+    local coords = GetEntityCoords(playerPed)
+    local closestPlayer, closestDistance = -1, 999.0
 
-            local playerCoords = GetEntityCoords(PlayerPedId())
-            local distance = #(playerCoords - vector3(coords.x, coords.y, coords.z))
-
-            if distance < 2.0 then
-                -- Afficher un message d'aide
-                SetTextComponentFormat("STRING")
-                AddTextComponentString("Appuyez sur ~g~E~s~ pour sortir un véhicule")
-                DisplayHelpTextFromStringLabel(0, 0, 1, -1)
-
-                -- Vérifier si le joueur appuie sur E
-                if IsControlJustReleased(0, 38) then
-                    -- Logique pour sortir un véhicule
-                    local vehicleModel = GetHashKey("adder") -- Exemple : voiture "Adder"
-                    RequestModel(vehicleModel)
-                    while not HasModelLoaded(vehicleModel) do
-                        Wait(10)
-                    end
-
-                    local vehicle = CreateVehicle(vehicleModel, coords.x, coords.y, coords.z, 0.0, true, false)
-                    SetPedIntoVehicle(PlayerPedId(), vehicle, -1)
-                    SetModelAsNoLongerNeeded(vehicleModel)
-
-                    -- Jouer un son
-                    PlaySoundFrontend(-1, "SELECT", "HUD_LIQUOR_STORE_SOUNDSET", true)
-
-                    -- Notification
-                    QBCore.Functions.Notify("Véhicule sorti avec succès !", "success")
-                end
+    for _, player in pairs(GetActivePlayers()) do
+        local target = GetPlayerPed(player)
+        if target ~= playerPed then
+            local dist = #(coords - GetEntityCoords(target))
+            if dist < closestDistance and dist <= 3.0 then
+                closestPlayer = player
+                closestDistance = dist
             end
         end
-    end)
+    end
+
+    if closestPlayer ~= -1 then
+        local targetPed = GetPlayerPed(closestPlayer)
+        local targetId = GetPlayerServerId(closestPlayer)
+
+        QBCore.Functions.Notify("Appuyez sur ~g~E~s~ pour donner la clef à " .. GetPlayerName(closestPlayer), "primary")
+
+        -- Affichage 3D du texte
+        CreateThread(function()
+            local given = false
+            while not given do
+                Wait(0)
+                local coords = GetEntityCoords(targetPed)
+                DrawText3D(coords.x, coords.y, coords.z + 1.0, "~g~[E]~s~ Donner la clef")
+
+                if IsControlJustReleased(0, 38) then -- Touche E
+                    given = true
+                    TriggerServerEvent("PipouImmo:server:giveKeyTo", targetId)
+                    QBCore.Functions.Notify("🔑 Clef donnée à " .. GetPlayerName(closestPlayer), "success")
+                end
+            end
+        end)
+    else
+        QBCore.Functions.Notify("❌ Aucun joueur proche pour donner une clef.", "error")
+    end
+end)
 
 
+function DrawText3D(x, y, z, text)
+    local onScreen, _x, _y = World3dToScreen2d(x, y, z)
+    local p = GetGameplayCamCoords()
+    local dist = #(vector3(x, y, z) - p)
+    local scale = (1 / dist) * 2
+    scale = scale * (1 / GetGameplayCamFov()) * 100
+
+    if onScreen then
+        SetTextScale(0.35, 0.35)
+        SetTextFont(4)
+        SetTextProportional(1)
+        SetTextColour(255, 255, 255, 215)
+        SetTextCentre(true)
+        SetTextEntry("STRING")
+        AddTextComponentString(text)
+        DrawText(_x, _y)
+    end
 end
+
+RegisterNetEvent("Pipou-Immo:addTenant", function()
+    local playerPed = PlayerPedId()
+    local coords = GetEntityCoords(playerPed)
+    local closestPlayer, closestDistance = -1, 999.0
+
+    for _, player in pairs(GetActivePlayers()) do
+        local target = GetPlayerPed(player)
+        if target ~= playerPed then
+            local dist = #(coords - GetEntityCoords(target))
+            if dist < closestDistance and dist <= 3.0 then
+                closestPlayer = player
+                closestDistance = dist
+            end
+        end
+    end
+
+    if closestPlayer ~= -1 then
+        local targetId = GetPlayerServerId(closestPlayer)
+        local propName = getCurrentPlayerProperty() -- à toi de définir la logique
+
+        if propName then
+            QBCore.Functions.TriggerCallback('PipouImmo:server:addTenant', function(success, msg)
+                QBCore.Functions.Notify(msg, success and "success" or "error")
+            end, targetId, propName)
+        else
+            QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
+        end
+    else
+        QBCore.Functions.Notify("❌ Aucun joueur proche.", "error")
+    end
+end)
+
+RegisterNetEvent("Pipou-Immo:removeTenant", function()
+    local playerPed = PlayerPedId()
+    local coords = GetEntityCoords(playerPed)
+    local closestPlayer, closestDistance = -1, 999.0
+
+    for _, player in pairs(GetActivePlayers()) do
+        local target = GetPlayerPed(player)
+        if target ~= playerPed then
+            local dist = #(coords - GetEntityCoords(target))
+            if dist < closestDistance and dist <= 3.0 then
+                closestPlayer = player
+                closestDistance = dist
+            end
+        end
+    end
+
+    if closestPlayer ~= -1 then
+        local targetId = GetPlayerServerId(closestPlayer)
+        local propName = getCurrentPlayerProperty() -- 🔧 À implémenter selon ton contexte
+
+        if propName then
+            QBCore.Functions.TriggerCallback('PipouImmo:server:removeTenant', function(success, msg)
+                QBCore.Functions.Notify(msg, success and "success" or "error")
+            end, targetId, propName)
+        else
+            QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
+        end
+    else
+        QBCore.Functions.Notify("❌ Aucun joueur proche.", "error")
+    end
+end)
+
+function getCurrentPlayerProperty()
+    return currentPropertyName
+end
+
+RegisterNetEvent("Pipou-Immo:showTenantList", function()
+    local propertyName = getCurrentPlayerProperty()
+    if not propertyName then
+        QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
+        return
+    end
+
+    QBCore.Functions.TriggerCallback('PipouImmo:server:getTenants', function(tenants)
+        if not tenants or #tenants == 0 then
+            QBCore.Functions.Notify("Aucun colocataire trouvé.", "error")
+            return
+        end
+
+        local menu = {
+            {
+                header = "👥 Liste des colocataires",
+                isMenuHeader = true
+            }
+        }
+
+        for _, tenant in pairs(tenants) do
+            local headerText = tenant.name .. " (" .. tenant.access_type .. ")"
+        
+            if tenant.access_type == "owner" then
+                table.insert(menu, {
+                    header = headerText,
+                    txt = "🔒 Propriétaire principal – accès protégé",
+                    isMenuHeader = true
+                })
+            else
+                table.insert(menu, {
+                    header = headerText,
+                    txt = "Cliquer pour retirer l’accès",
+                    params = {
+                        event = "Pipou-Immo:confirmRemoveTenant",
+                        args = {
+                            propertyName = propertyName,
+                            citizenid = tenant.citizenid,
+                            name = tenant.name
+                        }
+                    }
+                })
+            end
+        end
+        
+
+        table.insert(menu, {
+            header = "Retour",
+            params = {
+                event = "Pipou-Immo:openKeyMenu"
+            }
+        })
+
+        exports['qb-menu']:openMenu(menu)
+    end, propertyName)
+end)
+
+RegisterNetEvent("Pipou-Immo:confirmRemoveTenant", function(data)
+    local confirmMenu = {
+        {
+            header = "❌ Retirer " .. data.name .. " ?",
+            txt = "Cette action est irréversible.",
+            isMenuHeader = true
+        },
+        {
+            header = "✅ Oui, retirer",
+            params = {
+                event = "Pipou-Immo:removeTenantConfirmed",
+                args = data
+            }
+        },
+        {
+            header = "🔙 Annuler",
+            params = {
+                event = "Pipou-Immo:showTenantList"
+            }
+        }
+    }
+
+    exports['qb-menu']:openMenu(confirmMenu)
+end)
+
+RegisterNetEvent("Pipou-Immo:removeTenantConfirmed", function(data)
+    TriggerServerEvent("PipouImmo:server:removeTenantByCitizenId", data.propertyName, data.citizenid)
+    Wait(500)
+    TriggerEvent("Pipou-Immo:showTenantList") -- Rafraîchit la liste
+end)

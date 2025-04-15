@@ -1,9 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 files {
-	'common/carcols.meta',
 	'common/carvariations.meta',
-	'common/dlctext.meta',
 	'common/handling.meta',
 	'common/vehicles.meta',
 	'common/*.meta'

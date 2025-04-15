@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Display the properties
         if (item.type === 'setPropertyCoords') {
 
-
+            display(true)
             switch (item.propertyId) {
                 case 'button-inputsetupHouseDoor':
                     HouseDoorCoords = item.coords
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Close the UI if the player presses escape or backspace
     document.addEventListener('keyup', function (event) {
-        if (event.key === 'Escape' || event.key === 'Backspace') {
+        if (event.key === 'Escape') {
             exit();
         }
     });
@@ -109,6 +109,35 @@ document.addEventListener("DOMContentLoaded", function () {
     
         var menu = document.getElementById('menu');
         menu.style.display = 'none';
+
+        var interiorTypes = [];
+
+        fetch('https://Pipou-Immo/Pipou-Immo-getinteriortypes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            interiorTypes = data;
+
+            for (let i = 0; i < interiorTypes.length; i++) {
+                const type = interiorTypes[i];
+                const option = document.createElement('option');
+                option.value = type.name;
+                option.textContent = type.label;
+                document.getElementById('interiorType').appendChild(option);
+            }
+        })
+        .catch((error) => {
+            console.error('Erreur lors de la requête :', error);
+        });
+
+
+
+
     });
 
     const backbuttons = document.querySelectorAll('.backbutton');
@@ -204,12 +233,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 }),
             })
                 .then((response) => response.json())
-                .then((data) => console.log(data))
                 .catch((error) => console.error('Error:', error));
 
         }
 
 
+    });
+
+    const toggleBtn = document.getElementById('toggleTheme');
+
+    toggleBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('light-theme');
+        const isLight = document.documentElement.classList.contains('light-theme');
+        toggleBtn.textContent = isLight ? '🌙 Mode sombre' : '🌓 Mode clair';
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    });
+
+    // Charger thème depuis le stockage local
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.add('light-theme');
+            toggleBtn.textContent = '🌙 Mode sombre';
+        }
     });
 
     

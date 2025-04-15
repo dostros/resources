@@ -11,7 +11,6 @@ client_script {
 files {
     'vehicles.meta',
     'carvariations.meta',
-    'carcols.meta',
     'handling.meta',
     'vehiclelayouts.meta', 
 }

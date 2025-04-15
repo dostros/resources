@@ -1,20 +1,18 @@
-/* Variables CSS pour une personnalisation facile */
 :root {
     --primary-color: #3498db;
     --primary-hover: #2980b9;
     --primary-active: #1c598a;
-    --background-color: rgba(0, 0, 0, 0.6);
-    --card-background: #f4f4f4;
-    --text-color: #333;
-    --button-text-color: #fff;
+    --card-background: #1e1e1e;
+    --text-color: #f0f0f0;
+    --button-text-color: #ffffff;
     --border-color: #3498db;
-    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
     --border-radius: 12px;
 }
 
 /* Global styles */
 body {
-    background: var(--background-color);
+    background: transparent;
     font-family: 'Poppins', sans-serif;
     display: flex;
     justify-content: center;
@@ -24,28 +22,30 @@ body {
     color: var(--text-color);
 }
 
-/* Card styles for menus */
-#menu, #properties, #sellPropertyForm {
-    background: var(--card-background);
-    padding: 30px;
+/* Core container styles */
+#menu, #properties, #sellPropertyForm, #propertyDetails, #confirmationBox {
+    background: linear-gradient(145deg, #1f1f1f, #2a2a2a);
     border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    border: 3px solid var(--border-color);
+    color: var(--text-color);
+}
+
+#menu, #properties, #sellPropertyForm {
+    padding: 30px;
     text-align: center;
     width: 400px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border: 3px solid var(--border-color);
-    box-shadow: var(--box-shadow);
-
 }
 
 #properties, #sellPropertyForm {
-
-display: none;
+    display: none;
 }
 
-/* Button styles */
+/* Buttons */
 button {
     display: block;
     width: 100%;
@@ -70,12 +70,11 @@ button:active {
     transform: translateY(0);
 }
 
-/* Form styles */
+/* Forms */
 #sellPropertyForm {
     width: 70%;
     padding: 20px;
     margin: 10px 0;
-    border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
 }
 
@@ -86,9 +85,11 @@ button:active {
     border-radius: 8px;
     border: 1px solid var(--border-color);
     font-size: 16px;
+    background: #2c2c2c;
+    color: var(--text-color);
 }
 
-/* Input setup styles */
+/* Input setup */
 .inputsetup {
     display: flex;
     justify-content: space-between;
@@ -136,6 +137,7 @@ button:active {
     transform: translateY(0);
 }
 
+/* Select */
 #interiorType {
     width: 100%;
     padding: 10px;
@@ -143,9 +145,9 @@ button:active {
     border-radius: 8px;
     border: 1px solid var(--border-color);
     font-size: 16px;
-    background: var(--card-background);
+    background: #2c2c2c;
     color: var(--text-color);
-    appearance: none; /* désactive le style par défaut */
+    appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
     cursor: pointer;
@@ -158,9 +160,7 @@ button:active {
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
-/* Styles for the menu */
-
-/* Responsive styles */
+/* Responsive */
 @media (max-width: 768px) {
     body {
         flex-direction: column;
@@ -179,7 +179,7 @@ button:active {
         font-size: 14px;
     }
 }
-/* Responsive styles for smaller screens */
+
 @media (max-width: 480px) {
     #menu, #properties, #sellPropertyForm {
         width: 100%;
@@ -194,15 +194,17 @@ button:active {
         font-size: 12px;
     }
 }
-/* Additional styles for the property list */
+
+/* List styles */
 #properties ul {
     list-style: none;
     padding: 0;
     margin: 0;
     width: 100%;
 }
+
 #properties li {
-    background: var(--card-background);
+    background: linear-gradient(145deg, #262626, #1c1c1c);
     padding: 15px;
     margin: 10px 0;
     border-radius: var(--border-radius);
@@ -212,16 +214,17 @@ button:active {
     justify-content: space-between;
     align-items: center;
 }
-#properties li h3 {
+
+#properties li h3, #properties li p {
     margin: 0;
-    font-size: 20px;
     color: var(--text-color);
 }
+
 #properties li p {
-    margin: 5px 0;
+    margin-top: 5px;
     font-size: 16px;
-    color: var(--text-color);
 }
+
 #properties li button {
     width: auto;
     padding: 10px 15px;
@@ -233,34 +236,27 @@ button:active {
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
+
 #properties li button:hover {
     background-color: var(--primary-hover);
     transform: translateY(-2px);
 }
+
 #properties li button:active {
     background-color: var(--primary-active);
     transform: translateY(0);
 }
-/* Styles for the property details */
-#propertyDetails {
-    background: var(--card-background);
-    padding: 20px;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--box-shadow);
+
+/* Confirmation + details */
+#propertyDetails, #confirmationBox {
+    padding: 20px 30px;
+    margin: 20px auto;
     width: 100%;
     max-width: 600px;
-    margin: 20px auto;
+    text-align: center;
 }
 
 #confirmationBox {
-    background: var(--card-background);
-    padding: 30px;
-    border-radius: var(--border-radius);
-    border: 3px solid var(--border-color);
-    box-shadow: var(--box-shadow);
-    text-align: center;
-    width: 400px;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -268,7 +264,28 @@ button:active {
     z-index: 1000;
 }
 
-#confirmationBox h2 {
-    margin-bottom: 10px;
-    color: var(--text-color);
+/* Theme clair */
+.light-theme {
+    --background-color: #f4f4f4;
+    --card-background: #ffffff;
+    --text-color: #222;
+    --button-text-color: #ffffff;
+    --border-color: #3498db;
+    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.light-theme #menu,
+.light-theme #properties,
+.light-theme #sellPropertyForm,
+.light-theme #propertyDetails,
+.light-theme #confirmationBox,
+.light-theme #properties li {
+    background: linear-gradient(145deg, #ffffff, #f1f1f1);
+}
+
+.light-theme input,
+.light-theme select {
+    background: #ffffff;
+    color: #222;
+    border: 1px solid var(--border-color);
 }
