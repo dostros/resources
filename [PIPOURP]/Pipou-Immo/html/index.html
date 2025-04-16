@@ -14,8 +14,8 @@
 <body>
     <div id="menu">
         <h1>Agence Immobilière</h1>
-        <button id="showProperties">Voir propriétés</button>
-        <button id='sellProperty'>Vendre propriété</button>
+        <button id="manageProperties">📦 Gérer propriétés</button>
+        <button id='sellProperty'>Créer une propriété</button>
         <button id='rentProperty'>Louer propriété</button>
         <button id="toggleTheme">🌓 Basculer le thème</button>
         <button id='close'>❌ Fermer</button>
@@ -30,7 +30,6 @@
     <div id="sellPropertyForm">
         <h2>Vendre Propriété</h2>
         <input type="text" id="propertyName" placeholder="Nom de la propriété">
-        <!-- <input type="number" id="propertyPrice" placeholder="Prix de la propriété"> -->
         <div class="inputsetup"><label class="inputsetup-label">Porte d'Entrée</label><label id="label-inputsetupHouseDoor" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupHouseDoor">click</button></div>
         <div class="inputsetup"><label class="inputsetup-label">Garage</label><label id="label-inputsetupGarageDoor" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupGarageDoor">click</button></div>        
         <div class="inputsetup"><label class="inputsetup-label">Sortie de Garage</label><label id="label-inputsetupGarageOut" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupGarageOut">click</button></div>
@@ -60,6 +59,13 @@
         <button id= 'confirmCreationofProperty'>✅ Confirmer</button>
         <button class='backbutton'>🔙 Retour</button>
     </div>
+
+    <div id="propertyManagement" style="display: none;">
+        <h2>📋 Propriétés existantes</h2>
+        <ul id="propertyListManage"></ul>
+        <button class="backbutton">🔙 Retour</button>
+    </div>
+    
 
 
     <div id="confirmationBox" style="display: none;">

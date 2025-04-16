@@ -86,15 +86,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    const PropertiesListbutton = document.getElementById('showProperties');
-    PropertiesListbutton.addEventListener('click', function () {
-
-        var properties = document.getElementById('properties');
-        properties.style.display = 'block';
-    
-        var menu = document.getElementById('menu');
-        menu.style.display = 'none';
-    });
 
     const closebutton = document.getElementById('close');
     closebutton.addEventListener('click', function () {
@@ -148,10 +139,14 @@ document.addEventListener("DOMContentLoaded", function () {
             var sellProperty = document.getElementById('sellPropertyForm');
             sellProperty.style.display = 'none';
 
+            var propertyManagement = document.getElementById('propertyManagement');
+            propertyManagement.style.display = 'none'; // ← AJOUT ICI
+
             var menu = document.getElementById('menu');
             menu.style.display = 'block';
         });
     });
+
 
     const setpropertybuttons = document.querySelectorAll('.setpropertycoords')
     setpropertybuttons.forEach(function (setpropertybutton) {
@@ -258,6 +253,55 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+
+    document.getElementById('manageProperties').addEventListener('click', () => {
+        document.getElementById('menu').style.display = 'none'
+        document.getElementById('propertyManagement').style.display = 'block'
+    
+        const list = document.getElementById('propertyListManage')
+        list.innerHTML = ''
+    
+        fetch('https://Pipou-Immo/getAllProperties', {
+            method: 'POST',
+            body: JSON.stringify({}),
+        })
+        .then(res => res.json())
+        .then(properties => {
+            properties.forEach(prop => {
+                const li = document.createElement('li')
+                li.innerHTML = `
+                    🏠 <strong>${prop.name}</strong> (${prop.type}, étage ${prop.level})<br/>
+                    <div class="property-actions">
+                        <input type="number" placeholder="ID joueur" id="assign-${prop.id}" />
+                        <button onclick="assignProperty(${prop.id})">Attribuer</button>
+                        <button onclick="deleteProperty(${prop.id})">🗑 Supprimer</button>
+                    </div>
+                `;
+
+                list.appendChild(li)
+            })
+        })
+    })
+    
+    function deleteProperty(id) {
+        fetch('https://Pipou-Immo/deleteProperty', {
+            method: 'POST',
+            body: JSON.stringify({ id: id })
+        })
+    }
+    
+    function assignProperty(id) {
+        const input = document.getElementById(`assign-${id}`)
+        const targetId = input.value
+        if (!targetId || isNaN(targetId)) return alert("ID invalide")
+    
+        fetch('https://Pipou-Immo/assignPropertyToPlayerId', {
+            method: 'POST',
+            body: JSON.stringify({ id: id, target: parseInt(targetId) })
+        })
+    }
+    
+
     
 });
 
@@ -267,3 +311,55 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+// Rendre les fonctions globales pour être utilisables dans le HTML inline (onclick="")
+window.deleteProperty = function(id) {
+    if (!confirm("Es-tu sûr de vouloir supprimer cette propriété ?")) return;
+
+    fetch('https://Pipou-Immo/deleteProperty', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: id })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.success) {
+            alert("✅ Propriété supprimée !");
+            document.getElementById('manageProperties').click(); // Recharge la liste
+        } else {
+            alert("❌ Échec de la suppression.");
+        }
+    })
+    .catch(err => {
+        console.error("Erreur suppression :", err);
+        alert("❌ Erreur serveur.");
+    });
+}
+
+window.assignProperty = function(id) {
+    const input = document.getElementById(`assign-${id}`);
+    const targetId = input.value;
+
+    if (!targetId || isNaN(targetId)) return alert("ID invalide");
+
+    fetch('https://Pipou-Immo/assignPropertyToPlayerId', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: id, target: parseInt(targetId) })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.success) {
+            alert("✅ Propriété assignée !");
+        } else {
+            alert("❌ " + (res.message || "Erreur d’attribution."));
+        }
+    })
+    .catch(err => {
+        console.error("Erreur assignation :", err);
+        alert("❌ Erreur serveur.");
+    });
+}

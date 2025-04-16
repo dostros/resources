@@ -37,7 +37,18 @@ CreateThread(function()
         for _, prop in ipairs(properties) do
             createHousePoint(prop.name, prop.coords)
             cachedProperties[prop.name] = prop
-        end
+        
+            -- Charger le garage si présent
+            if prop.garagecoords and prop.garageout then
+                exports['d-garage']:AddPrivateGarage(
+                    "house_garage_" .. prop.name,
+                    "Garage de " .. prop.name,
+                    vector4(prop.garagecoords.x, prop.garagecoords.y, prop.garagecoords.z, prop.garagecoords.w or 0.0),
+                    vector3(prop.garageout.x, prop.garageout.y, prop.garageout.z),
+                    prop.name
+                )
+            end
+        end        
     end)
 end)
 
@@ -45,6 +56,9 @@ CreateThread(function()
     Wait(2000)
     local ped = PlayerPedId()
     local coords = GetEntityCoords(ped)
+
+    TriggerServerEvent("PipouImmo:server:getPlayerProperties")
+
 
     if coords.z <= -100 then
         QBCore.Functions.TriggerCallback('PipouImmo:server:getPropertyAtCoords', function(propData)
@@ -111,6 +125,19 @@ RegisterNUICallback('Pipou-Immo-createProperty', function(data, cb)
     SetEntityHeading(spawnedShell, 0.0)
     FreezeEntityPosition(spawnedShell, true)
 
+    if Garagecoords and GarageOut then
+        exports['d-garage']:AddPrivateGarage(
+            "house_garage_" .. propertyName,
+            "Garage de " .. propertyName,
+            vector4(Garagecoords.x, Garagecoords.y, Garagecoords.z, Garagecoords.w or 0.0),
+            vector3(GarageOut.x, GarageOut.y, GarageOut.z),
+            propertyName
+        )
+
+    end
+    
+    
+
     QBCore.Functions.TriggerCallback("PipouImmo:server:saveProperty", function(success)
         if success then
             QBCore.Functions.Notify("✅ Propriété enregistrée avec succès !", "success")
@@ -121,6 +148,9 @@ RegisterNUICallback('Pipou-Immo-createProperty', function(data, cb)
             cb({ success = false })
         end
     end, propertyName, propertyType, level, Housecoords, Garagecoords, GarageOut)
+
+    TriggerEvent('d-garage:reloadGarages')
+
 end)
 
 -- 🪯 Capture des coords depuis NUI
@@ -165,6 +195,7 @@ RegisterCommand("givehouse", function(source, args)
     QBCore.Functions.TriggerCallback("PipouImmo:server:assignProperty", function(success, message)
         if success then
             QBCore.Functions.Notify(message, "success")
+            TriggerServerEvent("PipouImmo:server:getPlayerProperties")
         else
             QBCore.Functions.Notify(message, "error")
         end
@@ -409,20 +440,20 @@ RegisterNetEvent("Pipou-Immo:openKeyMenu", function()
             header = "🔑 Gestion des clefs",
             isMenuHeader = true,
         },
-        {
-            header = "Donner une clef",
-            txt = "Donner une clef à un joueur proche",
-            params = {
-                event = "Pipou-Immo:giveKey"
-            }
-        },
-        {
-            header = "Retirer une clef",
-            txt = "Retirer une clef d’un joueur",
-            params = {
-                event = "Pipou-Immo:removeKey"
-            }
-        },
+        -- {
+        --     header = "Donner une clef",
+        --     txt = "Donner une clef à un joueur proche",
+        --     params = {
+        --         event = "Pipou-Immo:giveKey"
+        --     }
+        -- },
+        -- {
+        --     header = "Retirer une clef",
+        --     txt = "Retirer une clef d’un joueur",
+        --     params = {
+        --         event = "Pipou-Immo:removeKey"
+        --     }
+        -- },
         {
             header = "👥 Voir les colocataires",
             txt = "Voir la liste des personnes ayant accès",
@@ -612,6 +643,7 @@ RegisterNetEvent("Pipou-Immo:addTenant", function()
         if propName then
             QBCore.Functions.TriggerCallback('PipouImmo:server:addTenant', function(success, msg)
                 QBCore.Functions.Notify(msg, success and "success" or "error")
+                TriggerNetEvent("PipouImmo:refreshProperties")
             end, targetId, propName)
         else
             QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
@@ -644,6 +676,7 @@ RegisterNetEvent("Pipou-Immo:removeTenant", function()
         if propName then
             QBCore.Functions.TriggerCallback('PipouImmo:server:removeTenant', function(success, msg)
                 QBCore.Functions.Notify(msg, success and "success" or "error")
+                TriggerNetEvent("PipouImmo:refreshProperties")
             end, targetId, propName)
         else
             QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
@@ -743,4 +776,65 @@ RegisterNetEvent("Pipou-Immo:removeTenantConfirmed", function(data)
     TriggerServerEvent("PipouImmo:server:removeTenantByCitizenId", data.propertyName, data.citizenid)
     Wait(500)
     TriggerEvent("Pipou-Immo:showTenantList") -- Rafraîchit la liste
+end)
+
+local playerOwnedProperties = {}
+
+RegisterNetEvent("PipouImmo:client:setPlayerProperties", function(properties)
+    playerOwnedProperties = properties or {}
+
+    TriggerEvent("PipouImmo:client:SendPropertiesToGarage", playerOwnedProperties)
+    CreatePropertyBlips()
+end)
+
+
+RegisterNetEvent("PipouImmo:refreshProperties", function()
+    TriggerServerEvent("PipouImmo:server:getPlayerProperties")
+end)
+
+
+
+function CreatePropertyBlips()
+    -- On nettoie les anciens blips si existants
+    if propertyBlips then
+        for _, blip in pairs(propertyBlips) do
+            RemoveBlip(blip)
+        end
+    end
+    propertyBlips = {}
+
+    -- Parcourt les propriétés que possède ou loue le joueur
+    for _, propertyName in ipairs(playerOwnedProperties) do
+        local propertyData = cachedProperties[propertyName]
+        if propertyData and propertyData.coords then
+            local blip = AddBlipForCoord(propertyData.coords.x, propertyData.coords.y, propertyData.coords.z)
+            SetBlipSprite(blip, 40) -- Icône maison
+            SetBlipDisplay(blip, 4)
+            SetBlipScale(blip, 0.8)
+            SetBlipColour(blip, 0)
+            SetBlipAsShortRange(blip, true)
+            BeginTextCommandSetBlipName("STRING")
+            AddTextComponentString("🏠 Maison : " .. propertyName)
+            EndTextCommandSetBlipName(blip)
+
+            table.insert(propertyBlips, blip)
+        end
+    end
+end
+
+
+RegisterNUICallback("getAllProperties", function(_, cb)
+    QBCore.Functions.TriggerCallback("PipouImmo:server:getAllPropertiesWithID", function(props)
+        cb(props)
+    end)
+end)
+
+RegisterNUICallback("deleteProperty", function(data, cb)
+    TriggerServerEvent("PipouImmo:server:deleteProperty", data.id)
+    cb("ok")
+end)
+
+RegisterNUICallback("assignPropertyToPlayerId", function(data, cb)
+    TriggerServerEvent("PipouImmo:server:assignPropertyToPlayerId", data.id, data.target)
+    cb("ok")
 end)

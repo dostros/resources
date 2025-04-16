@@ -18,7 +18,7 @@ function GetGarageList (label,garagejob ) {
     }
 
     
-    fetch('https://d-garage/getGarageList', {
+    fetch(`https://${GetParentResourceName()}/getGarageList`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -28,8 +28,10 @@ function GetGarageList (label,garagejob ) {
             garagejob: garagejob
         }),
     })
-        .then((response) => response.json())
-        .then((data) => console.log(data))
+    .then((response) => response.json())
+    //.then((data) => console.log(data))
+    .catch((err) => console.error('Erreur fetch getGarageList:', err))
+    
         
 }
 
@@ -48,7 +50,7 @@ function GetOtherList (label, garagejob) {
         }),
     })
         .then((response) => response.json())
-        .then((data) => console.log(data))
+        //.then((data) => console.log(data))
 }   
 
 
@@ -67,7 +69,7 @@ function GetOutsideList (label, garagejob) {
             garagejob: garagejob}),
     })
         .then((response) => response.json())
-        .then((data) => console.log(data))
+        //.then((data) => console.log(data))
 }   
 
 
@@ -155,6 +157,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             else if (garagetype === 'job') {
                 garageMenu.style.border = "#c13f1d 3px solid"
+            }
+            else if (garagetype === 'private') {
+                garageMenu.style.border = "#fefee0 3px solid"
             }else {
                 garageMenu.style.border = "#010101 3px solid"
             }

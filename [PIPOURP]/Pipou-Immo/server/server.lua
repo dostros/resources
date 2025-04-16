@@ -49,6 +49,8 @@ QBCore.Functions.CreateCallback('PipouImmo:server:assignProperty', function(sour
                 if rowsChanged and rowsChanged > 0 then
                     cb(true, "Propriété assignée à " .. targetPlayer.PlayerData.charinfo.firstname)
                     TriggerClientEvent('PipouImmo:client:addHouseEntryPoint', targetId, propertyName)
+                    TriggerClientEvent('PipouImmo:client:RefreshGarages', targetId)
+
                 else
                     cb(false, "Cette personne possède déjà cette propriété.")
                 end
@@ -99,7 +101,7 @@ end)
 
 
 QBCore.Functions.CreateCallback('PipouImmo:server:getAllProperties', function(source, cb)
-    MySQL.Async.fetchAll('SELECT name, type, x, y, z, level FROM properties', {}, function(result)
+    MySQL.Async.fetchAll('SELECT name, type, x, y, z, garage_x, garage_y, garage_z, out_x, out_y, out_z, level FROM properties', {}, function(result)
         local formatted = {}
 
         for _, row in ipairs(result) do
@@ -108,7 +110,17 @@ QBCore.Functions.CreateCallback('PipouImmo:server:getAllProperties', function(so
                     name = row.name,
                     type = row.type, 
                     coords = { x = row.x, y = row.y, z = row.z },
-                    level = row.level
+                    level = row.level,
+                    garagecoords = (row.garage_x and row.garage_y and row.garage_z) and {
+                        x = row.garage_x,
+                        y = row.garage_y,
+                        z = row.garage_z
+                    } or nil,
+                    garageout = (row.out_x and row.out_y and row.out_z) and {
+                        x = row.out_x,
+                        y = row.out_y,
+                        z = row.out_z
+                    } or nil
                 })
             else
                 print(("❌ Erreur : Coordonnées invalides pour la propriété '%s'"):format(row.name))
@@ -118,6 +130,7 @@ QBCore.Functions.CreateCallback('PipouImmo:server:getAllProperties', function(so
         cb(formatted)
     end)
 end)
+
 
 QBCore.Functions.CreateCallback('PipouImmo:server:getPropertyAtCoords', function(source, cb, coords)
     MySQL.Async.fetchAll('SELECT * FROM properties', {}, function(properties)
@@ -203,7 +216,7 @@ end)
 
 QBCore.Functions.CreateCallback('PipouImmo:server:getTenants', function(source, cb, propertyName)
     MySQL.Async.fetchAll([[
-        SELECT p.citizenid, c.charinfo, po.access_type
+        SELECT po.citizenid, c.charinfo, po.access_type
         FROM property_owners po
         JOIN players c ON po.citizenid = c.citizenid
         JOIN properties p ON p.id = po.property_id
@@ -241,4 +254,72 @@ RegisterNetEvent('PipouImmo:server:removeTenantByCitizenId', function(propertyNa
             end)
         end
     end)
+end)
+
+
+RegisterNetEvent("PipouImmo:server:getPlayerProperties", function()
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+
+    if not Player then
+        print("❌ Impossible de récupérer le joueur avec source: " .. tostring(src))
+        return
+    end
+
+    local citizenid = Player.PlayerData.citizenid
+
+    MySQL.Async.fetchAll([[
+        SELECT p.name
+        FROM property_owners po
+        JOIN properties p ON po.property_id = p.id
+        WHERE po.citizenid = @citizenid AND po.access_type = 'owner'
+    ]], {
+        ['@citizenid'] = citizenid
+    }, function(result)
+        local ownedProps = {}
+        for _, row in ipairs(result) do
+            table.insert(ownedProps, row.name)
+        end
+        TriggerClientEvent("PipouImmo:client:setPlayerProperties", src, ownedProps)
+    end)
+end)
+
+
+
+
+QBCore.Functions.CreateCallback('PipouImmo:server:getAllPropertiesWithID', function(source, cb)
+    MySQL.Async.fetchAll('SELECT id, name, type, level FROM properties', {}, function(results)
+        cb(results or {})
+    end)
+end)
+
+RegisterNetEvent("PipouImmo:server:deleteProperty")
+AddEventHandler("PipouImmo:server:deleteProperty", function(propertyId)
+    MySQL.Async.execute('DELETE FROM properties WHERE id = @id', {
+        ['@id'] = propertyId
+    }, function(affectedRows)
+        print("[IMMO] Propriété supprimée : ID " .. propertyId)
+    end)
+end)
+
+RegisterNetEvent("PipouImmo:server:assignPropertyToPlayerId")
+AddEventHandler("PipouImmo:server:assignPropertyToPlayerId", function(propertyId, targetId)
+    local targetPlayer = QBCore.Functions.GetPlayer(tonumber(targetId))
+    if targetPlayer then
+        local citizenid = targetPlayer.PlayerData.citizenid
+
+        MySQL.Async.execute('INSERT IGNORE INTO property_owners (property_id, citizenid) VALUES (@pid, @cid)', {
+            ['@pid'] = propertyId,
+            ['@cid'] = citizenid
+        }, function(rows)
+            if rows > 0 then
+                TriggerClientEvent('QBCore:Notify', source, "✅ Propriété assignée.")
+                TriggerClientEvent('PipouImmo:client:addHouseEntryPoint', targetId, propertyId)
+            else
+                TriggerClientEvent('QBCore:Notify', source, "⚠️ Déjà attribuée.", "error")
+            end
+        end)
+    else
+        TriggerClientEvent('QBCore:Notify', source, "❌ Joueur introuvable.", "error")
+    end
 end)

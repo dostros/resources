@@ -1,5 +1,18 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local json = require("json")
+local garagePeds = {}
+local playerOwnedProperties = {}
+
+
+RegisterNetEvent("PipouImmo:client:SendPropertiesToGarage", function(properties)
+    playerOwnedProperties = properties or {}
+    LoadGarages()
+end)
+
+RegisterNetEvent("PipouImmo:client:setPlayerProperties", function(properties)
+    playerOwnedProperties = properties or {}
+    LoadGarages()
+end)
 
 
 Citizen.CreateThread(function()
@@ -9,14 +22,51 @@ Citizen.CreateThread(function()
     end   
 end)
 
-
 Citizen.CreateThread(function()
-    local listgarage = Config.Garages
-    Citizen.Wait(1000)
+    LoadGarages()
+end)
+
+RegisterNetEvent('d-garage:reloadGarages', function()
+    LoadGarages()
+end)
+
+RegisterNetEvent("PipouImmo:client:RefreshGarages", function()
+    TriggerServerEvent("PipouImmo:server:getPlayerProperties")
+    
+    Wait(1000)
+
+    LoadGarages()
+end)
+
+CreateThread(function()
+    while not QBCore.Functions.GetPlayerData().citizenid do
+        Wait(100)
+    end
+    TriggerServerEvent("PipouImmo:server:getPlayerProperties")
+end)
+
+
+
+function LoadGarages()
+    -- Supprime les anciens PNJ si existants
+    for _, ped in ipairs(garagePeds) do
+        if DoesEntityExist(ped) then
+            DeleteEntity(ped)
+        end
+    end
+    garagePeds = {}
+
+    while not QBCore.Functions.GetPlayerData() or not QBCore.Functions.GetPlayerData().job do
+        Wait(200)
+    end
+
+    local playerData = QBCore.Functions.GetPlayerData()
+    Wait(1000)
+
+
+
     for namegarage, garage in pairs(Config.Garages) do
         local garagelabel = garage.label
-
-      
         local garagespawnpoint = garage.spawnPoint
         local getinpoint = garage.getinpoint
         local garagetakevehicle = garage.takeVehicle
@@ -25,135 +75,194 @@ Citizen.CreateThread(function()
         local garagejob = garage.job
         local category = garage.category
         local garagegang = garage.gang
-        if garagetype == "gang" then
-            hashpnj = GetHashKey(Config.GaragePed[garagegang][1])
-        elseif garagetype =='job' then
-            if GetHashKey(Config.GaragePed[garagejob][1]) then
-                hashpnj = GetHashKey(Config.GaragePed[garagejob][1])
-            else
-                hashpnj = GetHashKey("a_m_y_business_01")
+
+
+        if garagetype == "private" then
+            local zoneName = garagelabel .. "_zonegarage"
+
+            -- 🔐 Vérification propriété
+            local isOwner = false
+            for _, propName in pairs(playerOwnedProperties) do
+                if garage.property and propName == garage.property then
+                    isOwner = true
+                    break
+                end
             end
-        end
-
-
-
-
-
-        ---------------------------------------PNJ--------------------------------------------
-
-        local pedheading = garagetakevehicle[4]
-        RequestModel(hashpnj)
-        local waiting = 0
-        while not HasModelLoaded(hashpnj) do
-            waiting = waiting + 100
-            Citizen.Wait(100)
-            if waiting > 3000 then
-                print("Model not found")
-                break
-            end
-        end
-
-        local garagepedJson = Config.GaragePed.default[1]
-        local appearanceData = json.decode(garagepedJson)
-
-
-
-
-        local pedGarageCreated = CreatePed(4, hashpnj, garagetakevehicle[1], garagetakevehicle[2], garagetakevehicle[3]-1, pedheading, false, true)
-        FreezeEntityPosition(pedGarageCreated, true)
-        SetEntityInvincible(pedGarageCreated, true)
-        SetBlockingOfNonTemporaryEvents(pedGarageCreated, true)
-        SetEntityAsMissionEntity(pedGarageCreated, true, true)
-        exports['DCommands']:LoadPlayerAppearance(pedGarageCreated,appearanceData)
-        TaskStartScenarioInPlace(pedGarageCreated, "WORLD_HUMAN_CLIPBOARD", 0, true)
-
-
-        exports['qb-target']:AddTargetEntity(pedGarageCreated, {
-            options = {
-                {
-                    num = 1,
-                    type = "client",
-                    icon = 'fa-solid fa-square-parking',
-                    label = 'Ouvrir le garage',
-                    targeticon = 'fa-solid fa-car',
-                    action = function()
-                        TriggerEvent('d-garage:openGarage', namegarage,garagejob,garagetype )
-                    end,
-                    job = garagejob,
-                    gang = garagegang
-                },
-                {
-                    num = 2,
-                    type = "client",
-                    icon = 'fa-solid fa-arrow-up-from-bracket',
-                    label = 'Ranger le véhicule le plus proche',
-                    targeticon = 'fa-solid fa-car',
-                    action = function()
-                        DGarageGetIn(namegarage,category,garagejob)
-                    end,
-                    job = garagejob,
-                    gang = garagegang
-                }
-            },
-            distance = 2.5,
-        })
-
-        ------------------------------------------------------------------------------------
-        ---------------------------------------BLIP------------------------------------------
         
-        if garagetype== "gang" then
-            
-            local blip = AddBlipForCoord(garagespawnpoint[1])
-            SetBlipSprite(blip, 357)  -- Choisis l'icône du blip
-            SetBlipDisplay(blip, 0)
-            SetBlipScale(blip, 0.8)
-            SetBlipColour(blip, 67)  
-            SetBlipAsShortRange(blip, true)  -- Le blip sera visible même de loin
-            BeginTextCommandSetBlipName("STRING")
-            AddTextComponentString("Garage de Faction")  -- Remplace par le nom de ton blip
-            EndTextCommandSetBlipName(blip)
-    
-        else if garagetype ~= "job" then
-
-            local blip = AddBlipForCoord(garagespawnpoint[1])
-            SetBlipSprite(blip, 357)  -- Choisis l'icône du blip
-            SetBlipDisplay(blip, 4)
-            SetBlipScale(blip, 0.8)
-            SetBlipColour(blip, 26)  
-            SetBlipAsShortRange(blip, true)  -- Le blip sera visible même de loin
-            BeginTextCommandSetBlipName("STRING")
-            AddTextComponentString("Garage publique")  -- Remplace par le nom de ton blip
-            EndTextCommandSetBlipName(blip)
+            if isOwner then
+                exports['qb-target']:AddCircleZone(zoneName, vector3(garagetakevehicle[1], garagetakevehicle[2], garagetakevehicle[3]), 1.5, {
+                    name = zoneName,
+                    useZ = true, 
+                    debugPoly = false,
+                }, {
+                    options = {
+                        {
+                            type = "client",
+                            icon = 'fa-solid fa-square-parking',
+                            label = 'Ouvrir le garage',
+                            action = function()
+                                TriggerEvent('d-garage:openGarage', namegarage, garagejob, garagetype)
+                            end
+                        },
+                        {
+                            type = "client",
+                            icon = 'fa-solid fa-arrow-up-from-bracket',
+                            label = 'Ranger le véhicule le plus proche',
+                            action = function()
+                                DGarageGetIn(namegarage, category, garagejob)
+                            end
+                        }
+                    },
+                    distance = 2.5,
+                })
         
-    
-            
-        else 
-
-            local playerData = QBCore.Functions.GetPlayerData()  -- Récupère les données du joueur
-
-            if playerData and playerData.job and playerData.job.name  then
-                local job = playerData.job.name
-            else
-                break
-            end
-            
-            if garagejob == job then
+                -- Blip uniquement si propriétaire
                 local blip = AddBlipForCoord(garagespawnpoint[1])
-                SetBlipSprite(blip, 357)  -- Choisis l'icône du blip
-                SetBlipDisplay(blip, 4)
+                SetBlipSprite(blip, 357)
+                SetBlipDisplay(blip, 0)
                 SetBlipScale(blip, 0.8)
-                SetBlipColour(blip, 25)  
-                SetBlipAsShortRange(blip, true)  -- Le blip sera visible même de loin
+                SetBlipColour(blip, 50)
+                SetBlipAsShortRange(blip, true)
                 BeginTextCommandSetBlipName("STRING")
-                AddTextComponentString("Garage "..garagejob)  -- Remplace par le nom de ton blip
+                AddTextComponentString("Garage privé")
                 EndTextCommandSetBlipName(blip)
             end
+        
+        else 
+
+            if garagetype == "gang" then
+                hashpnj = GetHashKey(Config.GaragePed[garagegang][1])
+            elseif garagetype == "job" then
+                if Config.GaragePed[garagejob] then
+                    hashpnj = GetHashKey(Config.GaragePed[garagejob][1])
+                else
+                    hashpnj = GetHashKey("a_m_y_business_01")
+                end
+            end
+
+            -- PNJ
+            local pedheading = garagetakevehicle[4]
+            RequestModel(hashpnj)
+            local waiting = 0
+            while not HasModelLoaded(hashpnj) do
+                waiting = waiting + 100
+                Wait(100)
+                if waiting > 3000 then print("Model not found") break end
+            end
+
+            local garagepedJson = Config.GaragePed.default[1]
+            local appearanceData = json.decode(garagepedJson)
+
+            local pedGarageCreated = CreatePed(4, hashpnj, garagetakevehicle[1], garagetakevehicle[2], garagetakevehicle[3]-1, pedheading, false, true)
+            FreezeEntityPosition(pedGarageCreated, true)
+            SetEntityInvincible(pedGarageCreated, true)
+            SetBlockingOfNonTemporaryEvents(pedGarageCreated, true)
+            SetEntityAsMissionEntity(pedGarageCreated, true, true)
+            exports['DCommands']:LoadPlayerAppearance(pedGarageCreated, appearanceData)
+            TaskStartScenarioInPlace(pedGarageCreated, "WORLD_HUMAN_CLIPBOARD", 0, true)
+
+            exports['qb-target']:AddTargetEntity(pedGarageCreated, {
+                options = {
+                    {
+                        num = 1,
+                        type = "client",
+                        icon = 'fa-solid fa-square-parking',
+                        label = 'Ouvrir le garage',
+                        targeticon = 'fa-solid fa-car',
+                        action = function()
+                            TriggerEvent('d-garage:openGarage', namegarage, garagejob, garagetype)
+                        end,
+                        job = garagejob,
+                        gang = garagegang
+                    },
+                    {
+                        num = 2,
+                        type = "client",
+                        icon = 'fa-solid fa-arrow-up-from-bracket',
+                        label = 'Ranger le véhicule le plus proche',
+                        targeticon = 'fa-solid fa-car',
+                        action = function()
+                            DGarageGetIn(namegarage, category, garagejob)
+                        end,
+                        job = garagejob,
+                        gang = garagegang
+                    }
+                },
+                distance = 2.5,
+            })
         end
 
+        table.insert(garagePeds, pedGarageCreated)
+
+        -- Blips
+        if garagetype == "gang" then
+            local blip = AddBlipForCoord(garagespawnpoint[1])
+            SetBlipSprite(blip, 357)
+            SetBlipDisplay(blip, 0)
+            SetBlipScale(blip, 0.8)
+            SetBlipColour(blip, 67)
+            SetBlipAsShortRange(blip, true)
+            BeginTextCommandSetBlipName("STRING")
+            AddTextComponentString("Garage de Faction")
+            EndTextCommandSetBlipName(blip)
+
+        elseif garagetype == "job" then
+            if playerData.job and garagejob == playerData.job.name then
+                local blip = AddBlipForCoord(garagespawnpoint[1])
+                SetBlipSprite(blip, 357)
+                SetBlipDisplay(blip, 4)
+                SetBlipScale(blip, 0.8)
+                SetBlipColour(blip, 44)
+                SetBlipAsShortRange(blip, true)
+                BeginTextCommandSetBlipName("STRING")
+                AddTextComponentString("Garage " .. garagejob)
+                EndTextCommandSetBlipName(blip)
+            end
+
+        elseif garagetype == "private" then
+            if isOwner then
+                local blip = AddBlipForCoord(garagespawnpoint[1])
+                SetBlipSprite(blip, 357)
+                SetBlipDisplay(blip, 0)
+                SetBlipScale(blip, 0.8)
+                SetBlipColour(blip, 50)
+                SetBlipAsShortRange(blip, true)
+                BeginTextCommandSetBlipName("STRING")
+                AddTextComponentString("Garage privé")
+                EndTextCommandSetBlipName(blip)
+            end
+
+        else
+            local blip = AddBlipForCoord(garagespawnpoint[1])
+            SetBlipSprite(blip, 357)
+            SetBlipDisplay(blip, 4)
+            SetBlipScale(blip, 0.8)
+            SetBlipColour(blip, 26)
+            SetBlipAsShortRange(blip, true)
+            BeginTextCommandSetBlipName("STRING")
+            AddTextComponentString("Garage publique")
+            EndTextCommandSetBlipName(blip)
+        end
     end
 end
-   
+
+RegisterNetEvent("d-garage:client:requestPrivateGarages", function()
+    TriggerServerEvent("PipouImmo:server:getAllProperties")
 end)
+
+AddEventHandler('onClientResourceStart', function(resource)
+    if resource == GetCurrentResourceName() then
+        CreateThread(function()
+            while not QBCore.Functions.GetPlayerData().citizenid do Wait(100) end
+
+            TriggerServerEvent("PipouImmo:server:getPlayerProperties")
+            
+            Wait(1000)
+            LoadGarages()
+        end)
+    end
+end)
+
 
 
 
@@ -170,26 +279,41 @@ Citizen.CreateThread(function()
             local category = garage.category
             local range = 20.0
 
-            if category == "air" or category =="boat" then
+            if category == "air" or category == "boat" then
                 range = 10
             end
 
-
-
             if distance < range then -- Seulement si le joueur est proche
-                drawnMarkers[namegarage] = true
+                local isOwner = true
+
+                if garage.type == "private" then
+                    isOwner = false
+                    for _, propName in pairs(playerOwnedProperties) do
+                        if garage.property and propName == garage.property then
+                            isOwner = true
+                            break
+                        end
+                    end
+                end
+
+                if isOwner then
+                    drawnMarkers[namegarage] = true
+                else
+                    drawnMarkers[namegarage] = nil
+                end
             else
                 drawnMarkers[namegarage] = nil
             end
         end
 
-        Citizen.Wait(500) -- Vérifie toutes les 500ms au lieu de 0ms (évite le surmenage du CPU)
+        Citizen.Wait(500)
     end
 end)
 
+
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(0) -- Minimum requis pour afficher les marqueurs
+        Citizen.Wait(0)
 
         for namegarage, _ in pairs(drawnMarkers) do
             local garage = Config.Garages[namegarage]
@@ -199,58 +323,60 @@ Citizen.CreateThread(function()
             local distance = #(playerCoords - getinpoint)
             local category = garage.category
             local garagejob = garage.job
-            local markertype = 0
-            local markersize = 0
-            local markerrange = 0
-            local upmarker =0
+            local garagetype = garage.type
+            local markertype, markersize, markerrange, upmarker = 36, 1.5, 2.0, 0
 
             if category == "air" then
-                markertype = 34
-                markersize = 2.0
-                markerrange = 7.0
-                upmarker = 1
+                markertype, markersize, markerrange, upmarker = 34, 2.0, 7.0, 1
             elseif category == "boat" then
-                markertype= 35
-                markersize = 2.0
-                markerrange = 7
-            else
-                markertype= 36
-                markersize = 1.5
-                markerrange = 2.0
+                markertype, markersize, markerrange = 35, 2.0, 7
             end
-            
-            -- Récupérer les données du joueur
+
             local playerData = QBCore.Functions.GetPlayerData()
             local job = playerData.job.name
 
-            -- Vérifier si le joueur est autorisé à utiliser ce garage (métier)
             local canInteract = true
-            if garage.job and garage.job ~= job then
+            if garagejob and garagejob ~= job then
                 canInteract = false
             end
 
+            -- Cas spécial pour les garages privés : affichage uniquement si le joueur est proprio
+            if garagetype == "private" then
+                local isOwner = false
+                for _, propName in pairs(playerOwnedProperties) do
+                    if garage.property and propName == garage.property then
+                        isOwner = true
+                        break
+                    end
+                end
+                if not isOwner then
+                    canInteract = false
+                end
+            end
+
             if canInteract then
-                -- Dessiner le marqueur
+                -- Affiche le marker au sol
                 DrawMarker(
-                    markertype, -- Type de marqueur
-                    getinpoint.x, getinpoint.y, getinpoint.z-0.5+upmarker, -- Coordonnées ajustées
-                    0.0, 0.0, 0.0, -- Direction
-                    1.0, 1.0, 1.0, -- Rotation
-                    markersize, markersize, markersize, -- Taille
-                    255, 0, 0, -- Couleur RGB
-                    100, -- Opacité (100 pour mieux voir)
-                    true, -- Bob up and down
-                    true, -- Face caméra
-                    2, -- Rotation
+                    markertype,
+                    getinpoint.x, getinpoint.y, getinpoint.z - 0.5 + upmarker,
+                    0.0, 0.0, 0.0,
+                    1.0, 1.0, 1.0,
+                    markersize, markersize, markersize,
+                    255, 0, 0,
+                    100,
+                    true,
+                    true,
+                    2,
                     nil, nil, false
                 )
 
-                if distance < markerrange then -- Distance à laquelle le texte devient visible
+                if distance < markerrange then
                     SetTextComponentFormat("STRING")
                     AddTextComponentString("Appuyez sur ~g~E~s~ pour garer le véhicule")
                     DisplayHelpTextFromStringLabel(0, 0, 1, -1)
-                    if IsControlJustReleased(0, 38) then -- 38 est le code de la touche E
-                        DGarageGetIn(namegarage,category,garagejob)
+
+                    if IsControlJustReleased(0, 38) then
+                        DGarageGetIn(namegarage, category, garagejob)
                     end
                 end
             end
@@ -262,67 +388,59 @@ end)
 
 
 
-
 RegisterNetEvent('d-garage:openGarage')
 AddEventHandler("d-garage:openGarage", function(label, garagejob,garagetype)
     SetDisplay(not display, label, garagejob,garagetype)
 end)
 
-function DGarageGetIn(garagelabel, category,garagejob)
-    
-    local coords = GetEntityCoords(PlayerPedId())
+function DGarageGetIn(garagelabel, category, garagejob)
+    local ped = PlayerPedId()
+    local coords = GetEntityCoords(ped)
     local closestVehicle, distance = QBCore.Functions.GetClosestVehicle(coords)
+
+    if closestVehicle == 0 or distance > 5.0 then
+        QBCore.Functions.Notify("Aucun véhicule à ranger", "error", 3000)
+        return
+    end
 
     local vehicletype = GetVehicleCategory(closestVehicle)
 
-
-
-    if category == nil then
+    if category == nil or category == "all" then
         category = vehicletype
     end
-    
-    if category == "all" then
-        category=  vehicletype
-    end
-    
+
     if vehicletype ~= category then
         QBCore.Functions.Notify("Ce type de véhicule ne peut pas être rangé ici.", "error", 3000)
         return
     end
 
-
-
-
-    if closestVehicle == 0 or distance > 5.0 then
-        QBCore.Functions.Notify("Aucun véhicule à ranger", "error", length)
-        return
-    end
     local plate = GetVehicleNumberPlateText(closestVehicle)
     local model = GetDisplayNameFromVehicleModel(GetEntityModel(closestVehicle))
-    local garage = garagelabel
     local mods = json.encode(QBCore.Functions.GetVehicleProperties(closestVehicle))
+    local garage = garagelabel
 
-    if garagejob == '' then
+    -- 🧠 Déterminer si le garage est de type privé
+    local isPrivate = not garagejob or garagejob == '' or garagejob == nil
 
+    if isPrivate then
+        -- Vérifie si le véhicule appartient bien au joueur
         QBCore.Functions.TriggerCallback('server-d-get-owner', function(result)
             if result == true then
-                TriggerServerEvent('d-garage:server:getinvehicle', data, plate,model, garage,mods,garagejob)
-                QBCore.Functions.Notify("Véhicule rangé : "..model, "primary", length)
+                TriggerServerEvent('d-garage:server:getinvehicle', plate, model, garage, mods, "")
+                QBCore.Functions.Notify("Véhicule rangé : " .. model, "primary", 3000)
                 DeleteEntity(closestVehicle)
             else
-                QBCore.Functions.Notify("Ce véhicule ne vous appartient pas", "error", length)
+                QBCore.Functions.Notify("🚫 Ce véhicule ne vous appartient pas", "error", 3000)
             end
-
         end, plate)
     else
-        
-        TriggerServerEvent('d-garage:server:getinvehicle', data, plate,model, garage,mods,garagejob )
-        QBCore.Functions.Notify("Véhicule rangé : "..model, "primary", length)
+        -- Pour les garages de métier ou gang
+        TriggerServerEvent('d-garage:server:getinvehicle', plate, model, garage, mods, garagejob)
+        QBCore.Functions.Notify("Véhicule rangé : " .. model, "primary", 3000)
         DeleteEntity(closestVehicle)
-
     end
-
 end
+
 
 
 function GetVehicleCategory(vehicle)
@@ -400,8 +518,8 @@ RegisterNUICallback('getGarageList', function(data, cb)
 
 
         else
-            print("getGarageListnotjob")
-            print(result[1].model)
+            --print("getGarageListnotjob")
+            --print(result[1].model)
             for k,v in pairs(result) do
                 SendNUIMessage({
                     type='addVehicleonlist',
@@ -409,10 +527,11 @@ RegisterNUICallback('getGarageList', function(data, cb)
                     plate = result[k].plate,
                     currentgarage = namegarage,
                 })
-                print("Model: "..result[k].model.." | Plate: "..result[k].plate.." | garage : "..namegarage)
+                --print("Model: "..result[k].model.." | Plate: "..result[k].plate.." | garage : "..namegarage)
             end
         end
         SendNUIMessage({type='updatelistener', currentgarage = namegarage})
+        cb(result)
     end, namegarage, garagejob)
 end)
 
@@ -431,6 +550,7 @@ RegisterNUICallback('getOtherList', function(data, cb)
                 garage = result[k].garage,
             })
         end
+        cb(result)
     end, namegarage)
 end)
 
@@ -446,6 +566,7 @@ RegisterNUICallback('getOutsideList', function(data, cb)
                 coords = result[k].coords,
             })
         end
+        cb(result)
     end, namegarage)
 end)
 
@@ -601,3 +722,26 @@ RegisterCommand("savevehicle", function()
     end, plate)
 
 end, false)
+
+
+
+-- Dans d-garage/server.lua (ou shared, selon l’archi)
+function AddPrivateGarage(name, label, spawnPoint, getInPoint, property)
+    Config.Garages[name] = {
+        label = label,
+        type = "private",
+        takeVehicle = spawnPoint,
+        spawnPoint = { spawnPoint },
+        getinpoint = getInPoint,
+        property = property,
+    }
+end
+exports('AddPrivateGarage', AddPrivateGarage)
+
+
+
+RegisterCommand("reloadgarages", function()
+    TriggerServerEvent("PipouImmo:server:getPlayerProperties")
+    Wait(1000)
+    LoadGarages()
+end)
