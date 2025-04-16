@@ -288,19 +288,49 @@ end)
 
 
 QBCore.Functions.CreateCallback('PipouImmo:server:getAllPropertiesWithID', function(source, cb)
-    MySQL.Async.fetchAll('SELECT id, name, type, level FROM properties', {}, function(results)
-        cb(results or {})
+    MySQL.Async.fetchAll([[
+        SELECT 
+            p.id, 
+            p.name, 
+            p.type, 
+            p.level,
+            JSON_UNQUOTE(JSON_EXTRACT(pl.charinfo, '$.firstname')) AS firstname,
+            JSON_UNQUOTE(JSON_EXTRACT(pl.charinfo, '$.lastname')) AS lastname
+        FROM properties p
+        LEFT JOIN property_owners po ON po.property_id = p.id AND po.access_type = 'owner'
+        LEFT JOIN players pl ON po.citizenid = pl.citizenid
+    ]], {}, function(results)
+        local props = {}
+
+        for _, row in ipairs(results) do
+            table.insert(props, {
+                id = row.id,
+                name = row.name,
+                type = row.type,
+                level = row.level,
+                owner_name = (row.firstname and row.lastname) and (row.firstname .. " " .. row.lastname) or nil
+            })
+        end
+
+        cb(props)
     end)
 end)
 
+
 RegisterNetEvent("PipouImmo:server:deleteProperty")
 AddEventHandler("PipouImmo:server:deleteProperty", function(propertyId)
-    MySQL.Async.execute('DELETE FROM properties WHERE id = @id', {
+    MySQL.Async.execute('DELETE FROM property_owners WHERE property_id = @id', {
         ['@id'] = propertyId
-    }, function(affectedRows)
-        print("[IMMO] Propriété supprimée : ID " .. propertyId)
+    }, function()
+        MySQL.Async.execute('DELETE FROM properties WHERE id = @id', {
+            ['@id'] = propertyId
+        }, function(affectedRows)
+            print("[IMMO] Propriété supprimée : ID " .. propertyId)
+            TriggerClientEvent("PipouImmo:client:notifyPropertyDeleted", src, success)
+        end)
     end)
 end)
+
 
 RegisterNetEvent("PipouImmo:server:assignPropertyToPlayerId")
 AddEventHandler("PipouImmo:server:assignPropertyToPlayerId", function(propertyId, targetId)
@@ -308,17 +338,24 @@ AddEventHandler("PipouImmo:server:assignPropertyToPlayerId", function(propertyId
     if targetPlayer then
         local citizenid = targetPlayer.PlayerData.citizenid
 
-        MySQL.Async.execute('INSERT IGNORE INTO property_owners (property_id, citizenid) VALUES (@pid, @cid)', {
-            ['@pid'] = propertyId,
-            ['@cid'] = citizenid
-        }, function(rows)
-            if rows > 0 then
-                TriggerClientEvent('QBCore:Notify', source, "✅ Propriété assignée.")
-                TriggerClientEvent('PipouImmo:client:addHouseEntryPoint', targetId, propertyId)
-            else
-                TriggerClientEvent('QBCore:Notify', source, "⚠️ Déjà attribuée.", "error")
-            end
+        -- Supprimer ancien propriétaire s'il existe
+        MySQL.Async.execute('DELETE FROM property_owners WHERE property_id = @pid AND access_type = "owner"', {
+            ['@pid'] = propertyId
+        }, function()
+            -- Ajouter le nouveau propriétaire
+            MySQL.Async.execute('INSERT INTO property_owners (property_id, citizenid, access_type) VALUES (@pid, @cid, "owner")', {
+                ['@pid'] = propertyId,
+                ['@cid'] = citizenid
+            }, function(rows)
+                if rows > 0 then
+                    TriggerClientEvent('QBCore:Notify', src, "✅ Propriété assignée.", "success")
+                    TriggerClientEvent('PipouImmo:client:addHouseEntryPoint', targetId, propertyId)
+                else
+                    TriggerClientEvent('QBCore:Notify', source, "❌ Attribution échouée", "error")
+                end
+            end)
         end)
+
     else
         TriggerClientEvent('QBCore:Notify', source, "❌ Joueur introuvable.", "error")
     end

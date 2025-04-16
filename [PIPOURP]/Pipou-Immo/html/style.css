@@ -300,19 +300,23 @@ button:active {
 #propertyManagement {
     padding: 30px;
     text-align: left;
-    width: 700px;
+    width: 90%; 
+    max-width: 1000px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    justify-content: center;
     gap: 20px;
 }
+
 
 #propertyListManage {
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: 400px;
+    max-height: 600px;
     overflow-y: auto;
+    padding-right: 5px;
 }
 
 #propertyListManage li {
@@ -353,4 +357,87 @@ button:active {
     flex-wrap: wrap;
     align-items: center;
     gap: 10px;
+}
+
+.notification-toast {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 12px 18px;
+    background-color: #2ecc71;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    z-index: 9999;
+    animation: fadeout 4s forwards;
+}
+@keyframes fadeout {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; display: none; }
+}
+
+#deleteConfirmationBox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #2c3e50;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--box-shadow);
+    z-index: 1000;
+}
+#deleteConfirmationBox h3 {
+    margin: 0 0 10px;
+    color: var(--text-color);
+}
+
+.owner-tag {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+    display: inline-block;
+}
+
+#propertyListManage::-webkit-scrollbar {
+    width: 10px;
+}
+
+#propertyListManage::-webkit-scrollbar-track {
+    background: #1e1e1e;
+    border-radius: 10px;
+}
+
+#propertyListManage::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 10px;
+    border: 2px solid #1e1e1e;
+}
+
+.property-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.property-name {
+    font-size: 18px;
+    color: var(--primary-color);
+}
+
+.property-info {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.property-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
 }

@@ -24,4 +24,13 @@ files {
     'html/*.css',
     'html/**.png',
     'html/**.svg',
+    'stream/**/*.ytyp'
+
 }
+
+data_file 'DLC_ITYP_REQUEST' 'stream/**/*.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/envi_shell_02_empty.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/envi_shell_01_empty.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/envi_shell_03_empty.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/free_shells.ytyp'
+dependency '/assetpacks'

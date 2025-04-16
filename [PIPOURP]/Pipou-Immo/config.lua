@@ -100,4 +100,46 @@ Config.InteriorTypes = {
         diffy = -2.66,
         diffz = 0.0,
     },
+    envi_shell_02_empty = {
+        label = "Appartement T7",
+        diffx = 0.08,
+        diffy = -10.84,
+        diffz = 0.94,
+    },
+    envi_shell_01_empty = {
+        label = "Appartement T6",
+        diffx = 0.66,
+        diffy = 0.32,
+        diffz = 0.0,
+    },
+    envi_shell_03_empty = {
+        label = "Appartement T8",
+        diffx = 5.12,
+        diffy = -6.8,
+        diffz = 0.18,
+    },
+    apart_luxe_1 = {
+        label = "Duplex",
+        diffx = -19,2,
+        diffy = -1.24,
+        diffz = 14.27,
+    },
+    coke_business_empty = {
+        label = "Hangar T2",
+        diffx = -4.23,
+        diffy = -2.97,
+        diffz = 0.0,
+    },
+    motel_low = {
+        label = "Motel V2",
+        diffx = -2.84,
+        diffy = -3.37,
+        diffz = 0.0,
+    },
+    warehouse_small = {
+        label = "Hangar T3",
+        diffx = -1.75,
+        diffy = -15.24,
+        diffz = 0.0,
+    },
 }

@@ -830,11 +830,30 @@ RegisterNUICallback("getAllProperties", function(_, cb)
 end)
 
 RegisterNUICallback("deleteProperty", function(data, cb)
+    if not data.id then
+        print("[PipouImmo] ❌ ID manquant dans deleteProperty")
+        return cb({ success = false, message = "ID manquant." })
+    end
+
     TriggerServerEvent("PipouImmo:server:deleteProperty", data.id)
-    cb("ok")
+    cb({ success = true })
 end)
 
+
 RegisterNUICallback("assignPropertyToPlayerId", function(data, cb)
+    if not data.id or not data.target then
+        QBCore.Functions.Notify("❌ Données manquantes.", "error")
+        return cb({ success = false, message = "ID ou cible manquant." })
+    end
+
     TriggerServerEvent("PipouImmo:server:assignPropertyToPlayerId", data.id, data.target)
-    cb("ok")
+    cb({ success = true })
+end)
+
+RegisterNetEvent("PipouImmo:client:notifyPropertyDeleted", function(success)
+    if success then
+        QBCore.Functions.Notify("✅ Propriété supprimée avec succès.", "success")
+    else
+        QBCore.Functions.Notify("❌ Échec lors de la suppression.", "error")
+    end
 end)
