@@ -34,24 +34,25 @@ QBCore.Functions.CreateCallback('server-d-get-owner', function(source, data, pla
 end)
 
 RegisterServerEvent('d-garage:server:getinvehicle')
-AddEventHandler('d-garage:server:getinvehicle', function(data, plate, model, garage, mods,garagejob)
-
+AddEventHandler('d-garage:server:getinvehicle', function(plate, model, garage, mods, garagejob)
     local Player = QBCore.Functions.GetPlayer(source)
-    --print(Player.PlayerData.citizenid)
 
+    print("[Garage Debug] Plate:", plate)
+    print("[Garage Debug] Model:", model)
+    print("[Garage Debug] Garage:", garage)
+    print("[Garage Debug] Job:", garagejob)
 
-    MySQL.update('UPDATE player_vehicles SET garage = @garage, mods =@mods, job =@job  WHERE plate = @plate', {
+    MySQL.update('UPDATE player_vehicles SET garage = @garage, model = @model, mods = @mods, job = @job WHERE plate = @plate', {
         ['@garage'] = garage,
-        ['mods']    = mods, 
-        ['job']     = garagejob,
-        ['plate']   = plate
+        ['@model']  = model,
+        ['@mods']   = mods,
+        ['@job']    = garagejob,
+        ['@plate']  = plate
     }, function(response)
-        --print(response)
+        print("[Garage Debug] Update response:", response)
     end)
-
-
-
 end)
+
 
 RegisterServerEvent('d-garage:server:registervehicle')
 AddEventHandler('d-garage:server:registervehicle', function(data, plate, model, garage, mods)

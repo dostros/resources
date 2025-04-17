@@ -41,7 +41,7 @@ CreateThread(function()
             -- Charger le garage si présent
             if prop.garagecoords and prop.garageout then
                 exports['d-garage']:AddPrivateGarage(
-                    "house_garage_" .. prop.name,
+                    "house_" .. prop.name,
                     "Garage de " .. prop.name,
                     vector4(prop.garagecoords.x, prop.garagecoords.y, prop.garagecoords.z, prop.garagecoords.w or 0.0),
                     vector3(prop.garageout.x, prop.garageout.y, prop.garageout.z),

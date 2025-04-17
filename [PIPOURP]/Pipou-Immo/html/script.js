@@ -3,6 +3,8 @@ let HouseDoorCoords = ''
 let GarageDoorCoords = ''
 let GarageOutCoords = ''
 let pendingDeleteId = null;
+let allProperties = [];
+
 
 // FUNCTION
 document.addEventListener("DOMContentLoaded", function () {
@@ -80,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll('.backbutton').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            ['properties', 'sellPropertyForm', 'propertyManagement'].forEach(id => {
+            ['sellPropertyForm', 'propertyManagement'].forEach(id => {
                 document.getElementById(id).style.display = 'none';
             });
             document.getElementById('menu').style.display = 'block';
@@ -124,31 +126,23 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('confirmationBox').style.display = 'none';
     });
 
-    document.getElementById('toggleTheme').addEventListener('click', () => {
-        document.documentElement.classList.toggle('light-theme');
-        const isLight = document.documentElement.classList.contains('light-theme');
-        toggleBtn.textContent = isLight ? '🌙 Mode sombre' : '🌓 Mode clair';
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
-    });
-
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.documentElement.classList.add('light-theme');
-        document.getElementById('toggleTheme').textContent = '🌙 Mode sombre';
-    }
 
     document.getElementById('manageProperties').addEventListener('click', () => {
         document.getElementById('menu').style.display = 'none';
         document.getElementById('propertyManagement').style.display = 'block';
-
-        const list = document.getElementById('propertyListManage');
-        list.innerHTML = '';
-
-
-        refreshPropertyList();
-
-        
+      
+        fetch('https://Pipou-Immo/getAllProperties', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        })
+          .then(res => res.json())
+          .then(data => {
+            allProperties = data;
+            refreshPropertyList();
+        });
     });
+      
 
     document.getElementById('deleteConfirmYes').addEventListener('click', () => {
         if (!pendingDeleteId) return;
@@ -174,6 +168,38 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('deleteConfirmationBox').style.display = 'none';
         pendingDeleteId = null;
     });
+
+    document.getElementById('propertySearch').addEventListener('input', () => {
+        const query = document.getElementById('propertySearch').value.toLowerCase();
+        const filtered = allProperties.filter(p =>
+          p.name.toLowerCase().includes(query)
+        );
+        refreshPropertyList(filtered);
+    });
+
+    window.togglePropertyActions = function(headerDiv, event) {
+        const tag = event?.target?.tagName?.toLowerCase();
+        if (tag === 'button' || tag === 'input' || event?.target?.classList.contains('property-actions')) {
+            return;
+        }
+    
+        const actions = headerDiv.querySelector('.property-actions');
+        if (actions.classList.contains('hidden')) {
+            actions.classList.remove('hidden');
+            actions.classList.add('expanded');
+        } else {
+            actions.classList.remove('expanded');
+            actions.classList.add('hidden');
+        }
+    }
+    
+      
+      
+      
+
+
+
+
 });
 
 // RENDRE GLOBAL POUR HTML
@@ -200,40 +226,34 @@ window.assignProperty = function (id) {
 
 
 
-function refreshPropertyList() {
+function refreshPropertyList(filteredList = allProperties) {
     const list = document.getElementById('propertyListManage');
     list.innerHTML = '';
-
-    fetch('https://Pipou-Immo/getAllProperties', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-    })
-    .then(res => res.json())
-    .then(properties => {
-        if (!Array.isArray(properties) || properties.length === 0) {
-            list.innerHTML = `<li class="empty-message">Aucune propriété enregistrée.</li>`;
-            return;
-        }
-
-        properties.forEach(prop => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <div class="property-header">
-                    <div>
-                        <strong class="property-name">🏠 ${prop.name}</strong><br/>
-                        <span class="property-info">${prop.type}, étage ${prop.level}</span><br/>
-                        ${prop.owner_name ? `<span class="owner-tag">👤 ${prop.owner_name}</span>` : '<span class="owner-tag">🔓 Non attribuée</span>'}
-                    </div>
-                    <div class="property-actions">
-                        <input type="number" placeholder="ID joueur" id="assign-${prop.id}" />
-                        <button onclick="assignProperty(${prop.id})">Attribuer</button>
-                        <button onclick="deleteProperty(${prop.id})">🗑 Supprimer</button>
-                    </div>
-                </div>
-            `;
-
-            list.appendChild(li);
-        });
+  
+    if (!filteredList.length) {
+      list.innerHTML = `<li class="empty-message">Aucune propriété trouvée.</li>`;
+      return;
+    }
+  
+    filteredList.forEach(prop => {
+        const li = document.createElement('li');
+        li.classList.add('property-item');
+        li.innerHTML = `
+          <div class="property-header" onclick="togglePropertyActions(this, event)">
+            <div>
+              <strong class="property-name">🏠 ${prop.name}</strong><br/>
+              <span class="property-info">${prop.type}, étage ${prop.level}</span><br/>
+              ${prop.owner_name ? `<span class="owner-tag">👤 ${prop.owner_name}</span>` : '<span class="owner-tag">🔓 Non attribuée</span>'}
+            </div>
+            <div class="property-actions hidden">
+              <input type="number" placeholder="ID joueur" id="assign-${prop.id}" />
+              <button onclick="assignProperty(${prop.id})">Attribuer</button>
+              <button onclick="deleteProperty(${prop.id})">🗑 Supprimer</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(li);
     });
+      
 }
+  

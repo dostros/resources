@@ -12,47 +12,24 @@
     <title>Immo Menu</title>
 </head>
 <body>
-    <div id="menu">
+    <div id="menu" class="card">
         <h1>Agence Immobilière</h1>
-        <button id="manageProperties">📦 Gérer propriétés</button>
+        <button id="manageProperties">Gérer propriétés</button>
         <button id='sellProperty'>Créer une propriété</button>
         <button id='rentProperty'>Louer propriété</button>
-        <button id="toggleTheme">🌓 Basculer le thème</button>
         <button id='close'>❌ Fermer</button>
     </div>
 
-    <div id="properties">
-        <h2>Propriétés</h2>
-        <ul id="propertyList"></ul>
-        <button class='backbutton'>🔙 Retour</button>
-    </div>
-
-    <div id="sellPropertyForm">
+    <div class="card" id="sellPropertyForm">
         <h2>Vendre Propriété</h2>
         <input type="text" id="propertyName" placeholder="Nom de la propriété">
-        <div class="inputsetup"><label class="inputsetup-label">Porte d'Entrée</label><label id="label-inputsetupHouseDoor" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupHouseDoor">click</button></div>
-        <div class="inputsetup"><label class="inputsetup-label">Garage</label><label id="label-inputsetupGarageDoor" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupGarageDoor">click</button></div>        
-        <div class="inputsetup"><label class="inputsetup-label">Sortie de Garage</label><label id="label-inputsetupGarageOut" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupGarageOut">click</button></div>
+        <div class="inputsetup"><label class="inputsetup-label">Porte d'Entrée</label><label id="label-inputsetupHouseDoor" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupHouseDoor">Choose</button></div>
+        <div class="inputsetup"><label class="inputsetup-label">Garage</label><label id="label-inputsetupGarageDoor" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupGarageDoor">Choose</button></div>        
+        <div class="inputsetup"><label class="inputsetup-label">Sortie de Garage</label><label id="label-inputsetupGarageOut" class="inputsetup-check">❌</label><button class = "setpropertycoords" id="button-inputsetupGarageOut">Choose</button></div>
         <div class="inputsetup">
             <label class="inputsetup-label">Type d'intérieur</label>
             <select id="interiorType">
                 <option value="none">Type d'intérieur</option>
-                <!-- <option value="container_shell">Conteneur</option>
-                <option value="furnitured_midapart">Appartement T1</option>
-                <option value="modernhotel_shell">Chambre d'Hôtel</option>
-                <option value="shell_frankaunt">Appartement T2</option>
-                <option value="shell_garagem">Garage T1</option>
-                <option value="shell_lester">Appartement T3</option>
-                <option value="shell_michael">Villa espagnole</option>
-                <option value="shell_office1">Bureau T1</option>
-                <option value="shell_ranch">Maison Ranch</option>
-                <option value="shell_store1">Magasin T1</option>
-                <option value="shell_trailer">Mobile-home</option>
-                <option value="shell_trevor">Appartement T4</option>
-                <option value="shell_v16low">Studio</option>
-                <option value="shell_v16mid">Appartement T5</option>
-                <option value="shell_warehouse1">Hangar T1</option>
-                <option value="standardmotel_shell">Chambre de Motel</option> -->
             </select>
         </div>        
         <input type="number" id="levelproperty" placeholder="Niveau d'étage">
@@ -60,15 +37,19 @@
         <button class='backbutton'>🔙 Retour</button>
     </div>
 
-    <div id="propertyManagement" style="display: none;">
+    <div class="card" id="propertyManagement" style="display: none;">
         <h2>📋 Propriétés existantes</h2>
+        
+        <input type="text" id="propertySearch" placeholder="🔍 Rechercher une propriété..." style="margin-bottom: 15px; width: 100%; padding: 10px; border-radius: 8px;" />
+        
         <ul id="propertyListManage"></ul>
+        
         <button class="backbutton">🔙 Retour</button>
     </div>
     
 
 
-    <div id="confirmationBox" style="display: none;">
+    <div class="card" id="confirmationBox" style="display: none;">
         <h2>Confirmer la création ?</h2>
         <p>Es-tu sûr de vouloir créer cette propriété ?</p>
         <div class="confirmation-buttons">
@@ -77,7 +58,7 @@
         </div>
     </div>
 
-    <div id="deleteConfirmationBox" style="display: none;">
+    <div class="card" id="deleteConfirmationBox" style="display: none;">
         <h2>Supprimer la propriété ?</h2>
         <p>Es-tu sûr de vouloir supprimer cette propriété ?</p>
         <div class="confirmation-buttons">
