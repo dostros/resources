@@ -511,6 +511,20 @@ Config.Garages = {
         type = 'job', -- public, gang, job, depot
         job='timber',
     },
+    realestategarage = {
+        label = 'Realestate Parking',
+        takeVehicle = vector4(-702.86, 276.63, 83.69, 33.85),
+        spawnPoint = {
+            vector4(-707.57, 280.55, 84.01, 76.97)
+        },
+        getinpoint = vector3(-714.58, 279.81, 84.43),
+        showBlip = false,
+        blipName = 'Realestate Parking',
+        blipNumber = 357,
+        blipColor = 2,
+        type = 'job', -- public, gang, job, depot
+        job='realestate',
+    },
 }
 
 

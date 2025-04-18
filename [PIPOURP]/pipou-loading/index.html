@@ -1,21 +1,83 @@
-<!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chargement - Pipou RP</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="keks.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-    <div class="loader-container">
-        <div class="loader"></div>
-        <h1>Pipou RP - Chargement...</h1>
-        <p>Merci de patienter pendant le chargement du serveur...</p>
-    </div>
-    <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
+    <div class="backdrop">
+        <div class="top">
+            <h1 title="Pipou RP">Pipou RP</h1>
+            <h2 title="Chargement du serveur">Chargement du serveur</h2>
+        </div>
+
+        <div class="letni">
+            <h2 title="Connexion">Connexion</h2>
+            <h3></h3>
+            <div class="loadbar"><div class="thingy"></div></div>
+            <p id="tip">Bienvenue sur Pipou RP !</p>
+        </div>
+
+        <div class="bottom">
+            <div id="gradient"></div>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+<script type="text/javascript">
+var count = 0;
+var thisCount = 0;
+
+const emoji = {
+    INIT_BEFORE_MAP_LOADED: ['🚀 Chargement initial'], // Avant que la map soit chargée
+    INIT_AFTER_MAP_LOADED: ['🌍 Map chargée', '🗺️ Préparation du monde'], // Après map
+    INIT_SESSION: ['🔐 Connexion', '🧍 Apparition', '🎮 Chargement de session'], // Session
+};
+
+
+const tips = [
+    "Astuce : Utilisez /report pour contacter un admin",
+    "Saviez-vous ? Pipou RP a été fondé en 2023 !",
+    "Rappel : Le powergaming est interdit.",
+    "Appuyez sur F2 pour ouvrir votre inventaire.",
+    "Restez fair-play et amusez-vous !"
+];
+
+function showRandomTip() {
+    const tipBox = document.getElementById("tip");
+    const randomTip = tips[Math.floor(Math.random() * tips.length)];
+    tipBox.textContent = randomTip;
+}
+setInterval(showRandomTip, 7000);
+
+const handlers = {
+    startInitFunctionOrder(data) {
+    count = data.count;
+    const emojiStep = emoji[data.type][data.order - 1] || '✨ Étape inconnue';
+    const h3 = document.querySelector('.letni h3');
+    h3.innerHTML += `<span class="emoji-step">${emojiStep}</span><br>`;
+    },
+
+
+    initFunctionInvoking(data) {
+        document.querySelector('.thingy').style.width = ((data.idx / count) * 100) + '%';
+    },
+
+    startDataFileEntries(data) {
+        count = data.count;
+        document.querySelector('.letni h3').innerHTML += "\u{1f358}";
+    },
+
+    performMapLoadFunction(data) {
+        ++thisCount;
+        document.querySelector('.thingy').style.width = ((thisCount / count) * 100) + '%';
+    },
+
+    onLogLine(data) {
+        document.getElementById('tip').textContent = data.message + "..!";
+    }
+};
+
+window.addEventListener('message', function(e) {
+    (handlers[e.data.eventName] || function() {})(e.data);
+});
+</script>
 </body>
 </html>

@@ -360,3 +360,58 @@ AddEventHandler("PipouImmo:server:assignPropertyToPlayerId", function(propertyId
         TriggerClientEvent('QBCore:Notify', source, "❌ Joueur introuvable.", "error")
     end
 end)
+
+QBCore.Functions.CreateCallback('PipouImmo:getPlayerFurnitureInventory', function(source, cb)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player then return cb({}) end
+
+    local citizenid = Player.PlayerData.citizenid
+
+    MySQL.Async.fetchAll([[
+        SELECT object_model, label, quantity 
+        FROM player_furnitures 
+        WHERE citizenid = @citizenid AND quantity > 0
+    ]], {
+        ['@citizenid'] = citizenid
+    }, function(results)
+        local inventory = {}
+        for _, row in pairs(results) do
+            table.insert(inventory, {
+                object = row.object_model,
+                label = row.label,
+                quantity = row.quantity
+            })
+        end
+        cb(inventory)
+    end)
+end)
+
+
+
+QBCore.Functions.CreateCallback('PipouDeco:getPlayerFurniture', function(source, cb, propertyName)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player then return cb({}) end
+
+    local citizenid = Player.PlayerData.citizenid
+
+    MySQL.Async.fetchAll([[
+        SELECT object_model, x, y, z, heading, pitch, roll 
+        FROM furniture_placements 
+        WHERE citizenid = @citizenid AND property_name = @property
+    ]], {
+        ['@citizenid'] = citizenid,
+        ['@property'] = propertyName
+    }, function(results)
+        local furnitureList = {}
+        for _, row in pairs(results) do
+            table.insert(furnitureList, {
+                object = row.object_model,
+                coords = vector3(row.x, row.y, row.z),
+                heading = row.heading,
+                pitch = row.pitch or 0.0,
+                roll = row.roll or 0.0
+            })
+        end
+        cb(furnitureList)
+    end)
+end)

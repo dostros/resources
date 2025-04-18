@@ -18,5 +18,14 @@ Config.BossMenu = {
         blipName = 'Gouvernement',
         blipNumber = 419,
         blipColor = 21,
+    },
+    realestate = {
+        label = 'Agence Immobiliere',
+        bossmenu = vector3(-724.24, 263.58, 84.06),
+        shiftpoint = vector3(-718.71, 272.37, 84.65),
+        blipcoords = vector3(-707.1, 268.03, 83.15),
+        blipName = 'Agence Immobiliere',
+        blipNumber = 475,
+        blipColor = 28,
     }
 }

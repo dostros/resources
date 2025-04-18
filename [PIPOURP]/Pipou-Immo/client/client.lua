@@ -416,7 +416,7 @@ CreateThread(function()
                     header = "Décorer la maison",
                     txt = "Accéder au menu de décoration",
                     params = {
-                        event = "",
+                        event = "Pipou-Immo:openDecorationMenu",
                         args = { number = 3 }
                     }
                 },
@@ -440,20 +440,6 @@ RegisterNetEvent("Pipou-Immo:openKeyMenu", function()
             header = "🔑 Gestion des clefs",
             isMenuHeader = true,
         },
-        -- {
-        --     header = "Donner une clef",
-        --     txt = "Donner une clef à un joueur proche",
-        --     params = {
-        --         event = "Pipou-Immo:giveKey"
-        --     }
-        -- },
-        -- {
-        --     header = "Retirer une clef",
-        --     txt = "Retirer une clef d’un joueur",
-        --     params = {
-        --         event = "Pipou-Immo:removeKey"
-        --     }
-        -- },
         {
             header = "👥 Voir les colocataires",
             txt = "Voir la liste des personnes ayant accès",
@@ -487,6 +473,31 @@ RegisterNetEvent("Pipou-Immo:openKeyMenu", function()
 
     exports['qb-menu']:openMenu(keyMenu)
 end)
+
+RegisterNetEvent("Pipou-Immo:openDecorationMenu", function()
+    local DecorationMenu = {
+        {
+            header = "🛋️ Mode décoration",
+            isMenuHeader = true
+        },
+        {
+            header = "📦 Placer un objet",
+            txt = "Choisir un meuble à placer",
+            params = {
+                event = "PipouImmo:openFurnitureUI"
+            }
+        },
+        {
+            header = "❌ Fermer",
+            params = {
+                event = "qb-menu:closeMenu"
+            }
+        }
+    }
+
+    exports['qb-menu']:openMenu(DecorationMenu)
+end)
+
 
 
 
@@ -857,3 +868,197 @@ RegisterNetEvent("PipouImmo:client:notifyPropertyDeleted", function(success)
         QBCore.Functions.Notify("❌ Échec lors de la suppression.", "error")
     end
 end)
+
+
+
+RegisterNetEvent('PipouImmo:openFurnitureList', function()
+    QBCore.Functions.TriggerCallback('PipouImmo:getPlayerFurnitureInventory', function(furnitureList)
+        if not furnitureList or #furnitureList == 0 then
+            QBCore.Functions.Notify("❌ Vous n'avez aucun meuble.", "error")
+            return
+        end
+
+        local menu = {
+            { header = "🪑 Meubles disponibles", isMenuHeader = true }
+        }
+
+        for _, item in ipairs(furnitureList) do
+            table.insert(menu, {
+                header = item.label .. " (x" .. item.quantity .. ")",
+                txt = "Modèle : " .. item.object,
+                params = {
+                    event = "PipouImmo:startPlacingFurniture",
+                    args = item
+                }
+            })
+        end
+
+        table.insert(menu, {
+            header = "❌ Fermer",
+            params = { event = "qb-menu:closeMenu" }
+        })
+
+        exports['qb-menu']:openMenu(menu)
+    end)
+end)
+
+
+RegisterNetEvent("PipouImmo:startPlacingFurniture", function(item)
+    local model = GetHashKey(item.object)
+    RequestModel(model)
+    while not HasModelLoaded(model) do Wait(0) end
+
+    local ped = PlayerPedId()
+    local coords = GetEntityCoords(ped)
+    local prop = CreateObject(model, coords.x, coords.y, coords.z - 1.0, true, true, false)
+
+    SetEntityAlpha(prop, 180, false)
+    FreezeEntityPosition(prop, true)
+    PlaceObjectOnGroundProperly(prop)
+
+    local heading = GetEntityHeading(prop)
+    local pos = coords
+
+    QBCore.Functions.Notify("🛠️ Placement en cours... Appuie sur [Entrée] pour valider, [Retour] pour annuler", "primary")
+
+    -- Utilitaire pour obtenir la droite du joueur
+    local function GetRightVector(forwardVec)
+        return vector3(-forwardVec.y, forwardVec.x, 0.0)
+    end
+
+    CreateThread(function()
+        local placing = true
+        local rot = vector3(0.0, 0.0, heading) -- yaw = heading
+    
+        while placing do
+            Wait(0)
+    
+            -- 🔒 Bloque les actions gênantes
+            DisableControlAction(0, 24, true)
+            DisableControlAction(0, 25, true)
+            DisableControlAction(0, 75, true)
+            DisableControlAction(0, 23, true)
+    
+            local moveSpeed = 0.03
+            local rotSpeed = 0.5
+    
+            -- 📦 Déplacement
+            if IsControlPressed(0, 172) then pos = pos + vector3(0.0, moveSpeed, 0.0) end -- ↑
+            if IsControlPressed(0, 173) then pos = pos - vector3(0.0, moveSpeed, 0.0) end -- ↓
+            if IsControlPressed(0, 174) then pos = pos - vector3(moveSpeed, 0.0, 0.0) end -- ←
+            if IsControlPressed(0, 175) then pos = pos + vector3(moveSpeed, 0.0, 0.0) end -- →
+    
+            -- ↕ Hauteur
+            if IsControlPressed(0, 10) then pos = pos + vector3(0, 0, moveSpeed) end -- PgUp
+            if IsControlPressed(0, 11) then pos = pos - vector3(0, 0, moveSpeed) end -- PgDn
+    
+            -- ↻ Yaw : SHIFT + ← / →
+            if IsControlPressed(0, 21) then
+                if IsControlPressed(0, 174) then rot.z = rot.z - rotSpeed end
+                if IsControlPressed(0, 175) then rot.z = rot.z + rotSpeed end
+            end
+    
+            -- ↻ Pitch / Roll : ALT + ← / → / ↑ / ↓
+            if IsControlPressed(0, 19) then
+                if IsControlPressed(0, 172) then rot.x = rot.x + rotSpeed end -- pitch +
+                if IsControlPressed(0, 173) then rot.x = rot.x - rotSpeed end -- pitch -
+                if IsControlPressed(0, 174) then rot.y = rot.y + rotSpeed end -- roll +
+                if IsControlPressed(0, 175) then rot.y = rot.y - rotSpeed end -- roll -
+            end
+    
+            -- Application
+            SetEntityCoordsNoOffset(prop, pos.x, pos.y, pos.z, true, true, true)
+            SetEntityRotation(prop, rot.x, rot.y, rot.z, 2, true)
+    
+            -- ✅ Valider
+            if IsControlJustReleased(0, 191) then
+                SetEntityAlpha(prop, 255, false)
+                FreezeEntityPosition(prop, true)
+                placing = false
+    
+                QBCore.Functions.Notify("✅ Meuble placé !", "success")
+                TriggerServerEvent("PipouDeco:saveObjectPlacement", {
+                    object = item.object,
+                    coords = pos,
+                    rotation = rot,
+                    property = getCurrentPlayerProperty()
+                })
+            end
+    
+            -- ❌ Annuler
+            if IsControlJustReleased(0, 202) then
+                DeleteEntity(prop)
+                QBCore.Functions.Notify("❌ Placement annulé", "error")
+                placing = false
+            end
+    
+            -- Aide + gizmo
+            DrawText3D(pos.x, pos.y, pos.z + 1.2, "~b~↑↓←→~s~ déplacement · ~y~PgUp/PgDn~s~ hauteur · ~c~SHIFT+←/→~s~ tourner YAW · ~g~ALT+↑↓←→~s~ PITCH/ROLL")
+            DrawXYZGizmo(pos)
+        end
+    end)
+    
+    
+end)
+
+
+function DrawPlacementHelp()
+    SetTextFont(4)
+    SetTextScale(0.4, 0.4)
+    SetTextColour(255, 255, 255, 255)
+    SetTextCentre(true)
+    BeginTextCommandDisplayText("STRING")
+    AddTextComponentSubstringPlayerName("↑↓←→ Déplacer | PgUp/PgDn Monter/Descendre | SHIFT+←→ Rotation Yaw | ALT+←→↑↓ Pitch & Roll | Entrée = OK | Retour = Annuler")
+    EndTextCommandDisplayText(0.5, 0.02)
+end
+
+
+function DrawXYZGizmo(base)
+    local size = 0.5
+    -- X : rouge
+    DrawLine(base.x, base.y, base.z, base.x + size, base.y, base.z, 255, 0, 0, 255)
+    -- Y : vert
+    DrawLine(base.x, base.y, base.z, base.x, base.y + size, base.z, 0, 255, 0, 255)
+    -- Z : bleu
+    DrawLine(base.x, base.y, base.z, base.x, base.y, base.z + size, 0, 0, 255, 255)
+end
+
+
+
+
+RegisterNetEvent("PipouImmo:openFurnitureUI", function()
+    QBCore.Functions.TriggerCallback("PipouImmo:getPlayerFurnitureInventory", function(furnitures)
+        SetNuiFocus(true, true)
+        SendNUIMessage({
+            type = "showFurnitureMenu",
+            furnitureList = furnitures
+        })
+    end)
+end)
+
+RegisterNUICallback("placeFurniture", function(data, cb)
+    SetNuiFocus(false, false)
+
+    -- Sécurité : Vérifie que l'objet est valide
+    if not data.object then
+        QBCore.Functions.Notify("❌ Objet invalide.", "error")
+        cb("error")
+        return
+    end
+
+    -- Démarre le placement
+    TriggerEvent("PipouImmo:startPlacingFurniture", {
+        object = data.object,
+        label = data.label or data.object,
+        quantity = data.quantity or 1
+    })
+
+    cb("ok")
+end)
+
+
+RegisterNUICallback("closeFurnitureUI", function(_, cb)
+    SetNuiFocus(false, false)
+    cb("ok")
+end)
+

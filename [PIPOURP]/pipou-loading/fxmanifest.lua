@@ -1,16 +1,12 @@
 version '1.0.0'
-author 'Dostros'
-description 'PipouLoading'
-
-client_scripts {
-    'client.lua',
-}
+author 'Pipou Rework'
+description 'Modern loading screen based on Cfx default logic.'
 
 files {
     'index.html',
-    'style.css',
-    'loadscreen.jpg',
-    'script.js',
+    'keks.css',
+    'bankgothic.ttf',
+    'loadscreen.jpg'
 }
 
 loadscreen 'index.html'

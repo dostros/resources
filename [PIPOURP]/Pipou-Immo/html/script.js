@@ -50,6 +50,53 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (item.type === 'notify') {
         }
+        if (event.data.type === 'showFurnitureMenu') {
+            display(true); 
+            const menuimmo = document.getElementById("menu");
+            if (menuimmo) menuimmo.style.display = "none";
+
+            const menu = document.getElementById("furnitureMenu");
+            const container = document.getElementById("furnitureList");
+
+            if (!menu || !container) {
+                console.error("[Pipou-Immo] furnitureMenu ou furnitureList introuvable !");
+                return;
+            }
+
+            container.innerHTML = ""; // Nettoie les anciens meubles
+
+            if (event.data.furnitureList.length === 0) {
+                container.innerHTML = "<p>Aucun meuble disponible.</p>";
+                return;
+            }
+
+            menu.classList.add("visible"); // Affiche le menu
+            menu.style.display = "block"; // 🔓 force l'affichage visuellement
+            console.log("[DEBUG] furnitureMenu affiché");
+
+            // Remplit le menu avec les meubles disponibles
+            event.data.furnitureList.forEach((item) => {
+                const div = document.createElement("div");
+                div.className = "furniture-item";
+                div.innerHTML = `
+                    <strong>${item.label}</strong>
+                    <small>${item.object}</small>
+                    <span class="quantity">Quantité : ${item.quantity}</span>
+                    <button onclick="placeFurniture('${item.object}', '${item.label}', ${item.quantity})">Placer</button>
+                `;
+
+                container.appendChild(div);
+            });
+            if (event.data.furnitureList.length === 0) {
+                container.innerHTML = "<p style='text-align:center;color:white;'>Aucun meuble disponible.</p>";
+            }
+            
+
+
+        }
+        
+        
+        
     });
 
     document.addEventListener('keyup', function (event) {
@@ -193,8 +240,35 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
     
-      
-      
+    document.getElementById('closeFurnitureButton').addEventListener('click', closeFurnitureUI);
+
+    function closeFurnitureUI() {
+        const menu = document.getElementById("furnitureMenu");
+    
+        if (menu) {
+            menu.classList.remove("visible");
+            menu.style.display = "none";
+        }
+    
+        display(false); // 👈 Ferme tout (corps en display: none) + focusNUI off
+    
+        fetch(`https://${GetParentResourceName()}/closeFurnitureUI`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+    }
+    
+    function placeFurniture(object, label, quantity) {
+        fetch(`https://${GetParentResourceName()}/placeFurniture`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ object, label, quantity })
+        });
+        document.getElementById("furnitureMenu").style.display = "none";
+    }
+    
+    
       
 
 
@@ -256,4 +330,4 @@ function refreshPropertyList(filteredList = allProperties) {
     });
       
 }
-  
+
