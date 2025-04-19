@@ -10,6 +10,7 @@ let allProperties = [];
 document.addEventListener("DOMContentLoaded", function () {
     function display(bool) {
         $("body").toggle(bool);
+        $("menu").toggle(bool);
     }
 
     display(false);
@@ -51,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (item.type === 'notify') {
         }
         if (event.data.type === 'showFurnitureMenu') {
-            display(true); 
+            $("body").toggle(true);
             const menuimmo = document.getElementById("menu");
             if (menuimmo) menuimmo.style.display = "none";
 
@@ -72,7 +73,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             menu.classList.add("visible"); // Affiche le menu
             menu.style.display = "block"; // 🔓 force l'affichage visuellement
-            console.log("[DEBUG] furnitureMenu affiché");
 
             // Remplit le menu avec les meubles disponibles
             event.data.furnitureList.forEach((item) => {
@@ -90,13 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (event.data.furnitureList.length === 0) {
                 container.innerHTML = "<p style='text-align:center;color:white;'>Aucun meuble disponible.</p>";
             }
-            
-
-
-        }
-        
-        
-        
+        }   
     });
 
     document.addEventListener('keyup', function (event) {
@@ -259,15 +253,11 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     
-    function placeFurniture(object, label, quantity) {
-        fetch(`https://${GetParentResourceName()}/placeFurniture`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ object, label, quantity })
-        });
-        document.getElementById("furnitureMenu").style.display = "none";
-    }
     
+      
+
+
+
 
 });
 
@@ -326,3 +316,12 @@ function refreshPropertyList(filteredList = allProperties) {
       
 }
 
+window.placeFurniture = function(object, label, quantity) {
+    console.log("je commence à placer")
+    fetch(`https://Pipou-Immo/placeFurniture`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ object, label, quantity })
+    });
+    document.getElementById("furnitureMenu").style.display = "none";
+}

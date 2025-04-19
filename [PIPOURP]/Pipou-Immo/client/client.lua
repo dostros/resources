@@ -903,6 +903,11 @@ RegisterNetEvent('PipouImmo:openFurnitureList', function()
 end)
 
 
+-- 📦 Placement de mobilier avec modes Déplacement / Rotation
+local ShowModeOverlay = false
+local ShowPlacementUI = true
+local uiOffsetY = 0.925
+
 RegisterNetEvent("PipouImmo:startPlacingFurniture", function(item)
     local model = GetHashKey(item.object)
     RequestModel(model)
@@ -918,64 +923,112 @@ RegisterNetEvent("PipouImmo:startPlacingFurniture", function(item)
 
     local heading = GetEntityHeading(prop)
     local pos = coords
+    local rot = vector3(0.0, 0.0, heading)
 
-    QBCore.Functions.Notify("🛠️ Placement en cours... Appuie sur [Entrée] pour valider, [Retour] pour annuler", "primary")
+    local modeRotation = false
+    local currentAxis = "yaw"
 
-    -- Utilitaire pour obtenir la droite du joueur
-    local function GetRightVector(forwardVec)
-        return vector3(-forwardVec.y, forwardVec.x, 0.0)
-    end
+    QBCore.Functions.Notify("Placement en cours... [Entrée] pour valider | [Retour] pour annuler", "primary")
 
     CreateThread(function()
         local placing = true
-        local rot = vector3(0.0, 0.0, heading) -- yaw = heading
-    
         while placing do
             Wait(0)
-    
-            -- 🔒 Bloque les actions gênantes
-            DisableControlAction(0, 24, true)
-            DisableControlAction(0, 25, true)
-            DisableControlAction(0, 75, true)
-            DisableControlAction(0, 23, true)
-    
+
+            -- 🔒 Bloquer toutes les touches sauf celles autorisées
+            for i = 1, 360 do
+                if not (
+                    -- Validation / Annulation
+                    i == 191 or i == 202 or
+            
+                    -- Déplacement (ZQSD + flèches)
+                    i == 172 or i == 173 or i == 174 or i == 175 or
+                    i == 20 or i == 31 or i == 44 or i == 32 or
+                    i == 34 or i == 35 or -- 🔥 Q et D (gauche / droite)
+
+            
+                    -- Hauteur + Saut
+                    i == 10 or i == 11 or i == 22 or
+            
+                    -- Rotation
+                    i == 45 or i == 23 or
+            
+                    -- Souris
+                    i == 1 or i == 2 or i == 237 or i == 329 or i == 330
+                ) then
+                    DisableControlAction(0, i, true)
+                end
+            end
+            
+
             local moveSpeed = 0.03
             local rotSpeed = 0.5
-    
-            -- 📦 Déplacement
-            if IsControlPressed(0, 172) then pos = pos + vector3(0.0, moveSpeed, 0.0) end -- ↑
-            if IsControlPressed(0, 173) then pos = pos - vector3(0.0, moveSpeed, 0.0) end -- ↓
-            if IsControlPressed(0, 174) then pos = pos - vector3(moveSpeed, 0.0, 0.0) end -- ←
-            if IsControlPressed(0, 175) then pos = pos + vector3(moveSpeed, 0.0, 0.0) end -- →
-    
-            -- ↕ Hauteur
-            if IsControlPressed(0, 10) then pos = pos + vector3(0, 0, moveSpeed) end -- PgUp
-            if IsControlPressed(0, 11) then pos = pos - vector3(0, 0, moveSpeed) end -- PgDn
-    
-            -- ↻ Yaw : SHIFT + ← / →
-            if IsControlPressed(0, 21) then
-                if IsControlPressed(0, 174) then rot.z = rot.z - rotSpeed end
-                if IsControlPressed(0, 175) then rot.z = rot.z + rotSpeed end
+
+            -- 🔁 Switch de mode (R)
+            if IsControlJustPressed(0, 45) then
+                modeRotation = not modeRotation
+                local msg = modeRotation and "🎮 Mode rotation activé" or "🚶 Mode déplacement activé"
+                QBCore.Functions.Notify(msg, "info")
+            
+                -- Blink effect
+                CreateThread(function()
+                    for i = 1, 3 do
+                        ShowModeOverlay = true
+                        Wait(100)
+                        ShowModeOverlay = false
+                        Wait(100)
+                    end
+                end)
             end
-    
-            -- ↻ Pitch / Roll : ALT + ← / → / ↑ / ↓
-            if IsControlPressed(0, 19) then
-                if IsControlPressed(0, 172) then rot.x = rot.x + rotSpeed end -- pitch +
-                if IsControlPressed(0, 173) then rot.x = rot.x - rotSpeed end -- pitch -
-                if IsControlPressed(0, 174) then rot.y = rot.y + rotSpeed end -- roll +
-                if IsControlPressed(0, 175) then rot.y = rot.y - rotSpeed end -- roll -
+            if IsControlJustPressed(0, 74) then -- H
+                ShowPlacementUI = not ShowPlacementUI
+                local txt = ShowPlacementUI and "🧾 Interface affichée" or "🧾 Interface masquée"
+                QBCore.Functions.Notify(txt, "info")
             end
-    
-            -- Application
+            
+
+            -- 🔄 Changement d'axe (F)
+            if IsControlJustPressed(0, 23) then
+                if currentAxis == "yaw" then currentAxis = "pitch"
+                elseif currentAxis == "pitch" then currentAxis = "roll"
+                else currentAxis = "yaw" end
+
+                QBCore.Functions.Notify("🌀 Axe actif : " .. currentAxis, "primary")
+            end
+
+            if modeRotation then
+                if currentAxis == "yaw" then
+                    if IsControlPressed(0, 174) then rot = vector3(rot.x, rot.y, rot.z - rotSpeed) end
+                    if IsControlPressed(0, 175) then rot = vector3(rot.x, rot.y, rot.z + rotSpeed) end
+                elseif currentAxis == "pitch" then
+                    if IsControlPressed(0, 172) then rot = vector3(rot.x + rotSpeed, rot.y, rot.z) end
+                    if IsControlPressed(0, 173) then rot = vector3(rot.x - rotSpeed, rot.y, rot.z) end
+                elseif currentAxis == "roll" then
+                    if IsControlPressed(0, 174) then rot = vector3(rot.x, rot.y + rotSpeed, rot.z) end
+                    if IsControlPressed(0, 175) then rot = vector3(rot.x, rot.y - rotSpeed, rot.z) end
+                end
+            else
+                -- Déplacement avec les flèches
+                if IsControlPressed(0, 172) then pos = pos + vector3(0.0, moveSpeed, 0.0) end
+                if IsControlPressed(0, 173) then pos = pos - vector3(0.0, moveSpeed, 0.0) end
+                if IsControlPressed(0, 174) then pos = pos - vector3(moveSpeed, 0.0, 0.0) end
+                if IsControlPressed(0, 175) then pos = pos + vector3(moveSpeed, 0.0, 0.0) end
+            end
+
+            -- Hauteur
+            if IsControlPressed(0, 10) then pos = pos + vector3(0.0, 0.0, moveSpeed) end
+            if IsControlPressed(0, 11) then pos = pos - vector3(0.0, 0.0, moveSpeed) end
+
+            -- ➕ Application en live de la rotation + position
             SetEntityCoordsNoOffset(prop, pos.x, pos.y, pos.z, true, true, true)
             SetEntityRotation(prop, rot.x, rot.y, rot.z, 2, true)
-    
+
             -- ✅ Valider
             if IsControlJustReleased(0, 191) then
                 SetEntityAlpha(prop, 255, false)
                 FreezeEntityPosition(prop, true)
                 placing = false
-    
+
                 QBCore.Functions.Notify("✅ Meuble placé !", "success")
                 TriggerServerEvent("PipouDeco:saveObjectPlacement", {
                     object = item.object,
@@ -984,44 +1037,78 @@ RegisterNetEvent("PipouImmo:startPlacingFurniture", function(item)
                     property = getCurrentPlayerProperty()
                 })
             end
-    
+
             -- ❌ Annuler
             if IsControlJustReleased(0, 202) then
                 DeleteEntity(prop)
                 QBCore.Functions.Notify("❌ Placement annulé", "error")
                 placing = false
             end
-    
-            -- Aide + gizmo
-            DrawText3D(pos.x, pos.y, pos.z + 1.2, "~b~↑↓←→~s~ déplacement · ~y~PgUp/PgDn~s~ hauteur · ~c~SHIFT+←/→~s~ tourner YAW · ~g~ALT+↑↓←→~s~ PITCH/ROLL")
+
+            DrawText3D(pos.x, pos.y, pos.z + 1.4, "Mode : " .. (modeRotation and "Rotation" or "Déplacement") .. " | Axe : " .. currentAxis:upper())
             DrawXYZGizmo(pos)
+            DrawInstructionUI(modeRotation, currentAxis)
         end
     end)
-    
-    
 end)
 
+-- Les fonctions auxiliaires (pas modifiées) :
+function DrawInstructionUI(modeRotation, currentAxis)
+    if not ShowPlacementUI then return end -- si masqué
 
-function DrawPlacementHelp()
-    SetTextFont(4)
-    SetTextScale(0.4, 0.4)
-    SetTextColour(255, 255, 255, 255)
-    SetTextCentre(true)
-    BeginTextCommandDisplayText("STRING")
-    AddTextComponentSubstringPlayerName("↑↓←→ Déplacer | PgUp/PgDn Monter/Descendre | SHIFT+←→ Rotation Yaw | ALT+←→↑↓ Pitch & Roll | Entrée = OK | Retour = Annuler")
-    EndTextCommandDisplayText(0.5, 0.02)
+    local bgColor = modeRotation and {255, 120, 0} or {0, 120, 255}
+    DrawRect(0.5, uiOffsetY, 0.65, 0.11, bgColor[1], bgColor[2], bgColor[3], 180)
+
+    if ShowModeOverlay then
+        DrawRect(0.5, uiOffsetY, 0.65, 0.11, 255, 255, 255, 80)
+    end
+
+    local lines = {
+        "Mode : " .. (modeRotation and "Rotation" or "Déplacement") .. " | Axe : " .. currentAxis:upper() .. " (F pour changer)",
+        "ZQSD ou Flèches : " .. (modeRotation and "Tourner l'objet" or "Déplacer l'objet") .. " | PgUp/PgDn : Monter/Descendre",
+        "R : Mode | F : Axe | Entrée : Valider | Retour : Annuler | H : Masquer"
+    }
+
+    for i = 1, #lines do
+        SetTextFont(4)
+        SetTextScale(0.38, 0.38)
+        SetTextWrap(0.0, 1.0)
+        SetTextCentre(true)
+        SetTextColour(255, 255, 255, 230)
+        SetTextOutline()
+        SetTextEntry("STRING")
+        AddTextComponentString(lines[i])
+        DrawText(0.5, uiOffsetY - 0.035 + ((i - 1) * 0.026))
+    end
 end
 
+
+
+function DrawText3D(x, y, z, text)
+    local onScreen, _x, _y = World3dToScreen2d(x, y, z)
+    if onScreen then
+        SetTextScale(0.35, 0.35)
+        SetTextFont(4)
+        SetTextProportional(1)
+        SetTextColour(255, 255, 255, 215)
+        SetTextEntry("STRING")
+        SetTextCentre(1)
+        AddTextComponentString(text)
+        DrawText(_x, _y)
+    end
+end
 
 function DrawXYZGizmo(base)
     local size = 0.5
-    -- X : rouge
-    DrawLine(base.x, base.y, base.z, base.x + size, base.y, base.z, 255, 0, 0, 255)
-    -- Y : vert
-    DrawLine(base.x, base.y, base.z, base.x, base.y + size, base.z, 0, 255, 0, 255)
-    -- Z : bleu
-    DrawLine(base.x, base.y, base.z, base.x, base.y, base.z + size, 0, 0, 255, 255)
+    DrawLine(base.x, base.y, base.z, base.x + size, base.y, base.z, 255, 0, 0, 255)   -- X : rouge
+    DrawLine(base.x, base.y, base.z, base.x, base.y + size, base.z, 0, 255, 0, 255)   -- Y : vert
+    DrawLine(base.x, base.y, base.z, base.x, base.y, base.z + size, 0, 0, 255, 255)   -- Z : bleu
 end
+
+
+
+
+
 
 
 
@@ -1037,6 +1124,7 @@ RegisterNetEvent("PipouImmo:openFurnitureUI", function()
 end)
 
 RegisterNUICallback("placeFurniture", function(data, cb)
+    print("tu vas le placer là normalement")
     SetNuiFocus(false, false)
 
     -- Sécurité : Vérifie que l'objet est valide
@@ -1061,4 +1149,3 @@ RegisterNUICallback("closeFurnitureUI", function(_, cb)
     SetNuiFocus(false, false)
     cb("ok")
 end)
-

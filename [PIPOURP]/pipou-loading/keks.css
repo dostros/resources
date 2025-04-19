@@ -149,3 +149,23 @@ h1:before, h2:before {
         transform: translateY(0);
     }
 }
+
+
+.backdrop {
+    animation: fadeIn 1s ease-in;
+    backdrop-filter: blur(2px);
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.top h1 {
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #FF6A00,
+        0 0 20px #FF6A00,
+        0 0 40px #FFB14D;
+}

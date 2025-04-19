@@ -29,6 +29,8 @@ function GetGarageList (label,garagejob ) {
         }),
     })
     .then((response) => response.json())
+    //.then((data) => console.log(data))
+    .catch((err) => console.error('Erreur fetch getGarageList:', err))
     
         
 }
@@ -97,6 +99,8 @@ function updateselectedlisterners (currentgarage) {
                 }),
             })
                 .then((response) => response.json())
+                .then((data) => console.log(data))
+
         })
     })
 }
