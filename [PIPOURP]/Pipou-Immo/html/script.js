@@ -268,11 +268,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("furnitureMenu").style.display = "none";
     }
     
-    
-      
-
-
-
 
 });
 
