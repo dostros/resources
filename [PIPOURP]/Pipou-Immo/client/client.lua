@@ -7,6 +7,9 @@ local currentPropertyName = nil
 local isLightOn = true
 local previewProp = nil
 local previewRotationThread = nil
+local spawnedFurniture = {}
+local activeZones = {}
+
 
 
 function GetInstanceZ(level)
@@ -265,6 +268,57 @@ RegisterNetEvent('Pipou-Immo:enterHouse', function(data)
             local exitZoneCenter = shellCoords + vector3(shellConfig.diffx, shellConfig.diffy, shellConfig.diffz)
             createShellExitPoint(exitZoneCenter, houseCoords)
 
+            -- QBCore.Functions.TriggerCallback("PipouImmo:getPlayerFurniture", function(furnitures)
+            --     for _, item in pairs(furnitures) do
+            --         local model = GetHashKey(item.object)
+            --         RequestModel(model)
+            --         while not HasModelLoaded(model) do Wait(10) end
+            
+            --         local obj = CreateObject(model, item.coords.x, item.coords.y, item.coords.z, true, true, true)
+            --         while not DoesEntityExist(obj) do Wait(0) end
+
+            --         SetEntityAsMissionEntity(obj, true, true)
+            --         SetEntityCollision(obj, true, true)
+            --         SetEntityDynamic(obj, true)
+
+            --         SetEntityRotation(obj, item.pitch or 0.0, item.roll or 0.0, item.heading or 0.0, 2, false)
+            --         PlaceObjectOnGroundProperly(obj)
+            --         FreezeEntityPosition(obj, true)
+
+            --         table.insert(spawnedFurniture, obj)
+
+            --         -- qb-target
+            --         exports['qb-target']:AddTargetEntity(obj, {
+            --             options = {
+            --                 {
+            --                     label = "🛠️ Déplacer le meuble",
+            --                     icon = "fas fa-arrows-alt",
+            --                     action = function()
+            --                         TriggerEvent("PipouImmo:startPlacingExistingFurniture", obj, item)
+            --                     end
+            --                 },
+            --                 {
+            --                     label = "❌ Supprimer le meuble",
+            --                     icon = "fas fa-trash",
+            --                     action = function()
+            --                         TriggerServerEvent("PipouImmo:server:removeFurniture", item.id)
+            --                         DeleteEntity(obj)
+            --                         QBCore.Functions.Notify("🗑️ Meuble supprimé", "success")
+            --                     end
+            --                 }
+            --             },
+            --             distance = 2.5
+            --         })
+
+
+
+            --     end
+            -- end, propertyName)
+            
+            TriggerServerEvent("PipouImmo:server:broadcastFurniture", propertyName)
+            
+            
+
 
         elseif hasAccess then
             QBCore.Functions.Notify("🔒 Vous êtes locataire : l'accès est restreint.", "error")
@@ -278,7 +332,7 @@ end)
 function createShellExitPoint(instanceCoords, returnCoords)
     local exitName = "exit_shell_" .. math.random(1000, 9999)
 
-    exports['qb-target']:AddBoxZone(exitName, instanceCoords, 1.0, 1.0, {
+    AddZone(exitName, instanceCoords, 1.0, 1.0, {
         name = exitName,
         heading = 0,
         debugPoly = false,
@@ -292,7 +346,7 @@ function createShellExitPoint(instanceCoords, returnCoords)
                 icon = "fas fa-sign-out-alt",
                 label = "Sortir de la maison",
                 returnCoords = returnCoords,
-                zoneName = exitName -- pour pouvoir supprimer après
+                zoneName = exitName
             }
         },
         distance = 3.0
@@ -308,31 +362,35 @@ RegisterNetEvent('Pipou-Immo:exitHouse', function(data)
     Wait(100)
     DoScreenFadeIn(500)
 
-    -- Supprimer le shell
-    if spawnedShell then
-        DeleteEntity(spawnedShell)
-        spawnedShell = nil
-    end
-
-    -- Supprimer la zone de sortie
     if data.zoneName then
         exports['qb-target']:RemoveZone(data.zoneName)
     end
 
-    IsInInstance = false
-    currentPropertyName = nil
-
+    CleanInstance()
 end)
 
 
 
 -- 🧹 Nettoyage du shell
 RegisterCommand("removeappart", function()
-    if spawnedShell then
-        DeleteEntity(spawnedShell)
-        spawnedShell = nil
+    CleanInstance()
+    QBCore.Functions.Notify("🏠 Shell et meubles supprimés avec succès.", "success")
+end)
+
+
+
+AddEventHandler('onResourceStop', function(resource)
+    if resource == GetCurrentResourceName() then
+        CleanInstance()
     end
 end)
+
+
+AddEventHandler('playerDropped', function()
+    CleanInstance()
+end)
+
+
 
 -- 📦 Envoi des types d'intérieurs à la NUI
 RegisterNUICallback('Pipou-Immo-getinteriortypes', function(_, cb)
@@ -918,142 +976,42 @@ RegisterNetEvent("PipouImmo:startPlacingFurniture", function(item)
 
     local ped = PlayerPedId()
     local coords = GetEntityCoords(ped)
-    local prop = CreateObject(model, coords.x, coords.y, coords.z - 1.0, true, true, false)
 
-    SetEntityAlpha(prop, 180, false)
-    FreezeEntityPosition(prop, true)
-    PlaceObjectOnGroundProperly(prop)
+    -- Position de base pour spawn l'objet devant le joueur
+    local spawnX, spawnY, spawnZ = coords.x, coords.y, coords.z - 1.0
+    local obj = CreateObject(model, spawnX, spawnY, spawnZ, true, true, true)
 
-    local heading = GetEntityHeading(prop)
-    local pos = coords
-    local rot = vector3(0.0, 0.0, heading)
-
-    local modeRotation = false
-    local currentAxis = "yaw"
-
-    QBCore.Functions.Notify("Placement en cours... [Entrée] pour valider | [Retour] pour annuler", "primary")
-
-    CreateThread(function()
-        local placing = true
-        while placing do
-            Wait(0)
-
-            -- 🔒 Bloquer toutes les touches sauf celles autorisées
-            for i = 1, 360 do
-                if not (
-                    -- Validation / Annulation
-                    i == 191 or i == 202 or
-            
-                    -- Déplacement (ZQSD + flèches)
-                    i == 172 or i == 173 or i == 174 or i == 175 or
-                    i == 20 or i == 31 or i == 44 or i == 32 or
-                    i == 34 or i == 35 or -- 🔥 Q et D (gauche / droite)
-
-            
-                    -- Hauteur + Saut
-                    i == 10 or i == 11 or i == 22 or
-            
-                    -- Rotation
-                    i == 45 or i == 23 or
-            
-                    -- Souris
-                    i == 1 or i == 2 or i == 237 or i == 329 or i == 330
-                ) then
-                    DisableControlAction(0, i, true)
-                end
-            end
-            
-
-            local moveSpeed = 0.03
-            local rotSpeed = 0.5
-
-            -- 🔁 Switch de mode (R)
-            if IsControlJustPressed(0, 45) then
-                modeRotation = not modeRotation
-                local msg = modeRotation and "🎮 Mode rotation activé" or "🚶 Mode déplacement activé"
-                QBCore.Functions.Notify(msg, "info")
-            
-                -- Blink effect
-                CreateThread(function()
-                    for i = 1, 3 do
-                        ShowModeOverlay = true
-                        Wait(100)
-                        ShowModeOverlay = false
-                        Wait(100)
-                    end
-                end)
-            end
-            if IsControlJustPressed(0, 74) then -- H
-                ShowPlacementUI = not ShowPlacementUI
-                local txt = ShowPlacementUI and "🧾 Interface affichée" or "🧾 Interface masquée"
-                QBCore.Functions.Notify(txt, "info")
-            end
-            
-
-            -- 🔄 Changement d'axe (F)
-            if IsControlJustPressed(0, 23) then
-                if currentAxis == "yaw" then currentAxis = "pitch"
-                elseif currentAxis == "pitch" then currentAxis = "roll"
-                else currentAxis = "yaw" end
-
-                QBCore.Functions.Notify("🌀 Axe actif : " .. currentAxis, "primary")
-            end
-
-            if modeRotation then
-                if currentAxis == "yaw" then
-                    if IsControlPressed(0, 174) then rot = vector3(rot.x, rot.y, rot.z - rotSpeed) end
-                    if IsControlPressed(0, 175) then rot = vector3(rot.x, rot.y, rot.z + rotSpeed) end
-                elseif currentAxis == "pitch" then
-                    if IsControlPressed(0, 172) then rot = vector3(rot.x + rotSpeed, rot.y, rot.z) end
-                    if IsControlPressed(0, 173) then rot = vector3(rot.x - rotSpeed, rot.y, rot.z) end
-                elseif currentAxis == "roll" then
-                    if IsControlPressed(0, 174) then rot = vector3(rot.x, rot.y + rotSpeed, rot.z) end
-                    if IsControlPressed(0, 175) then rot = vector3(rot.x, rot.y - rotSpeed, rot.z) end
-                end
-            else
-                -- Déplacement avec les flèches
-                if IsControlPressed(0, 172) then pos = pos + vector3(0.0, moveSpeed, 0.0) end
-                if IsControlPressed(0, 173) then pos = pos - vector3(0.0, moveSpeed, 0.0) end
-                if IsControlPressed(0, 174) then pos = pos - vector3(moveSpeed, 0.0, 0.0) end
-                if IsControlPressed(0, 175) then pos = pos + vector3(moveSpeed, 0.0, 0.0) end
-            end
-
-            -- Hauteur
-            if IsControlPressed(0, 10) then pos = pos + vector3(0.0, 0.0, moveSpeed) end
-            if IsControlPressed(0, 11) then pos = pos - vector3(0.0, 0.0, moveSpeed) end
-
-            -- ➕ Application en live de la rotation + position
-            SetEntityCoordsNoOffset(prop, pos.x, pos.y, pos.z, true, true, true)
-            SetEntityRotation(prop, rot.x, rot.y, rot.z, 2, true)
-
-            -- ✅ Valider
-            if IsControlJustReleased(0, 191) then
-                SetEntityAlpha(prop, 255, false)
-                FreezeEntityPosition(prop, true)
-                placing = false
-
-                QBCore.Functions.Notify("✅ Meuble placé !", "success")
-                TriggerServerEvent("PipouDeco:saveObjectPlacement", {
-                    object = item.object,
-                    coords = pos,
-                    rotation = rot,
-                    property = getCurrentPlayerProperty()
-                })
-            end
-
-            -- ❌ Annuler
-            if IsControlJustReleased(0, 202) then
-                DeleteEntity(prop)
-                QBCore.Functions.Notify("❌ Placement annulé", "error")
-                placing = false
-            end
-
-            DrawText3D(pos.x, pos.y, pos.z + 1.4, "Mode : " .. (modeRotation and "Rotation" or "Déplacement") .. " | Axe : " .. currentAxis:upper())
-            DrawXYZGizmo(pos)
-            DrawInstructionUI(modeRotation, currentAxis)
-        end
+    StartFurniturePlacement(obj, item, true, function(pos, rot)
+        QBCore.Functions.Notify("✅ Meuble placé !", "success")
+        TriggerServerEvent("PipouImmo:saveObjectPlacement", {
+            object = item.object,
+            coords = pos,
+            rotation = rot,
+            property = getCurrentPlayerProperty()
+        })
     end)
 end)
+
+
+RegisterNetEvent("PipouImmo:startPlacingExistingFurniture", function(obj, item)
+    if not item.id then
+        QBCore.Functions.Notify("❌ Impossible de modifier ce meuble (ID manquant)", "error")
+        return
+    end
+
+    StartFurniturePlacement(obj, item, false, function(pos, rot)
+        QBCore.Functions.Notify("✅ Position mise à jour", "success")
+        TriggerServerEvent("PipouImmo:updateFurniturePlacement", {
+            id = item.id,
+            coords = pos,
+            rotation = rot
+        })
+        
+    end)
+end)
+
+
+
 
 -- Les fonctions auxiliaires (pas modifiées) :
 function DrawInstructionUI(modeRotation, currentAxis)
@@ -1273,5 +1231,211 @@ RegisterNUICallback("clearPreview", function()
     end
     if previewRotationThread then
         previewRotationThread = nil
+    end
+end)
+
+function CleanInstance()
+    for _, obj in ipairs(spawnedFurniture) do
+        if DoesEntityExist(obj) then
+            DeleteEntity(obj)
+        end
+    end
+    spawnedFurniture = {}
+
+    if spawnedShell and DoesEntityExist(spawnedShell) then
+        DeleteEntity(spawnedShell)
+        spawnedShell = nil
+    end
+
+    if previewProp and DoesEntityExist(previewProp) then
+        DeleteEntity(previewProp)
+        previewProp = nil
+    end
+
+    previewRotationThread = nil
+
+    IsInInstance = false
+    currentPropertyName = nil
+
+    CleanZones()
+end
+
+function AddZone(name, ...)
+    exports['qb-target']:AddBoxZone(name, ...)
+    activeZones[name] = true
+end
+
+function CleanZones()
+    for name in pairs(activeZones) do
+        exports['qb-target']:RemoveZone(name)
+    end
+    activeZones = {}
+end
+
+
+function StartFurniturePlacement(entity, itemData, isNew, onConfirm, onCancel)
+    if not DoesEntityExist(entity) then
+        QBCore.Functions.Notify("❌ Entité non trouvée", "error")
+        return
+    end
+
+    local originalPos = nil
+    local originalRot = nil
+
+    if not isNew then
+        originalPos = GetEntityCoords(entity)
+        originalRot = GetEntityRotation(entity, 2)
+    end
+
+
+    local pos = GetEntityCoords(entity)
+    local rot = GetEntityRotation(entity, 2)
+    local modeRotation, currentAxis = false, "yaw"
+    local moveSpeed, rotSpeed = 0.03, 0.5
+
+    FreezeEntityPosition(entity, false)
+    SetEntityAlpha(entity, 180, false)
+    PlaceObjectOnGroundProperly(entity)
+
+    local placing = true
+    QBCore.Functions.Notify("🎮 " .. (isNew and "Placement" or "Modification") .. " de meuble... [Entrée] pour valider | [Retour] pour annuler", "primary")
+
+    CreateThread(function()
+        while placing do
+            Wait(0)
+
+            -- 🔒 Block controls
+            for i = 1, 360 do
+                if not (
+                    i == 191 or i == 202 or
+                    i == 172 or i == 173 or i == 174 or i == 175 or
+                    i == 10 or i == 11 or
+                    i == 45 or i == 23 or
+                    i == 1 or i == 2 or i == 237 or i == 329 or i == 330
+                ) then
+                    DisableControlAction(0, i, true)
+                end
+            end
+
+            -- 🎮 Mode toggle
+            if IsControlJustPressed(0, 45) then
+                modeRotation = not modeRotation
+                QBCore.Functions.Notify(modeRotation and "🎮 Mode rotation" or "🚶 Mode déplacement", "info")
+            end
+
+            -- 🔁 Axis change
+            if IsControlJustPressed(0, 23) then
+                currentAxis = currentAxis == "yaw" and "pitch" or currentAxis == "pitch" and "roll" or "yaw"
+                QBCore.Functions.Notify("🌀 Axe : " .. currentAxis, "primary")
+            end
+
+            -- ✨ Movement / Rotation logic
+            if modeRotation then
+                if currentAxis == "yaw" then
+                    if IsControlPressed(0, 174) then rot = vector3(rot.x, rot.y, rot.z - rotSpeed) end
+                    if IsControlPressed(0, 175) then rot = vector3(rot.x, rot.y, rot.z + rotSpeed) end
+                elseif currentAxis == "pitch" then
+                    if IsControlPressed(0, 172) then rot = vector3(rot.x + rotSpeed, rot.y, rot.z) end
+                    if IsControlPressed(0, 173) then rot = vector3(rot.x - rotSpeed, rot.y, rot.z) end
+                elseif currentAxis == "roll" then
+                    if IsControlPressed(0, 174) then rot = vector3(rot.x, rot.y + rotSpeed, rot.z) end
+                    if IsControlPressed(0, 175) then rot = vector3(rot.x, rot.y - rotSpeed, rot.z) end
+                end
+            else
+                if IsControlPressed(0, 172) then pos = pos + vector3(0.0, moveSpeed, 0.0) end
+                if IsControlPressed(0, 173) then pos = pos - vector3(0.0, moveSpeed, 0.0) end
+                if IsControlPressed(0, 174) then pos = pos - vector3(moveSpeed, 0.0, 0.0) end
+                if IsControlPressed(0, 175) then pos = pos + vector3(moveSpeed, 0.0, 0.0) end
+            end
+
+            if IsControlPressed(0, 10) then pos = pos + vector3(0.0, 0.0, moveSpeed) end
+            if IsControlPressed(0, 11) then pos = pos - vector3(0.0, 0.0, moveSpeed) end
+
+            SetEntityCoordsNoOffset(entity, pos.x, pos.y, pos.z, true, true, true)
+            SetEntityRotation(entity, rot.x, rot.y, rot.z, 2, true)
+
+            DrawInstructionUI(modeRotation, currentAxis)
+            DrawText3D(pos.x, pos.y, pos.z + 1.4, "Mode : " .. (modeRotation and "Rotation" or "Déplacement") .. " | Axe : " .. currentAxis:upper())
+
+            -- ✅ Confirm
+            if IsControlJustReleased(0, 191) then
+                SetEntityAlpha(entity, 255, false)
+                FreezeEntityPosition(entity, true)
+                placing = false
+                onConfirm(pos, rot)
+            end
+
+            -- ❌ Cancel
+            if IsControlJustReleased(0, 202) then
+                QBCore.Functions.Notify("❌ Annulé", "error")
+                placing = false
+
+                if isNew then
+                    DeleteEntity(entity)
+                else
+                    -- Repositionne l'objet à son emplacement d'origine
+                    SetEntityCoordsNoOffset(entity, originalPos.x, originalPos.y, originalPos.z, true, true, true)
+                    SetEntityRotation(entity, originalRot.x, originalRot.y, originalRot.z, 2, true)
+                    FreezeEntityPosition(entity, true)
+                    SetEntityAlpha(entity, 255, false)
+                end
+
+                if onCancel then onCancel() end
+            end
+
+        end
+    end)
+end
+
+
+
+
+RegisterNetEvent("PipouImmo:client:loadFurnitureForAll", function(propertyName, furnitureList)
+    if getCurrentPlayerProperty() ~= propertyName then return end
+
+
+    for _, obj in ipairs(spawnedFurniture) do
+        if DoesEntityExist(obj) then
+            DeleteEntity(obj)
+        end
+    end
+    spawnedFurniture = {}
+    
+
+    for _, item in pairs(furnitureList) do
+        local model = GetHashKey(item.object_model)
+        RequestModel(model)
+        while not HasModelLoaded(model) do Wait(10) end
+
+        local obj = CreateObject(model, item.x, item.y, item.z, true, true, true)
+        while not DoesEntityExist(obj) do Wait(0) end
+
+        SetEntityAsMissionEntity(obj, true, true)
+        SetEntityCollision(obj, true, true)
+        SetEntityDynamic(obj, true)
+        SetEntityRotation(obj, item.pitch or 0.0, item.roll or 0.0, item.heading or 0.0, 2, false)
+        FreezeEntityPosition(obj, true)
+
+        table.insert(spawnedFurniture, obj)
+
+        exports['qb-target']:AddTargetEntity(obj, {
+            options = {
+                {
+                    label = "🛠️ Déplacer le meuble",
+                    icon = "fas fa-arrows-alt",
+                    action = function()
+                        TriggerEvent("PipouImmo:startPlacingExistingFurniture", obj, item)
+                    end
+                },
+                {
+                    label = "❌ Supprimer le meuble",
+                    icon = "fas fa-trash",
+                    action = function()
+                        TriggerServerEvent("PipouImmo:server:removeFurniture", item.id)
+                    end
+                }
+            },
+            distance = 2.5
+        })
     end
 end)

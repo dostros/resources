@@ -1,0 +1,132 @@
+# Details
+
+Date : 2025-04-20 17:18:04
+
+Directory c:\\Users\\tangu\\Desktop\\Server\\FIVEM\\txData\\QBCoreFramework_ED3476.base\\resources\\[PIPOURP]
+
+Total : 117 files,  17889 codes, 1327 comments, 2661 blanks, all 21877 lines
+
+[Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
+
+## Files
+| filename | language | code | comment | blank | total |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| [\[PIPOURP\]/DCommands/client.lua](/%5BPIPOURP%5D/DCommands/client.lua) | Lua | 56 | 21 | 18 | 95 |
+| [\[PIPOURP\]/DCommands/fxmanifest.lua](/%5BPIPOURP%5D/DCommands/fxmanifest.lua) | Lua | 12 | 0 | 5 | 17 |
+| [\[PIPOURP\]/DCommands/server.lua](/%5BPIPOURP%5D/DCommands/server.lua) | Lua | 0 | 0 | 1 | 1 |
+| [\[PIPOURP\]/Pipou-Immo/client/catalogue.lua](/%5BPIPOURP%5D/Pipou-Immo/client/catalogue.lua) | Lua | 140 | 5 | 28 | 173 |
+| [\[PIPOURP\]/Pipou-Immo/client/client.lua](/%5BPIPOURP%5D/Pipou-Immo/client/client.lua) | Lua | 1,088 | 75 | 279 | 1,442 |
+| [\[PIPOURP\]/Pipou-Immo/config.lua](/%5BPIPOURP%5D/Pipou-Immo/config.lua) | Lua | 1,115 | 0 | 7 | 1,122 |
+| [\[PIPOURP\]/Pipou-Immo/fxmanifest.lua](/%5BPIPOURP%5D/Pipou-Immo/fxmanifest.lua) | Lua | 28 | 2 | 6 | 36 |
+| [\[PIPOURP\]/Pipou-Immo/html/index.html](/%5BPIPOURP%5D/Pipou-Immo/html/index.html) | HTML | 76 | 0 | 15 | 91 |
+| [\[PIPOURP\]/Pipou-Immo/html/script.js](/%5BPIPOURP%5D/Pipou-Immo/html/script.js) | JavaScript | 431 | 6 | 110 | 547 |
+| [\[PIPOURP\]/Pipou-Immo/html/style.css](/%5BPIPOURP%5D/Pipou-Immo/html/style.css) | CSS | 953 | 30 | 203 | 1,186 |
+| [\[PIPOURP\]/Pipou-Immo/server/server.lua](/%5BPIPOURP%5D/Pipou-Immo/server/server.lua) | Lua | 465 | 8 | 74 | 547 |
+| [\[PIPOURP\]/Pipou-Jobs/client/client-jobmenu.lua](/%5BPIPOURP%5D/Pipou-Jobs/client/client-jobmenu.lua) | Lua | 111 | 4 | 30 | 145 |
+| [\[PIPOURP\]/Pipou-Jobs/client/function\_utils.lua](/%5BPIPOURP%5D/Pipou-Jobs/client/function_utils.lua) | Lua | 0 | 36 | 3 | 39 |
+| [\[PIPOURP\]/Pipou-Jobs/client/interaction.lua](/%5BPIPOURP%5D/Pipou-Jobs/client/interaction.lua) | Lua | 57 | 6 | 9 | 72 |
+| [\[PIPOURP\]/Pipou-Jobs/client/nui\_callbacks.lua](/%5BPIPOURP%5D/Pipou-Jobs/client/nui_callbacks.lua) | Lua | 100 | 10 | 34 | 144 |
+| [\[PIPOURP\]/Pipou-Jobs/config.lua](/%5BPIPOURP%5D/Pipou-Jobs/config.lua) | Lua | 30 | 0 | 1 | 31 |
+| [\[PIPOURP\]/Pipou-Jobs/fxmanifest.lua](/%5BPIPOURP%5D/Pipou-Jobs/fxmanifest.lua) | Lua | 25 | 0 | 6 | 31 |
+| [\[PIPOURP\]/Pipou-Jobs/html/index.html](/%5BPIPOURP%5D/Pipou-Jobs/html/index.html) | HTML | 64 | 0 | 5 | 69 |
+| [\[PIPOURP\]/Pipou-Jobs/html/script.js](/%5BPIPOURP%5D/Pipou-Jobs/html/script.js) | JavaScript | 171 | 6 | 33 | 210 |
+| [\[PIPOURP\]/Pipou-Jobs/html/style.css](/%5BPIPOURP%5D/Pipou-Jobs/html/style.css) | CSS | 217 | 3 | 37 | 257 |
+| [\[PIPOURP\]/Pipou-Jobs/server/server-jobmenu.lua](/%5BPIPOURP%5D/Pipou-Jobs/server/server-jobmenu.lua) | Lua | 67 | 3 | 20 | 90 |
+| [\[PIPOURP\]/d-MDT/client.lua](/%5BPIPOURP%5D/d-MDT/client.lua) | Lua | 17 | 1 | 7 | 25 |
+| [\[PIPOURP\]/d-MDT/fxmanifest.lua](/%5BPIPOURP%5D/d-MDT/fxmanifest.lua) | Lua | 18 | 2 | 6 | 26 |
+| [\[PIPOURP\]/d-MDT/html/index.html](/%5BPIPOURP%5D/d-MDT/html/index.html) | HTML | 24 | 0 | 3 | 27 |
+| [\[PIPOURP\]/d-MDT/html/script.js](/%5BPIPOURP%5D/d-MDT/html/script.js) | JavaScript | 48 | 4 | 27 | 79 |
+| [\[PIPOURP\]/d-MDT/html/style.css](/%5BPIPOURP%5D/d-MDT/html/style.css) | CSS | 118 | 2 | 15 | 135 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/README.md](/%5BPIPOURP%5D/d-MDT/html/tablette-police/README.md) | Markdown | 3 | 0 | 3 | 6 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/index.html](/%5BPIPOURP%5D/d-MDT/html/tablette-police/index.html) | HTML | 13 | 0 | 1 | 14 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/package-lock.json](/%5BPIPOURP%5D/d-MDT/html/tablette-police/package-lock.json) | JSON | 1,909 | 0 | 1 | 1,910 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/package.json](/%5BPIPOURP%5D/d-MDT/html/tablette-police/package.json) | JSON | 22 | 0 | 1 | 23 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/postcss.config.js](/%5BPIPOURP%5D/d-MDT/html/tablette-police/postcss.config.js) | JavaScript | 8 | 0 | 2 | 10 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/public/vite.svg](/%5BPIPOURP%5D/d-MDT/html/tablette-police/public/vite.svg) | XML | 1 | 0 | 0 | 1 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/src/App.vue](/%5BPIPOURP%5D/d-MDT/html/tablette-police/src/App.vue) | vue | 68 | 2 | 16 | 86 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/src/assets/main.css](/%5BPIPOURP%5D/d-MDT/html/tablette-police/src/assets/main.css) | CSS | 3 | 0 | 1 | 4 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/src/assets/vue.svg](/%5BPIPOURP%5D/d-MDT/html/tablette-police/src/assets/vue.svg) | XML | 1 | 0 | 0 | 1 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/src/components/Casier.vue](/%5BPIPOURP%5D/d-MDT/html/tablette-police/src/components/Casier.vue) | vue | 57 | 0 | 12 | 69 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/src/components/HelloWorld.vue](/%5BPIPOURP%5D/d-MDT/html/tablette-police/src/components/HelloWorld.vue) | vue | 37 | 0 | 7 | 44 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/src/components/Menue.vue](/%5BPIPOURP%5D/d-MDT/html/tablette-police/src/components/Menue.vue) | vue | 25 | 0 | 5 | 30 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/src/components/Rapports.vue](/%5BPIPOURP%5D/d-MDT/html/tablette-police/src/components/Rapports.vue) | vue | 109 | 2 | 21 | 132 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/src/components/Vehicules.vue](/%5BPIPOURP%5D/d-MDT/html/tablette-police/src/components/Vehicules.vue) | vue | 25 | 0 | 5 | 30 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/src/main.js](/%5BPIPOURP%5D/d-MDT/html/tablette-police/src/main.js) | JavaScript | 5 | 0 | 2 | 7 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/src/style.css](/%5BPIPOURP%5D/d-MDT/html/tablette-police/src/style.css) | CSS | 113 | 0 | 20 | 133 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/tailwind.config.js](/%5BPIPOURP%5D/d-MDT/html/tablette-police/tailwind.config.js) | JavaScript | 10 | 0 | 1 | 11 |
+| [\[PIPOURP\]/d-MDT/html/tablette-police/vite.config.js](/%5BPIPOURP%5D/d-MDT/html/tablette-police/vite.config.js) | JavaScript | 5 | 1 | 2 | 8 |
+| [\[PIPOURP\]/d-MDT/server.lua](/%5BPIPOURP%5D/d-MDT/server.lua) | Lua | 0 | 0 | 1 | 1 |
+| [\[PIPOURP\]/d-bucheron/client.lua](/%5BPIPOURP%5D/d-bucheron/client.lua) | Lua | 600 | 110 | 175 | 885 |
+| [\[PIPOURP\]/d-bucheron/config.lua](/%5BPIPOURP%5D/d-bucheron/config.lua) | Lua | 78 | 10 | 16 | 104 |
+| [\[PIPOURP\]/d-bucheron/fxmanifest.lua](/%5BPIPOURP%5D/d-bucheron/fxmanifest.lua) | Lua | 15 | 2 | 4 | 21 |
+| [\[PIPOURP\]/d-bucheron/log.json](/%5BPIPOURP%5D/d-bucheron/log.json) | JSON | 1 | 0 | 0 | 1 |
+| [\[PIPOURP\]/d-bucheron/plank.json](/%5BPIPOURP%5D/d-bucheron/plank.json) | JSON | 0 | 0 | 1 | 1 |
+| [\[PIPOURP\]/d-bucheron/sell\_and\_construct.lua](/%5BPIPOURP%5D/d-bucheron/sell_and_construct.lua) | Lua | 34 | 3 | 6 | 43 |
+| [\[PIPOURP\]/d-bucheron/server.lua](/%5BPIPOURP%5D/d-bucheron/server.lua) | Lua | 122 | 10 | 37 | 169 |
+| [\[PIPOURP\]/d-garage/client/client.lua](/%5BPIPOURP%5D/d-garage/client/client.lua) | Lua | 592 | 23 | 156 | 771 |
+| [\[PIPOURP\]/d-garage/client/client\_vehicle\_despawn.lua](/%5BPIPOURP%5D/d-garage/client/client_vehicle_despawn.lua) | Lua | 124 | 63 | 35 | 222 |
+| [\[PIPOURP\]/d-garage/config.lua](/%5BPIPOURP%5D/d-garage/config.lua) | Lua | 392 | 118 | 21 | 531 |
+| [\[PIPOURP\]/d-garage/fxmanifest.lua](/%5BPIPOURP%5D/d-garage/fxmanifest.lua) | Lua | 21 | 2 | 4 | 27 |
+| [\[PIPOURP\]/d-garage/html/garage.svg](/%5BPIPOURP%5D/d-garage/html/garage.svg) | XML | 1 | 0 | 0 | 1 |
+| [\[PIPOURP\]/d-garage/html/index.html](/%5BPIPOURP%5D/d-garage/html/index.html) | HTML | 70 | 1 | 6 | 77 |
+| [\[PIPOURP\]/d-garage/html/script.js](/%5BPIPOURP%5D/d-garage/html/script.js) | JavaScript | 309 | 17 | 91 | 417 |
+| [\[PIPOURP\]/d-garage/html/style.css](/%5BPIPOURP%5D/d-garage/html/style.css) | CSS | 249 | 1 | 41 | 291 |
+| [\[PIPOURP\]/d-garage/server/server.lua](/%5BPIPOURP%5D/d-garage/server/server.lua) | Lua | 115 | 3 | 46 | 164 |
+| [\[PIPOURP\]/d-garage/server/server\_vehicle\_despawn.lua](/%5BPIPOURP%5D/d-garage/server/server_vehicle_despawn.lua) | Lua | 225 | 46 | 62 | 333 |
+| [\[PIPOURP\]/d-locksystem/client.lua](/%5BPIPOURP%5D/d-locksystem/client.lua) | Lua | 111 | 29 | 34 | 174 |
+| [\[PIPOURP\]/d-locksystem/doors.json](/%5BPIPOURP%5D/d-locksystem/doors.json) | JSON | 1 | 0 | 0 | 1 |
+| [\[PIPOURP\]/d-locksystem/fxmanifest.lua](/%5BPIPOURP%5D/d-locksystem/fxmanifest.lua) | Lua | 23 | 2 | 6 | 31 |
+| [\[PIPOURP\]/d-locksystem/html/index.html](/%5BPIPOURP%5D/d-locksystem/html/index.html) | HTML | 79 | 27 | 5 | 111 |
+| [\[PIPOURP\]/d-locksystem/html/script.js](/%5BPIPOURP%5D/d-locksystem/html/script.js) | JavaScript | 240 | 12 | 60 | 312 |
+| [\[PIPOURP\]/d-locksystem/html/style.css](/%5BPIPOURP%5D/d-locksystem/html/style.css) | CSS | 220 | 1 | 37 | 258 |
+| [\[PIPOURP\]/d-locksystem/menu.lua](/%5BPIPOURP%5D/d-locksystem/menu.lua) | Lua | 442 | 63 | 101 | 606 |
+| [\[PIPOURP\]/d-locksystem/server.lua](/%5BPIPOURP%5D/d-locksystem/server.lua) | Lua | 75 | 13 | 24 | 112 |
+| [\[PIPOURP\]/pipou-loading/fxmanifest.lua](/%5BPIPOURP%5D/pipou-loading/fxmanifest.lua) | Lua | 12 | 0 | 3 | 15 |
+| [\[PIPOURP\]/pipou-loading/index.html](/%5BPIPOURP%5D/pipou-loading/index.html) | HTML | 69 | 0 | 14 | 83 |
+| [\[PIPOURP\]/pipou-loading/keks.css](/%5BPIPOURP%5D/pipou-loading/keks.css) | CSS | 150 | 0 | 22 | 172 |
+| [\[PIPOURP\]/pipou-loading/script.js](/%5BPIPOURP%5D/pipou-loading/script.js) | JavaScript | 32 | 5 | 6 | 43 |
+| [\[PIPOURP\]/pipoumenu/client.lua](/%5BPIPOURP%5D/pipoumenu/client.lua) | Lua | 43 | 0 | 27 | 70 |
+| [\[PIPOURP\]/pipoumenu/fxmanifest.lua](/%5BPIPOURP%5D/pipoumenu/fxmanifest.lua) | Lua | 15 | 2 | 4 | 21 |
+| [\[PIPOURP\]/pipoumenu/html/index.html](/%5BPIPOURP%5D/pipoumenu/html/index.html) | HTML | 82 | 10 | 8 | 100 |
+| [\[PIPOURP\]/pipoumenu/html/script.js](/%5BPIPOURP%5D/pipoumenu/html/script.js) | JavaScript | 180 | 27 | 43 | 250 |
+| [\[PIPOURP\]/pipoumenu/html/style.css](/%5BPIPOURP%5D/pipoumenu/html/style.css) | CSS | 218 | 8 | 36 | 262 |
+| [\[PIPOURP\]/qb-government/client/main.lua](/%5BPIPOURP%5D/qb-government/client/main.lua) | Lua | 133 | 4 | 21 | 158 |
+| [\[PIPOURP\]/qb-government/config.lua](/%5BPIPOURP%5D/qb-government/config.lua) | Lua | 7 | 41 | 5 | 53 |
+| [\[PIPOURP\]/qb-government/fxmanifest.lua](/%5BPIPOURP%5D/qb-government/fxmanifest.lua) | Lua | 22 | 10 | 6 | 38 |
+| [\[PIPOURP\]/qb-government/locales/ar.lua](/%5BPIPOURP%5D/qb-government/locales/ar.lua) | Lua | 198 | 0 | 2 | 200 |
+| [\[PIPOURP\]/qb-government/locales/da.lua](/%5BPIPOURP%5D/qb-government/locales/da.lua) | Lua | 198 | 0 | 2 | 200 |
+| [\[PIPOURP\]/qb-government/locales/de.lua](/%5BPIPOURP%5D/qb-government/locales/de.lua) | Lua | 198 | 0 | 2 | 200 |
+| [\[PIPOURP\]/qb-government/locales/en.lua](/%5BPIPOURP%5D/qb-government/locales/en.lua) | Lua | 204 | 0 | 3 | 207 |
+| [\[PIPOURP\]/qb-government/locales/es.lua](/%5BPIPOURP%5D/qb-government/locales/es.lua) | Lua | 198 | 0 | 2 | 200 |
+| [\[PIPOURP\]/qb-government/locales/et.lua](/%5BPIPOURP%5D/qb-government/locales/et.lua) | Lua | 198 | 0 | 2 | 200 |
+| [\[PIPOURP\]/qb-government/locales/fi.lua](/%5BPIPOURP%5D/qb-government/locales/fi.lua) | Lua | 198 | 0 | 2 | 200 |
+| [\[PIPOURP\]/qb-government/locales/fr.lua](/%5BPIPOURP%5D/qb-government/locales/fr.lua) | Lua | 198 | 0 | 2 | 200 |
+| [\[PIPOURP\]/qb-government/locales/it.lua](/%5BPIPOURP%5D/qb-government/locales/it.lua) | Lua | 195 | 0 | 2 | 197 |
+| [\[PIPOURP\]/qb-government/locales/lt.lua](/%5BPIPOURP%5D/qb-government/locales/lt.lua) | Lua | 198 | 0 | 2 | 200 |
+| [\[PIPOURP\]/qb-government/locales/nl.lua](/%5BPIPOURP%5D/qb-government/locales/nl.lua) | Lua | 195 | 0 | 1 | 196 |
+| [\[PIPOURP\]/qb-government/locales/pt-br.lua](/%5BPIPOURP%5D/qb-government/locales/pt-br.lua) | Lua | 207 | 0 | 3 | 210 |
+| [\[PIPOURP\]/qb-government/locales/pt.lua](/%5BPIPOURP%5D/qb-government/locales/pt.lua) | Lua | 196 | 0 | 2 | 198 |
+| [\[PIPOURP\]/qb-government/locales/ro.lua](/%5BPIPOURP%5D/qb-government/locales/ro.lua) | Lua | 201 | 1 | 2 | 204 |
+| [\[PIPOURP\]/qb-government/locales/sk.lua](/%5BPIPOURP%5D/qb-government/locales/sk.lua) | Lua | 195 | 0 | 2 | 197 |
+| [\[PIPOURP\]/qb-government/locales/th.lua](/%5BPIPOURP%5D/qb-government/locales/th.lua) | Lua | 198 | 0 | 2 | 200 |
+| [\[PIPOURP\]/qb-government/locales/tr.lua](/%5BPIPOURP%5D/qb-government/locales/tr.lua) | Lua | 198 | 0 | 1 | 199 |
+| [\[PIPOURP\]/qb-government/server/main.lua](/%5BPIPOURP%5D/qb-government/server/main.lua) | Lua | 23 | 0 | 6 | 29 |
+| [\[PIPOURP\]/qb-helicopter/client/main.lua](/%5BPIPOURP%5D/qb-helicopter/client/main.lua) | Lua | 78 | 9 | 47 | 134 |
+| [\[PIPOURP\]/qb-helicopter/client/objects.lua](/%5BPIPOURP%5D/qb-helicopter/client/objects.lua) | Lua | 0 | 0 | 1 | 1 |
+| [\[PIPOURP\]/qb-helicopter/config.lua](/%5BPIPOURP%5D/qb-helicopter/config.lua) | Lua | 6 | 0 | 7 | 13 |
+| [\[PIPOURP\]/qb-helicopter/fxmanifest.lua](/%5BPIPOURP%5D/qb-helicopter/fxmanifest.lua) | Lua | 24 | 0 | 4 | 28 |
+| [\[PIPOURP\]/qb-helicopter/server/main.lua](/%5BPIPOURP%5D/qb-helicopter/server/main.lua) | Lua | 3 | 1 | 2 | 6 |
+| [\[PIPOURP\]/qb-restaurant/client/interactions.lua](/%5BPIPOURP%5D/qb-restaurant/client/interactions.lua) | Lua | 142 | 20 | 14 | 176 |
+| [\[PIPOURP\]/qb-restaurant/client/job.lua](/%5BPIPOURP%5D/qb-restaurant/client/job.lua) | Lua | 0 | 342 | 43 | 385 |
+| [\[PIPOURP\]/qb-restaurant/client/main.lua](/%5BPIPOURP%5D/qb-restaurant/client/main.lua) | Lua | 150 | 10 | 53 | 213 |
+| [\[PIPOURP\]/qb-restaurant/client/objects.lua](/%5BPIPOURP%5D/qb-restaurant/client/objects.lua) | Lua | 95 | 3 | 11 | 109 |
+| [\[PIPOURP\]/qb-restaurant/client/sell-customer.lua](/%5BPIPOURP%5D/qb-restaurant/client/sell-customer.lua) | Lua | 195 | 29 | 83 | 307 |
+| [\[PIPOURP\]/qb-restaurant/client/transformation.lua](/%5BPIPOURP%5D/qb-restaurant/client/transformation.lua) | Lua | 46 | 5 | 35 | 86 |
+| [\[PIPOURP\]/qb-restaurant/config.lua](/%5BPIPOURP%5D/qb-restaurant/config.lua) | Lua | 539 | 2 | 11 | 552 |
+| [\[PIPOURP\]/qb-restaurant/fxmanifest.lua](/%5BPIPOURP%5D/qb-restaurant/fxmanifest.lua) | Lua | 33 | 2 | 6 | 41 |
+| [\[PIPOURP\]/qb-restaurant/html/index.html](/%5BPIPOURP%5D/qb-restaurant/html/index.html) | HTML | 44 | 0 | 2 | 46 |
+| [\[PIPOURP\]/qb-restaurant/html/script.js](/%5BPIPOURP%5D/qb-restaurant/html/script.js) | JavaScript | 34 | 5 | 15 | 54 |
+| [\[PIPOURP\]/qb-restaurant/html/style.css](/%5BPIPOURP%5D/qb-restaurant/html/style.css) | CSS | 72 | 0 | 10 | 82 |
+| [\[PIPOURP\]/qb-restaurant/server/main.lua](/%5BPIPOURP%5D/qb-restaurant/server/main.lua) | Lua | 85 | 6 | 31 | 122 |
+
+[Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)

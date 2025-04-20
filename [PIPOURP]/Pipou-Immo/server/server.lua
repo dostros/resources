@@ -319,6 +319,7 @@ end)
 
 RegisterNetEvent("PipouImmo:server:deleteProperty")
 AddEventHandler("PipouImmo:server:deleteProperty", function(propertyId)
+    local src = source
     MySQL.Async.execute('DELETE FROM property_owners WHERE property_id = @id', {
         ['@id'] = propertyId
     }, function()
@@ -326,10 +327,11 @@ AddEventHandler("PipouImmo:server:deleteProperty", function(propertyId)
             ['@id'] = propertyId
         }, function(affectedRows)
             print("[IMMO] Propriété supprimée : ID " .. propertyId)
-            TriggerClientEvent("PipouImmo:client:notifyPropertyDeleted", src, success)
+            TriggerClientEvent("PipouImmo:client:notifyPropertyDeleted", src, affectedRows > 0)
         end)
     end)
 end)
+
 
 
 RegisterNetEvent("PipouImmo:server:assignPropertyToPlayerId")
@@ -388,14 +390,14 @@ end)
 
 
 
-QBCore.Functions.CreateCallback('PipouDeco:getPlayerFurniture', function(source, cb, propertyName)
+QBCore.Functions.CreateCallback('PipouImmo:getPlayerFurniture', function(source, cb, propertyName)
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return cb({}) end
 
     local citizenid = Player.PlayerData.citizenid
 
     MySQL.Async.fetchAll([[
-        SELECT object_model, x, y, z, heading, pitch, roll 
+        SELECT id, object_model, x, y, z, heading, pitch, roll 
         FROM furniture_placements 
         WHERE citizenid = @citizenid AND property_name = @property
     ]], {
@@ -405,13 +407,140 @@ QBCore.Functions.CreateCallback('PipouDeco:getPlayerFurniture', function(source,
         local furnitureList = {}
         for _, row in pairs(results) do
             table.insert(furnitureList, {
+                id = row.id, -- 🔥 ESSENTIEL pour le déplacement et suppression
                 object = row.object_model,
                 coords = vector3(row.x, row.y, row.z),
-                heading = row.heading,
+                heading = row.heading or 0.0,
                 pitch = row.pitch or 0.0,
                 roll = row.roll or 0.0
             })
         end
         cb(furnitureList)
+    end)
+end)
+
+
+
+RegisterNetEvent("PipouImmo:saveObjectPlacement")
+AddEventHandler("PipouImmo:saveObjectPlacement", function(data)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    local citizenid = Player.PlayerData.citizenid
+
+        MySQL.Async.execute([[
+        INSERT INTO furniture_placements 
+        (citizenid, property_name, object_model, x, y, z, heading, pitch, roll)
+        VALUES 
+        (@citizenid, @property, @model, @x, @y, @z, @h, @p, @r)
+        ON DUPLICATE KEY UPDATE
+            x = VALUES(x), y = VALUES(y), z = VALUES(z),
+            heading = VALUES(heading), pitch = VALUES(pitch), roll = VALUES(roll)
+    ]], {
+        ['@citizenid'] = citizenid,
+        ['@property'] = data.property,
+        ['@model'] = data.object,
+        ['@x'] = data.coords.x,
+        ['@y'] = data.coords.y,
+        ['@z'] = data.coords.z,
+        ['@p'] = data.rotation.x,
+        ['@r'] = data.rotation.y, 
+        ['@h'] = data.rotation.z, 
+
+    })
+    TriggerEvent("PipouImmo:server:broadcastFurniture", data.property)
+
+end)
+
+RegisterNetEvent("PipouImmo:updateFurniturePlacement")
+AddEventHandler("PipouImmo:updateFurniturePlacement", function(data)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    if not data.id then
+        print(("[IMMOBILIER] ❌ Tentative sans ID valide par %s"):format(Player.PlayerData.citizenid))
+        return
+    end
+    
+
+    local citizenid = Player.PlayerData.citizenid
+
+    -- Sécurité basique : vérifie que le meuble appartient au joueur
+    MySQL.Async.fetchAll([[
+        SELECT * FROM furniture_placements
+        WHERE id = @id AND citizenid = @citizenid
+    ]], {
+        ['@id'] = data.id,
+        ['@citizenid'] = citizenid
+    }, function(result)
+        if result and result[1] then
+            -- Met à jour la position/rotation du meuble
+            MySQL.Async.execute([[
+                UPDATE furniture_placements
+                SET x = @x, y = @y, z = @z, heading = @h, pitch = @p, roll = @r
+                WHERE id = @id
+            ]], {
+                ['@x'] = data.coords.x,
+                ['@y'] = data.coords.y,
+                ['@z'] = data.coords.z,
+                ['@p'] = data.rotation.x,
+                ['@r'] = data.rotation.y, 
+                ['@h'] = data.rotation.z,
+                ['@id'] = data.id
+            })
+            TriggerClientEvent("PipouImmo:server:broadcastFurniture", -1, result[1].property_name)
+        else
+            print(("[IMMOBILIER] ⚠️ Tentative de modification d’un meuble non autorisée (id: %s) par %s"):format(tostring(data.id), citizenid))
+        end
+    end)
+end)
+
+RegisterNetEvent("PipouImmo:server:removeFurniture", function(furnitureId)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    local citizenid = Player.PlayerData.citizenid
+
+    -- Vérifie que le meuble appartient bien au joueur
+    MySQL.Async.fetchAll([[
+        SELECT * FROM furniture_placements
+        WHERE id = @id AND citizenid = @citizenid
+    ]], {
+        ['@id'] = furnitureId,
+        ['@citizenid'] = citizenid
+    }, function(result)
+        if result and result[1] then
+            -- Meuble trouvé et appartient bien au joueur
+            local propertyName = result[1].property_name
+            MySQL.Async.execute('DELETE FROM furniture_placements WHERE id = @id', {
+                ['@id'] = furnitureId
+            }, function(rowsAffected)
+                if rowsAffected > 0 then
+                    print(("[IMMO] ✅ Meuble supprimé (ID %s) par %s"):format(furnitureId, citizenid))
+                    TriggerEvent("PipouImmo:server:broadcastFurniture", propertyName)
+                else
+                    print(("[IMMO] ❌ Échec suppression meuble ID %s"):format(furnitureId))
+                end
+            end)
+        else
+            print(("[IMMO] ⚠️ Tentative de suppression d’un meuble non autorisée (id: %s) par %s"):format(tostring(furnitureId), citizenid))
+        end
+    end)
+end)
+
+
+RegisterNetEvent("PipouImmo:server:broadcastFurniture")
+AddEventHandler("PipouImmo:server:broadcastFurniture", function(propertyName)
+    MySQL.Async.fetchAll([[
+        SELECT id, object_model, x, y, z, heading, pitch, roll
+        FROM furniture_placements
+        WHERE property_name = @property
+    ]], {
+        ['@property'] = propertyName
+    }, function(results)
+        TriggerClientEvent("PipouImmo:client:loadFurnitureForAll", -1, propertyName, results)
     end)
 end)
