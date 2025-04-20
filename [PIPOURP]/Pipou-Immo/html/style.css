@@ -904,7 +904,7 @@ select::-webkit-scrollbar-track {
 #furnitureSellMenu {
     position: fixed;
     top: 50%;
-    left: 50%;
+    
     transform: translate(-50%, -50%);
     background: linear-gradient(135deg, #849fc9, #c3cfe2);
     color: #222;
@@ -917,6 +917,8 @@ select::-webkit-scrollbar-track {
     display: flex;
     flex-direction: column;
     overflow: hidden; /* ✅ essentiel */
+    align-items: baseline;
+    justify-content: baseline;
 }
 
 

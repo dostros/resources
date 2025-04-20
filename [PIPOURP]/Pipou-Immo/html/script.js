@@ -9,15 +9,20 @@ let allProperties = [];
 // FUNCTION
 document.addEventListener("DOMContentLoaded", function () {
     function display(bool) {
-        $("body").toggle(bool);
-        $("menu").toggle(bool);
+        document.body.style.display = bool ? 'flex' : 'none';
     }
+    
 
-    display(false);
+    hideAllMenus();
 
     function exit() {
-        display(false);
+        hideAllMenus()
         fetch('https://Pipou-Immo/exit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        fetch(`https://${GetParentResourceName()}/clearPreview`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({})
@@ -28,8 +33,13 @@ document.addEventListener("DOMContentLoaded", function () {
         var item = event.data;
 
         if (item.type === 'ui') {
-            display(item.status);
+            if (item.status) {
+                document.getElementById('menu').style.display = 'block';
+            } else {
+                hideAllMenus();
+            }
         }
+        
 
         if (item.type === 'setPropertyCoords') {
             display(true);
@@ -52,7 +62,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (item.type === 'notify') {
         }
         if (event.data.type === 'showFurnitureMenu') {
-            $("body").toggle(true);
+            document.body.style.display = 'flex'; // ✅ garde le body actif
+            hideAllMenus(); // ✅ ferme tout proprement avant d’ouvrir le bon menu
+
             const menuimmo = document.getElementById("menu");
             if (menuimmo) menuimmo.style.display = "none";
 
@@ -92,7 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
         if (event.data.type === 'showFurnitureSellMenu') {
-            $("body").toggle(true);
+            document.body.style.display = 'flex'; // ✅ garde le body actif
+            hideAllMenus(); // ✅ ferme tout proprement avant d’ouvrir le bon menu
+
         
             const menuimmo = document.getElementById("menu");
             if (menuimmo) menuimmo.style.display = "none";
@@ -124,12 +138,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.addEventListener('keyup', function (event) {
-        if (event.key === 'Escape') exit();
+        if (event.key === 'Escape') {
+            hideAllMenus();
+            fetch('https://Pipou-Immo/exit', { method: 'POST' });
+            fetch(`https://${GetParentResourceName()}/clearPreview`, { method: 'POST' });
+        }
     });
+    
 
     document.getElementById('close').addEventListener('click', exit);
 
     document.getElementById('sellProperty').addEventListener('click', function () {
+        hideAllMenus();
         document.getElementById('sellPropertyForm').style.display = 'block';
         document.getElementById('menu').style.display = 'none';
 
@@ -153,6 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll('.backbutton').forEach(function (btn) {
         btn.addEventListener('click', function () {
+            hideAllMenus();
             ['sellPropertyForm', 'propertyManagement'].forEach(id => {
                 document.getElementById(id).style.display = 'none';
             });
@@ -274,14 +295,50 @@ document.addEventListener("DOMContentLoaded", function () {
             menu.style.display = "none";
         }
     
-        display(false); // 👈 Ferme tout (corps en display: none) + focusNUI off
+        hideAllMenus(); 
+
     
         fetch(`https://${GetParentResourceName()}/closeFurnitureUI`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({})
         });
+        fetch(`https://${GetParentResourceName()}/clearPreview`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        
     }
+
+
+    document.getElementById('closeFurnitureSellButton').addEventListener('click', closeFurnitureSellUI);
+
+    function closeFurnitureSellUI() {
+        const menu = document.getElementById("furnitureSellMenu");
+    
+        if (menu) {
+            menu.classList.remove("visible");
+            menu.style.display = "none";
+        }
+    
+        hideAllMenus();
+    
+        fetch(`https://${GetParentResourceName()}/closeFurnitureUI`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        fetch(`https://${GetParentResourceName()}/clearPreview`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        
+    }
+
+
+
 
 
     document.querySelectorAll('.category-button').forEach(button => {
@@ -337,6 +394,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function loadFurnitureCategory(category, furnitureData) {
         const list = document.getElementById('furnitureSellList');
         list.innerHTML = '';
+
+        fetch(`https://${GetParentResourceName()}/clearPreview`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        
     
         const items = furnitureData[category]?.items || [];
     
@@ -347,7 +411,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 <strong>${item.label}</strong>
                 <small>Objet: ${item.object}</small>
                 <span class="price">${item.price} $</span>
-                <button onclick="placeFurniture('${item.object}', ${item.price})">Placer</button>
+                <button onclick="previsualisatinFurniture('${item.object}', ${item.price})">Aperçu</button>
+                <button onclick="        ('${item.object}', ${item.price})">Acheter</button>
             `;
             list.appendChild(div);
         });
@@ -356,6 +421,12 @@ document.addEventListener("DOMContentLoaded", function () {
     function loadAllFurniture(furnitureData) {
         const list = document.getElementById('furnitureSellList');
         list.innerHTML = '';
+        fetch(`https://${GetParentResourceName()}/clearPreview`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        
     
         Object.keys(furnitureData).forEach((catKey) => {
             furnitureData[catKey].items.forEach(item => {
@@ -365,19 +436,38 @@ document.addEventListener("DOMContentLoaded", function () {
                     <strong>${item.label}</strong>
                     <small>Objet: ${item.object}</small>
                     <span class="price">${item.price} $</span>
-                    <button onclick="placeFurniture('${item.object}', ${item.price})">Placer</button>
+                    <button onclick="previsualisatinFurniture('${item.object}', ${item.price})">Aperçu</button>
+                    <button onclick="        ('${item.object}', ${item.price})">Acheter</button>
                 `;
                 list.appendChild(div);
             });
         });
     }
     
+    function hideAllMenus() {
+        const allMenuIds = [
+            'menu',
+            'sellPropertyForm',
+            'propertyManagement',
+            'confirmationBox',
+            'deleteConfirmationBox',
+            'furnitureMenu',
+            'furnitureSellMenu'
+        ];
+    
+        allMenuIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+    
+        document.body.style.display = 'flex'; // Important ! Ne jamais cacher tout le body
+    }
+    
     
       
     
     
-      
-
+    
 
 
 
@@ -439,11 +529,19 @@ function refreshPropertyList(filteredList = allProperties) {
 }
 
 window.placeFurniture = function(object, label, quantity) {
-    console.log("je commence à placer")
     fetch(`https://Pipou-Immo/placeFurniture`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ object, label, quantity })
     });
     document.getElementById("furnitureMenu").style.display = "none";
+}
+
+
+window.previsualisatinFurniture = function(object, label, quantity) {
+    fetch(`https://Pipou-Immo/previsualisatinFurniture`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ object, label, quantity })
+    });
 }

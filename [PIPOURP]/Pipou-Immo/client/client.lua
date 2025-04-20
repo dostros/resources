@@ -5,6 +5,9 @@ local cachedProperties = {}
 local IsInInstance = false
 local currentPropertyName = nil
 local isLightOn = true
+local previewProp = nil
+local previewRotationThread = nil
+
 
 function GetInstanceZ(level)
     return -100 - (level * 50)
@@ -1124,7 +1127,6 @@ RegisterNetEvent("PipouImmo:openFurnitureUI", function()
 end)
 
 RegisterNUICallback("placeFurniture", function(data, cb)
-    print("tu vas le placer là normalement")
     SetNuiFocus(false, false)
 
     -- Sécurité : Vérifie que l'objet est valide
@@ -1136,6 +1138,28 @@ RegisterNUICallback("placeFurniture", function(data, cb)
 
     -- Démarre le placement
     TriggerEvent("PipouImmo:startPlacingFurniture", {
+        object = data.object,
+        label = data.label or data.object,
+        quantity = data.quantity or 1
+    })
+
+    cb("ok")
+end)
+
+
+
+
+RegisterNUICallback("previsualisatinFurniture", function(data, cb)
+
+    -- Sécurité : Vérifie que l'objet est valide
+    if not data.object then
+        QBCore.Functions.Notify("❌ Objet invalide.", "error")
+        cb("error")
+        return
+    end
+
+    -- Démarre le placement
+    TriggerEvent("PipouImmo:startPrevisualisateFurniture", {
         object = data.object,
         label = data.label or data.object,
         quantity = data.quantity or 1
@@ -1187,3 +1211,67 @@ exports("OpenSellFurnitureList", OpenSellFurnitureList)
 RegisterCommand("sellfurniture", function()
     OpenSellFurnitureList()
 end, false)
+
+
+
+
+
+RegisterNetEvent("PipouImmo:startPrevisualisateFurniture", function(item)
+    if previewProp and DoesEntityExist(previewProp) then
+        DeleteEntity(previewProp)
+        previewProp = nil
+    end
+
+    if previewRotationThread then
+        previewRotationThread = nil
+    end
+
+    local model = GetHashKey(item.object)
+    RequestModel(model)
+    while not HasModelLoaded(model) do Wait(0) end
+
+    local ped = PlayerPedId()
+    local coords = GetEntityCoords(ped)
+    local heading = GetEntityHeading(ped)
+
+    local distanceForward = 1.8
+    local distanceRight = 2.5
+
+    local offsetX = -distanceForward * math.sin(math.rad(heading)) + distanceRight * math.cos(math.rad(heading))
+    local offsetY = distanceForward * math.cos(math.rad(heading)) + distanceRight * math.sin(math.rad(heading))
+
+
+
+
+    local spawnX = coords.x + offsetX
+    local spawnY = coords.y + offsetY
+    local spawnZ = coords.z - 1.0
+
+    previewProp = CreateObject(model, spawnX, spawnY, spawnZ, false, true, false)
+    SetEntityAlpha(previewProp, 250, false)
+    FreezeEntityPosition(previewProp, true)
+    PlaceObjectOnGroundProperly(previewProp)
+
+    -- ➿ Rotation continue
+    previewRotationThread = CreateThread(function()
+        local angle = 0.0
+        while previewProp and DoesEntityExist(previewProp) do
+            angle = angle + 0.3
+            if angle >= 360.0 then angle = 0.0 end
+            SetEntityHeading(previewProp, angle)
+            Wait(10)
+        end
+    end)
+end)
+
+
+
+RegisterNUICallback("clearPreview", function()
+    if previewProp and DoesEntityExist(previewProp) then
+        DeleteEntity(previewProp)
+        previewProp = nil
+    end
+    if previewRotationThread then
+        previewRotationThread = nil
+    end
+end)
