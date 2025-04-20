@@ -1149,3 +1149,41 @@ RegisterNUICallback("closeFurnitureUI", function(_, cb)
     SetNuiFocus(false, false)
     cb("ok")
 end)
+
+
+function GetFurnitureConfig(cb)
+    local FurnitureList = Config.Furniture
+    if cb then
+        cb(FurnitureList)
+    end
+end
+exports("GetFurnitureConfig", GetFurnitureConfig)
+
+function OpenSellFurnitureList()
+    local furnitureByCategory = {}
+
+    for categoryName, category in pairs(Config.Furniture) do
+        furnitureByCategory[categoryName] = {
+            label = category.label or categoryName,
+            items = {}
+        }
+
+        for _, item in ipairs(category.items) do
+            item.quantity = 1
+            table.insert(furnitureByCategory[categoryName].items, item)
+        end
+    end
+
+    SetNuiFocus(true, true)
+    SendNUIMessage({
+        type = "showFurnitureSellMenu",
+        furnitureCategories = furnitureByCategory
+    })
+end
+
+
+exports("OpenSellFurnitureList", OpenSellFurnitureList)
+
+RegisterCommand("sellfurniture", function()
+    OpenSellFurnitureList()
+end, false)

@@ -90,7 +90,37 @@ document.addEventListener("DOMContentLoaded", function () {
             if (event.data.furnitureList.length === 0) {
                 container.innerHTML = "<p style='text-align:center;color:white;'>Aucun meuble disponible.</p>";
             }
-        }   
+        }
+        if (event.data.type === 'showFurnitureSellMenu') {
+            $("body").toggle(true);
+        
+            const menuimmo = document.getElementById("menu");
+            if (menuimmo) menuimmo.style.display = "none";
+        
+            const menu = document.getElementById("furnitureSellMenu");
+            const container = document.getElementById("furnitureSellList");
+        
+            if (!menu || !container) {
+                console.error("[Pipou-Immo] furnitureMenu ou furnitureList introuvable !");
+                return;
+            }
+        
+            container.innerHTML = "";
+        
+            menu.classList.add("visible");
+            menu.style.display = "block";
+        
+            if (event.data.furnitureCategories) {
+                populateFurnitureCategories(event.data.furnitureCategories);
+        
+                // Charge automatiquement tous les meubles par défaut
+                loadAllFurniture(event.data.furnitureCategories);
+            } else {
+                container.innerHTML = "<p style='text-align:center;color:white;'>Aucun meuble disponible.</p>";
+            }
+        }
+        
+        
     });
 
     document.addEventListener('keyup', function (event) {
@@ -252,6 +282,98 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify({})
         });
     }
+
+
+    document.querySelectorAll('.category-button').forEach(button => {
+        button.addEventListener('click', () => {
+          // Active button UI
+          document.querySelectorAll('.category-button').forEach(b => b.classList.remove('active'));
+          button.classList.add('active');
+      
+          const category = button.getAttribute('data-category');
+          document.querySelectorAll('.furniture-sell-item').forEach(item => {
+            const itemCategory = item.getAttribute('data-category');
+            if (category === 'all' || itemCategory === category) {
+              item.style.display = '';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        });
+    });
+
+    function populateFurnitureCategories(furnitureData) {
+        const categoryBar = document.getElementById('furnitureCategories');
+        categoryBar.innerHTML = ''; 
+    
+        const allBtn = document.createElement('button');
+        allBtn.className = 'category-button active';
+        allBtn.textContent = 'Tous';
+        allBtn.dataset.category = 'all';
+        allBtn.addEventListener('click', () => {
+            document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
+            allBtn.classList.add('active');
+            loadAllFurniture(furnitureData);
+        });
+        categoryBar.appendChild(allBtn);
+    
+        Object.keys(furnitureData).forEach((key) => {
+            const button = document.createElement('button');
+            button.className = 'category-button';
+            button.textContent = furnitureData[key].label || key;
+            button.dataset.category = key;
+    
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                loadFurnitureCategory(key, furnitureData);
+            });
+    
+            categoryBar.appendChild(button);
+        });
+    }
+    
+    
+    function loadFurnitureCategory(category, furnitureData) {
+        const list = document.getElementById('furnitureSellList');
+        list.innerHTML = '';
+    
+        const items = furnitureData[category]?.items || [];
+    
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'furniture-sell-item';
+            div.innerHTML = `
+                <strong>${item.label}</strong>
+                <small>Objet: ${item.object}</small>
+                <span class="price">${item.price} $</span>
+                <button onclick="placeFurniture('${item.object}', ${item.price})">Placer</button>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function loadAllFurniture(furnitureData) {
+        const list = document.getElementById('furnitureSellList');
+        list.innerHTML = '';
+    
+        Object.keys(furnitureData).forEach((catKey) => {
+            furnitureData[catKey].items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'furniture-sell-item';
+                div.innerHTML = `
+                    <strong>${item.label}</strong>
+                    <small>Objet: ${item.object}</small>
+                    <span class="price">${item.price} $</span>
+                    <button onclick="placeFurniture('${item.object}', ${item.price})">Placer</button>
+                `;
+                list.appendChild(div);
+            });
+        });
+    }
+    
+    
+      
     
     
       

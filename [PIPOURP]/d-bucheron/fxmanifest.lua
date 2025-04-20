@@ -8,7 +8,7 @@ version '1.0.0'
 
 -- What to run
 client_scripts {
-    'client.lua',"config.lua",
+    'client.lua',"config.lua", 'sell_and_construct.lua'
 }
 
 server_scripts {

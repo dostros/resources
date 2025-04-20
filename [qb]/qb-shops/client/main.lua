@@ -211,3 +211,11 @@ if not Config.UseTarget then
         end)
     end)
 end
+
+local Shops = {}
+
+function AddShop(name, data)
+    Shops[name] = data
+end
+exports("AddShop", AddShop)
+

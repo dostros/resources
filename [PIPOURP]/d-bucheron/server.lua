@@ -92,6 +92,21 @@ AddEventHandler('timber:OpenStash', function()
 end)
 
 
+RegisterNetEvent('timber:OpenSellStash')
+AddEventHandler('timber:OpenSellStash', function()
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+
+
+    if Player.PlayerData.job.name == "timber" then
+        local data = { label = 'Timber sellandconstruct Stash', maxweight = 40000, slots = 50 }
+        exports['qb-inventory']:OpenInventory(src, "timbersellandconstructstash", data)
+    else
+        TriggerClientEvent('QBCore:Notify', src, "Vous n'êtes pas autorisé à accéder à ce coffre !", "error")
+    end
+end)
+
+
 
 
 
@@ -138,4 +153,16 @@ AddEventHandler("qb-timber:server:storePlank", function()
     TriggerClientEvent('QBCore:Notify', src, "Vous avez ajouté "..amount.." planche(s) au coffre d'entreprise.", "success")
     print("✅ "..amount.." planche(s) ajoutée(s) au coffre : "..stashName)
 
+end)
+
+
+-- Enregistre dynamiquement un shop sur le serveur
+RegisterNetEvent("CreateFurnitureShop", function(shopName, config)
+    local qbShops = exports['qb-shops']
+    if qbShops and qbShops.AddShop then
+        qbShops:AddShop(shopName, config)
+        print("✅ Shop '" .. shopName .. "' ajouté dynamiquement.")
+    else
+        print("❌ L'export AddShop n'existe pas.")
+    end
 end)
