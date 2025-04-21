@@ -33,12 +33,17 @@ document.addEventListener("DOMContentLoaded", function () {
         var item = event.data;
 
         if (item.type === 'ui') {
+            hideAllMenus();
+        
             if (item.status) {
-                document.getElementById('menu').style.display = 'block';
-            } else {
-                hideAllMenus();
+                if (item.page === 'sellPropertyForm') {
+                    document.getElementById('sellPropertyForm').style.display = 'block';
+                } else {
+                    document.getElementById('menu').style.display = 'block';
+                }
             }
         }
+        
         
 
         if (item.type === 'setPropertyCoords') {
@@ -200,19 +205,63 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById('confirmYes').addEventListener('click', function () {
         document.getElementById('confirmationBox').style.display = 'none';
-        const propertyName = document.getElementById('propertyName').value;
+    
+        const propertyName = document.getElementById('propertyName').value.trim();
         const coords1 = HouseDoorCoords;
         const coords2 = GarageDoorCoords;
         const coords3 = GarageOutCoords;
         const typeinterior = document.getElementById('interiorType').value;
         const level = document.getElementById('levelproperty').value;
-
+    
+        // Vérification du nom
+        if (!propertyName) {
+            notifyNUI("❌ Le nom de la propriété est requis.");
+            return;
+        }
+    
+        // Vérification du type d’intérieur
+        if (!typeinterior || typeinterior === 'none') {
+            notifyNUI("❌ Le type d’intérieur est requis.");
+            return;
+        }
+    
+        // Vérification des coordonnées de la maison
+        if (!coords1 || typeof coords1 !== 'object' || coords1.x === undefined || coords1.y === undefined || coords1.z === undefined) {
+            notifyNUI("❌ Le point d’entrée de la maison est requis.");
+            return;
+        }
+    
+        // Vérification des coordonnées du garage
+        if (!coords2 || typeof coords2 !== 'object' || coords2.x === undefined || coords2.y === undefined || coords2.z === undefined) {
+            notifyNUI("❌ Le point du garage est requis.");
+            return;
+        }
+    
+        // Vérification des coordonnées de sortie du garage
+        if (!coords3 || typeof coords3 !== 'object' || coords3.x === undefined || coords3.y === undefined || coords3.z === undefined) {
+            notifyNUI("❌ Le point de sortie du garage est requis.");
+            return;
+        }
+    
+        // Vérification du niveau (facultatif, mais on force un 0 si vide)
+        const parsedLevel = parseInt(level);
+        const finalLevel = isNaN(parsedLevel) ? 0 : parsedLevel;
+    
         fetch('https://Pipou-Immo/Pipou-Immo-createProperty', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ propertyName, coords1, coords2, coords3, typeinterior, level })
+            body: JSON.stringify({
+                propertyName,
+                coords1,
+                coords2,
+                coords3,
+                typeinterior,
+                level: finalLevel
+            })
         });
     });
+    
+    
 
     document.getElementById('confirmNo').addEventListener('click', function () {
         document.getElementById('confirmationBox').style.display = 'none';
@@ -412,7 +461,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <small>Objet: ${item.object}</small>
                 <span class="price">${item.price} $</span>
                 <button onclick="previsualisatinFurniture('${item.object}', ${item.price})">Aperçu</button>
-                <button onclick="        ('${item.object}', ${item.price})">Acheter</button>
+                <button onclick="buyFurniture('${item.object}', ${item.price})">Acheter</button>
             `;
             list.appendChild(div);
         });
@@ -437,7 +486,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <small>Objet: ${item.object}</small>
                     <span class="price">${item.price} $</span>
                     <button onclick="previsualisatinFurniture('${item.object}', ${item.price})">Aperçu</button>
-                    <button onclick="        ('${item.object}', ${item.price})">Acheter</button>
+                    <button onclick="buyFurniture('${item.object}', ${item.price})">Acheter</button>
                 `;
                 list.appendChild(div);
             });
@@ -462,13 +511,21 @@ document.addEventListener("DOMContentLoaded", function () {
     
         document.body.style.display = 'flex'; // Important ! Ne jamais cacher tout le body
     }
+
+    function notifyNUI(message, type = "error") {
+        fetch(`https://${GetParentResourceName()}/notify`, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message, type })
+        });
+    }
+    
+    
     
     
       
     
     
-    
-
 
 
 });
@@ -544,4 +601,17 @@ window.previsualisatinFurniture = function(object, label, quantity) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ object, label, quantity })
     });
+}
+
+window.buyFurniture = function(objectName, price) {
+    fetch(`https://${GetParentResourceName()}/PipouImmo:buyFurniture`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            furnitureName: objectName,
+            label: objectName,
+            price: price
+        })
+    })
+    .then(res => res.json())
 }

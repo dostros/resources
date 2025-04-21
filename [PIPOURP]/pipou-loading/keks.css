@@ -153,7 +153,7 @@ h1:before, h2:before {
 
 .backdrop {
     animation: fadeIn 1s ease-in;
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(0.5px);
     background-color: rgba(0, 0, 0, 0.3);
 }
 
@@ -168,4 +168,46 @@ h1:before, h2:before {
         0 0 10px #FF6A00,
         0 0 20px #FF6A00,
         0 0 40px #FFB14D;
+}
+
+
+.centered-title {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 100%;
+    z-index: 10;
+}
+
+.neon-flash {
+    font-size: 100px;
+    font-family: 'BankGothic';
+    color: #fff;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #FF6A00,
+        0 0 20px #FF6A00,
+        0 0 40px #FFB14D,
+        0 0 60px #FF6A00;
+    animation: flash 1s infinite alternate;
+}
+
+@keyframes flash {
+    0% {
+        opacity: 1;
+        text-shadow:
+            0 0 5px #fff,
+            0 0 10px #FF6A00,
+            0 0 20px #FF6A00,
+            0 0 40px #FFB14D,
+            0 0 60px #FF6A00;
+    }
+    100% {
+        opacity: 0.4;
+        text-shadow:
+            0 0 2px #fff,
+            0 0 4px #FF6A00;
+    }
 }

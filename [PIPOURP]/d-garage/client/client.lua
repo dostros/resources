@@ -205,17 +205,18 @@ function LoadGarages()
                 EndTextCommandSetBlipName(blip)
             end
 
-        elseif garagetype == "private" and isOwner then
-            local blip = AddBlipForCoord(garagespawnpoint[1])
-            SetBlipSprite(blip, 357)
-            SetBlipDisplay(blip, 0)
-            SetBlipScale(blip, 0.8)
-            SetBlipColour(blip, 50)
-            SetBlipAsShortRange(blip, true)
-            BeginTextCommandSetBlipName("STRING")
-            AddTextComponentString("Garage privé")
-            EndTextCommandSetBlipName(blip)
-
+        if garagetype == "private" then
+            if isOwner then
+                local blip = AddBlipForCoord(garagespawnpoint[1])
+                SetBlipSprite(blip, 357)
+                SetBlipDisplay(blip, 4)
+                SetBlipScale(blip, 0.8)
+                SetBlipColour(blip, 50)
+                SetBlipAsShortRange(blip, true)
+                BeginTextCommandSetBlipName("STRING")
+                AddTextComponentString("🏠 Garage personnel")
+                EndTextCommandSetBlipName(blip)
+            end         
         else
             local blip = AddBlipForCoord(garagespawnpoint[1])
             SetBlipSprite(blip, 357)
@@ -732,6 +733,11 @@ end, false)
 
 -- Dans d-garage/server.lua (ou shared, selon l’archi)
 function AddPrivateGarage(name, label, spawnPoint, getInPoint, property)
+    if Config.Garages[name] then
+        print("^3[Garage] Le garage privé '" .. name .. "' existe déjà. Ignoré.^0")
+        return
+    end
+
     Config.Garages[name] = {
         label = label,
         type = "private",
@@ -740,7 +746,10 @@ function AddPrivateGarage(name, label, spawnPoint, getInPoint, property)
         getinpoint = getInPoint,
         property = property,
     }
+
+    print("^2[Garage] Garage privé ajouté : " .. name .. "^0")
 end
+
 exports('AddPrivateGarage', AddPrivateGarage)
 
 

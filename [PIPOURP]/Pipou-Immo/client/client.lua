@@ -175,6 +175,11 @@ RegisterNUICallback("Pipou-Immo-setPropertyCoords", function(data, cb)
 
                 SetNuiFocus(true, true)
                 SendNUIMessage({
+                    type = "ui",
+                    status = true,
+                    page = "sellPropertyForm"
+                })
+                SendNUIMessage({
                     type = "setPropertyCoords",
                     propertyId = data.propertyId,
                     coords = {
@@ -183,6 +188,8 @@ RegisterNUICallback("Pipou-Immo-setPropertyCoords", function(data, cb)
                         z = playerCoords.z
                     }
                 })
+
+
                 waiting = false
             end
         end
@@ -451,47 +458,57 @@ CreateThread(function()
     while true do
         Wait(0)
 
-        if IsInInstance and IsControlJustReleased(0, 38) then -- touche E
-            local menuData = {
-                {
-                    header = "Gestion immobilière",
-                    isMenuHeader = true,
-                },
-                {
-                    header = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
-                    txt = "Contrôle de la luminosité",
-                    params = {
-                        event = "Pipou-Immo:toggleLight",
-                        args = { number = 1 }
-                    }
-                },
-                {
-                    header = "Clefs de la maison",
-                    txt = "Gérer les clefs de la maison",
-                    params = {
-                        event = "Pipou-Immo:openKeyMenu",
-                        args = { number = 2 }
-                    }
-                },
-                {
-                    header = "Décorer la maison",
-                    txt = "Accéder au menu de décoration",
-                    params = {
-                        event = "Pipou-Immo:openDecorationMenu",
-                        args = { number = 3 }
-                    }
-                },
-                {
-                    header = "Fermer le menu",
-                    txt = "Retourner au jeu",
-                    params = {
-                        event = "qb-menu:closeMenu"
+        if IsInInstance and IsControlJustReleased(0, 38) then
+            local propertyName = getCurrentPlayerProperty()
+            if not propertyName then return end
+        
+            QBCore.Functions.TriggerCallback("PipouImmo:server:isPropertyPublic", function(isPublic)
+                local menuData = {
+                    {
+                        header = "Gestion immobilière",
+                        isMenuHeader = true,
+                    },
+                    {
+                        header = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
+                        txt = "Contrôle de la luminosité",
+                        params = {
+                            event = "Pipou-Immo:toggleLight",
+                        }
+                    },
+                    {
+                        header = "Clefs de la maison",
+                        txt = "Gérer les clefs de la maison",
+                        params = {
+                            event = "Pipou-Immo:openKeyMenu"
+                        }
+                    },
+                    {
+                        header = "Décorer la maison",
+                        txt = "Accéder au menu de décoration",
+                        params = {
+                            event = "Pipou-Immo:openDecorationMenu"
+                        }
+                    },
+                    {
+                        header = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous",
+                        txt = isPublic and "Révoquer l’accès libre" or "Permettre l’entrée à tout le monde",
+                        params = {
+                            event = "PipouImmo:togglePublicAccess"
+                        }
+                    },
+                    {
+                        header = "Fermer le menu",
+                        txt = "Retourner au jeu",
+                        params = {
+                            event = "qb-menu:closeMenu"
+                        }
                     }
                 }
-            }
-
-            exports['qb-menu']:openMenu(menuData)
+        
+                exports['qb-menu']:openMenu(menuData)
+            end, propertyName)
         end
+        
     end
 end)
 
@@ -590,44 +607,56 @@ RegisterNetEvent("Pipou-Immo:reopenMainMenu", function()
 end)
 
 RegisterNetEvent("Pipou-Immo:openMainMenu", function()
-    -- Remets ici le même contenu que dans le menu principal
-    local menuData = {
-        {
-            header = "Gestion immobilière",
-            isMenuHeader = true,
-        },
-        {
-            header = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
-            txt = "Contrôle de la luminosité",
-            params = {
-                event = "Pipou-Immo:toggleLight"
-            }
-        },
-        {
-            header = "Clefs de la maison",
-            txt = "Gérer les clefs de la maison",
-            params = {
-                event = "Pipou-Immo:openKeyMenu"
-            }
-        },
-        {
-            header = "Décorer la maison",
-            txt = "Accéder au menu de décoration",
-            params = {
-                event = "Pipou-Immo:decorateMenu"
-            }
-        },
-        {
-            header = "Fermer le menu",
-            txt = "Retourner au jeu",
-            params = {
-                event = "qb-menu:closeMenu"
+    local propertyName = getCurrentPlayerProperty()
+    if not propertyName then return end
+
+    QBCore.Functions.TriggerCallback("PipouImmo:server:isPropertyPublic", function(isPublic)
+        local menuData = {
+            {
+                header = "Gestion immobilière",
+                isMenuHeader = true,
+            },
+            {
+                header = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
+                txt = "Contrôle de la luminosité",
+                params = {
+                    event = "Pipou-Immo:toggleLight"
+                }
+            },
+            {
+                header = "Clefs de la maison",
+                txt = "Gérer les clefs de la maison",
+                params = {
+                    event = "Pipou-Immo:openKeyMenu"
+                }
+            },
+            {
+                header = "Décorer la maison",
+                txt = "Accéder au menu de décoration",
+                params = {
+                    event = "Pipou-Immo:decorateMenu"
+                }
+            },
+            {
+                header = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous",
+                txt = isPublic and "Révoquer l’accès libre" or "Permettre l’entrée à tout le monde",
+                params = {
+                    event = "PipouImmo:togglePublicAccess"
+                }
+            },
+            {
+                header = "Fermer le menu",
+                txt = "Retourner au jeu",
+                params = {
+                    event = "qb-menu:closeMenu"
+                }
             }
         }
-    }
 
-    exports['qb-menu']:openMenu(menuData)
+        exports['qb-menu']:openMenu(menuData)
+    end, propertyName)
 end)
+
 
 
 RegisterNetEvent("Pipou-Immo:giveKey", function()
@@ -1439,3 +1468,37 @@ RegisterNetEvent("PipouImmo:client:loadFurnitureForAll", function(propertyName, 
         })
     end
 end)
+
+RegisterNUICallback("PipouImmo:buyFurniture", function(data, cb)
+    local object = data.furnitureName
+    local label = data.label or object
+    local price = tonumber(data.price)
+
+    QBCore.Functions.TriggerCallback("PipouImmo:server:buyFurniture", function(success, message)
+        if success then
+            QBCore.Functions.Notify(message or "✅ Meuble acheté !", "success")
+            cb({ success = true })
+        else
+            QBCore.Functions.Notify(message or "❌ Achat échoué.", "error")
+            cb({ success = false, message = message })
+        end
+    end, object, price)
+end)
+
+
+RegisterNUICallback("notify", function(data, cb)
+    QBCore.Functions.Notify(data.message or "Notification", data.type or "primary")
+    cb("ok")
+end)
+
+RegisterNetEvent("PipouImmo:togglePublicAccess", function()
+    local propertyName = getCurrentPlayerProperty()
+    if propertyName then
+        TriggerServerEvent("PipouImmo:server:togglePublicAccess", propertyName)
+
+        -- 🔁 Rafraîchir le menu après petit délai
+        Wait(500)
+        TriggerEvent("Pipou-Immo:openMainMenu")
+    end
+end)
+

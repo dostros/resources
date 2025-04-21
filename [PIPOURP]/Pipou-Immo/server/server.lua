@@ -2,6 +2,14 @@ local QBCore = exports['qb-core']:GetCoreObject()
 
 -- 📥 Sauvegarde d'une propriété
 QBCore.Functions.CreateCallback('PipouImmo:server:saveProperty', function(source, cb, propertyName, propertyType, level, Housecoords, Garagecoords, GarageOut)
+    -- 🚫 Validation des champs obligatoires
+    if not propertyName or propertyName == "" or not propertyType or propertyType == "" or not level or not Housecoords or not Housecoords.x or not Housecoords.y or not Housecoords.z then
+        print("[IMMO] ❌ Données de propriété invalides reçues depuis client (manque des champs)")
+        cb(false)
+        return
+    end
+
+    -- ✅ Insertion si toutes les conditions sont valides
     MySQL.Async.execute('INSERT INTO properties (name, type, level, x, y, z, garage_x, garage_y, garage_z, out_x, out_y, out_z) VALUES (@name, @type, @level, @x, @y, @z, @gx, @gy, @gz, @ox, @oy, @oz)', {
         ['@name'] = propertyName,
         ['@type'] = propertyType,
@@ -25,6 +33,7 @@ QBCore.Functions.CreateCallback('PipouImmo:server:saveProperty', function(source
         end
     end)
 end)
+
 
 -- 🎁 Attribution d'une propriété à un joueur
 QBCore.Functions.CreateCallback('PipouImmo:server:assignProperty', function(source, cb, targetId, propertyName)
@@ -78,9 +87,20 @@ QBCore.Functions.CreateCallback('PipouImmo:server:checkPropertyAccess', function
             cb(false)
             return
         end
-
+    
         local property = propertyResult[1]
-
+    
+        -- 🆕 SI propriété en accès public
+        if property.public_access == 1 then
+            cb(true, {
+                x = property.x,
+                y = property.y,
+                z = property.z
+            }, property.level, "public")
+            return
+        end
+    
+        -- Sinon, vérifie s’il a un accès attribué
         MySQL.Async.fetchAll('SELECT * FROM property_owners WHERE property_id = @propertyId AND citizenid = @citizenid', {
             ['@propertyId'] = property.id,
             ['@citizenid'] = citizenid
@@ -97,11 +117,12 @@ QBCore.Functions.CreateCallback('PipouImmo:server:checkPropertyAccess', function
             end
         end)
     end)
+    
 end)
 
 
 QBCore.Functions.CreateCallback('PipouImmo:server:getAllProperties', function(source, cb)
-    MySQL.Async.fetchAll('SELECT name, type, x, y, z, garage_x, garage_y, garage_z, out_x, out_y, out_z, level FROM properties', {}, function(result)
+    MySQL.Async.fetchAll('SELECT name, type, x, y, z, garage_x, garage_y, garage_z, out_x, out_y, out_z, level, public_access FROM properties', {}, function(result)
         local formatted = {}
 
         for _, row in ipairs(result) do
@@ -336,7 +357,9 @@ end)
 
 RegisterNetEvent("PipouImmo:server:assignPropertyToPlayerId")
 AddEventHandler("PipouImmo:server:assignPropertyToPlayerId", function(propertyId, targetId)
+    local src = source -- ✅ FIX ici
     local targetPlayer = QBCore.Functions.GetPlayer(tonumber(targetId))
+
     if targetPlayer then
         local citizenid = targetPlayer.PlayerData.citizenid
 
@@ -353,15 +376,15 @@ AddEventHandler("PipouImmo:server:assignPropertyToPlayerId", function(propertyId
                     TriggerClientEvent('QBCore:Notify', src, "✅ Propriété assignée.", "success")
                     TriggerClientEvent('PipouImmo:client:addHouseEntryPoint', targetId, propertyId)
                 else
-                    TriggerClientEvent('QBCore:Notify', source, "❌ Attribution échouée", "error")
+                    TriggerClientEvent('QBCore:Notify', src, "❌ Attribution échouée", "error")
                 end
             end)
         end)
-
     else
         TriggerClientEvent('QBCore:Notify', source, "❌ Joueur introuvable.", "error")
     end
 end)
+
 
 QBCore.Functions.CreateCallback('PipouImmo:getPlayerFurnitureInventory', function(source, cb)
     local Player = QBCore.Functions.GetPlayer(source)
@@ -544,3 +567,67 @@ AddEventHandler("PipouImmo:server:broadcastFurniture", function(propertyName)
         TriggerClientEvent("PipouImmo:client:loadFurnitureForAll", -1, propertyName, results)
     end)
 end)
+
+QBCore.Functions.CreateCallback("PipouImmo:server:buyFurniture", function(source, cb, furnitureName, price)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player then return cb(false, "Joueur introuvable") end
+
+    if Player.Functions.RemoveMoney("bank", price) then
+        -- Ajoute le meuble dans l'inventaire de déco du joueur (ta DB ou table en mémoire)
+        MySQL.Async.execute("INSERT INTO player_furnitures (citizenid, object_model, label, quantity) VALUES (@citizenid, @object, @label, 1) ON DUPLICATE KEY UPDATE quantity = quantity + 1", {
+            ['@citizenid'] = Player.PlayerData.citizenid,
+            ['@object'] = furnitureName,
+            ['@label'] = furnitureName -- tu peux mettre un label si tu veux
+        })
+        cb(true, "✅ Meuble acheté !")
+    else
+        cb(false, "❌ Pas assez d'argent")
+    end
+end)
+
+RegisterNetEvent("PipouImmo:server:togglePublicAccess", function(propertyName)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return end
+
+    print("[TOGGLE PUBLIC] Reçu pour "..propertyName.." par "..Player.PlayerData.citizenid)
+
+    local citizenid = Player.PlayerData.citizenid
+
+    MySQL.Async.fetchAll([[
+        SELECT p.id, CAST(p.public_access AS UNSIGNED) as public_access
+        FROM properties p
+        JOIN property_owners o ON o.property_id = p.id
+        WHERE p.name = @name AND o.citizenid = @citizenid AND o.access_type = 'owner'
+    ]], {
+        ['@name'] = propertyName,
+        ['@citizenid'] = citizenid
+    }, function(result)
+        if result and result[1] then
+            local current = tonumber(result[1].public_access or 0)
+            local newState = current == 0 and 1 or 0 -- on inverse
+
+            MySQL.Async.execute("UPDATE properties SET public_access = @state WHERE id = @id", {
+                ['@state'] = newState,
+                ['@id'] = result[1].id
+            }, function(rows)
+                print("[IMMO] Mise à jour état public_access →", newState, " (rows affected: ", rows, ")")
+                TriggerClientEvent("QBCore:Notify", src, newState == 1 and "✅ La maison est maintenant ouverte à tous." or "🚪 Accès libre désactivé.", "primary")
+            end)
+        else
+            TriggerClientEvent("QBCore:Notify", src, "❌ Vous n'êtes pas propriétaire de cette maison", "error")
+        end
+    end)
+end)
+
+
+QBCore.Functions.CreateCallback("PipouImmo:server:isPropertyPublic", function(source, cb, propertyName)
+    MySQL.Async.fetchScalar("SELECT public_access FROM properties WHERE name = ?", {
+        propertyName
+    }, function(result)
+        print("[CHECK PUBLIC] "..propertyName.." → "..tostring(result))
+        cb(result == 1 or result == true)
+    end)
+end)
+
+
