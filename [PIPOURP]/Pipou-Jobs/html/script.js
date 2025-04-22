@@ -38,11 +38,13 @@ function display(show, joblabel, jobid, isgang) {
             document.getElementById("footer-role-text").textContent = "Connecté en tant que Boss de gang :";
             document.getElementById('banquebutton').style.display="none"
             document.getElementById('annoncesbutton').style.display="none"
+            document.getElementById('PipouJobMenu').style.border = "#218838 3px solid"
         
         } else {
             document.getElementById("footer-role-text").textContent = "Connecté en tant que Patron :";
             document.getElementById('banquebutton').style.display="block"
             document.getElementById('annoncesbutton').style.display="block"
+            document.getElementById('PipouJobMenu').style.border = "3px solid #c03939"
         }
         
         document.getElementById("footer-job-name").textContent = joblabel;
@@ -135,11 +137,21 @@ function updateGrade(isgang) {
 
             data.grades.forEach(grade => {
                 const row = document.createElement('tr');
-                row.innerHTML = `
+
+                if (isgang) {
+                    row.innerHTML = `
                     <td>${grade.name}</td>
-                    <td>${grade.payment} $</td>
+                    <td> Non concerné</td>
                     <td><button><i class="fas fa-pen"></i> Modifier</button></td>
                 `;
+                }
+                else {
+                    row.innerHTML = `
+                        <td>${grade.name}</td>
+                        <td>${grade.payment} $</td>
+                        <td><button><i class="fas fa-pen"></i> Modifier</button></td>
+                    `;
+                } 
                 row.querySelector('button').addEventListener('click', () => {
                     showEditGradeModal(grade);
                 });

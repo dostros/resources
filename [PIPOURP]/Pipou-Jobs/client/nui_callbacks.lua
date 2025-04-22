@@ -95,19 +95,22 @@ RegisterNUICallback('getGradeInfo', function(data, cb)
             cb({
                 type = 'ui:gradeinfo',
                 grades = grades,
+                isgang = isgang,
             })
         else
             print("Aucun grade trouvé pour ce job.")
             cb({
                 type = 'ui:gradeinfo',
-                grades = {} -- Si aucun grade n'est trouvé, renvoyer une liste vide
+                grades = {}, -- Si aucun grade n'est trouvé, renvoyer une liste vide
+                isgang = isgang,
             })
         end
     else
         print("Job introuvable: " .. tostring(playerjob))
         cb({
             type = 'ui:gradeinfo',
-            grades = {} -- Si le job n'est pas trouvé, renvoyer une liste vide
+            grades = {}, -- Si le job n'est pas trouvé, renvoyer une liste vide
+            isgang = isgang
         })
     end
 end)
