@@ -6,6 +6,7 @@ end)
 
 RegisterNUICallback('getJobInfo', function(data, cb)
     local playerjob = data.JobId
+    local isgang = data.isgang
     
 
     QBCore.Functions.TriggerCallback('Pipou-Jobs:server:getJobInfo', function(result)
@@ -28,7 +29,7 @@ RegisterNUICallback('getJobInfo', function(data, cb)
         else
             print("Aucun résultat ou erreur de réception.")
         end
-    end, playerjob)
+    end, playerjob, isgang)
 end)
 
 
@@ -51,17 +52,26 @@ end)
 
 RegisterNUICallback('getGradeInfo', function(data, cb)
     local playerjob = data.JobId
+    local isgang = data.isgang
 
-    -- Accéder correctement aux informations du job
-    local job = QBCore.Shared.Jobs[tostring(playerjob)]
+    print(isgang)
+    local organisation =''
 
-    if job then
+    if isgang then
+        organisation = QBCore.Shared.Gangs[tostring(playerjob)]
+    else
+        organisation = QBCore.Shared.Jobs[tostring(playerjob)]
+    end
+
+    
+
+    if organisation then
         -- Vérifier que 'grades' existe avant de commencer la boucle
-        if job.grades then
+        if organisation.grades then
             local grades = {}
             
             -- Itérer sur les grades d'un job
-            for grade, info in pairs(job.grades) do
+            for grade, info in pairs(organisation.grades) do
                 -- Vérifier si 'name' et 'payment' existent avant de les utiliser
                 local gradeName = info.name or "Nom non défini"  -- Si 'name' est nil, on utilise "Nom non défini"
                 

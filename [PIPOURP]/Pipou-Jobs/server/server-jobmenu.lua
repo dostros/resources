@@ -1,24 +1,41 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-QBCore.Functions.CreateCallback('Pipou-Jobs:server:getJobInfo', function(source, cb, job)
+QBCore.Functions.CreateCallback('Pipou-Jobs:server:getJobInfo', function(source, cb, job, isgang)
     local employees = {} 
 
-    MySQL.query('SELECT charinfo, job FROM players WHERE JSON_EXTRACT(job, "$.name") = ?', {job}, function(results)
-        for _, row in pairs(results) do
-            local charinfo = json.decode(row.charinfo)
-            local jobData = json.decode(row.job)
+    if not isgang then 
 
-            table.insert(employees, {
-                name = ("%s %s"):format(charinfo.firstname, charinfo.lastname),
-                grade = jobData.grade,
-                grade_name = jobData.grade.name or "inconnu"
-            })
-        end
+        MySQL.query('SELECT charinfo, job FROM players WHERE JSON_EXTRACT(job, "$.name") = ?', {job}, function(results)
+            for _, row in pairs(results) do
+                local charinfo = json.decode(row.charinfo)
+                local jobData = json.decode(row.job)
 
-        cb(employees)
+                table.insert(employees, {
+                    name = ("%s %s"):format(charinfo.firstname, charinfo.lastname),
+                    grade = jobData.grade,
+                    grade_name = jobData.grade.name or "inconnu"
+                })
+            end
 
-    end)
+            cb(employees)
 
+        end)
+    else 
+        MySQL.query('SELECT charinfo, gang FROM players WHERE JSON_EXTRACT(gang, "$.name") = ?', {job}, function(results)
+            for _, row in pairs(results) do
+                local charinfo = json.decode(row.charinfo)
+                local gangData = json.decode(row.gang)
+
+                table.insert(employees, {
+                    name = ("%s %s"):format(charinfo.firstname, charinfo.lastname),
+                    grade = gangData.grade,
+                    grade_name = gangData.grade.name or "inconnu"
+                })
+            end
+
+            cb(employees)
+        end)
+    end
 end)
 
 QBCore.Functions.CreateCallback('Pipou-Jobs:server:getBanqueInfo', function(source, cb, job)

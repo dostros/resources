@@ -170,3 +170,18 @@ RegisterNetEvent("Pipou-Immo:exitPreview", function(data)
     DoScreenFadeIn(500)
     QBCore.Functions.Notify("🔙 Retour à l'agence", "primary")
 end)
+
+
+
+
+
+RegisterCommand("catalogue", function()
+    exports['Pipou-UI']:OpenMenu({
+        title = "📘 Catalogue Agence",
+        options = {
+            { label = "Réparer", event = "garage:repair" },
+            { label = "Ranger", event = "garage:store" },
+            { label = "Fermer", event = "pipou-ui:closeMenu" }
+        }
+    })
+end)

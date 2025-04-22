@@ -1,0 +1,46 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: 'Exo 2', sans-serif;
+}
+  
+#menu-container {
+    position: absolute;
+    top: 30%;
+    left: 40%;
+    width: 300px;
+    background-color: rgba(30, 30, 30, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    display: none;
+}
+
+#menu-title {
+    color: white;
+    font-size: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.menu-item {
+    padding: 10px;
+    background-color: rgba(70, 70, 70, 0.7);
+    margin: 5px 0;
+    color: white;
+    border-radius: 5px;
+    transition: background 0.2s;
+}
+
+.menu-item:hover, .menu-item.active {
+    background-color: rgba(244, 67, 54, 0.85);
+}
+  
+#container {
+    display: none;
+    pointer-events: none;
+}
+#container.active {
+    display: block;
+    pointer-events: auto;
+}

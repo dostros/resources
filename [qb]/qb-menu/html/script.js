@@ -4,7 +4,7 @@ let images = [];
 const openMenu = (data = null) => {
     let html = "";
     data.forEach((item, index) => {
-        if(!item.hidden) {
+        if (!item.hidden) {
             let header = item.header;
             let message = item.txt || item.text;
             let isMenuHeader = item.isMenuHeader;
@@ -16,15 +16,19 @@ const openMenu = (data = null) => {
         }
     });
 
+    const container = document.getElementById('container');
+    container.classList.add('active'); // ✅ rend visible
+
     $("#buttons").html(html);
 
-    $('.button').click(function() {
-        const target = $(this)
+    $('.button').click(function () {
+        const target = $(this);
         if (!target.hasClass('title') && !target.hasClass('disabled')) {
             postData(target.attr('id'));
         }
     });
 };
+
 
 const getButtonRender = (header, message = null, id, isMenuHeader, isDisabled, icon) => {
     return `
@@ -40,9 +44,11 @@ const getButtonRender = (header, message = null, id, isMenuHeader, isDisabled, i
 
 const closeMenu = () => {
     $("#buttons").html(" ");
-    $('#imageHover').css('display' , 'none');
+    $('#imageHover').css('display', 'none');
     buttonParams = [];
     images = [];
+
+    document.getElementById('container').classList.remove('active'); // ❌ rend invisible
 };
 
 const postData = (id) => {

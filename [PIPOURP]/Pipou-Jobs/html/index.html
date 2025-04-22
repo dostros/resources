@@ -14,10 +14,10 @@
 
         <div class="choice-tab-content">
             <ul>
-                <li><button data-target="annonces" class="tab-button"><i class="fas fa-bullhorn"></i> Annonces</button></li>
+                <li><button id="annoncesbutton" data-target="annonces" class="tab-button"><i class="fas fa-bullhorn"></i> Annonces</button></li>
                 <li><button data-target="employes" class="tab-button active"><i class="fas fa-users"></i> Employés</button></li>
                 <li><button data-target="grade" class="tab-button"><i class="fas fa-layer-group"></i> Grade</button></li>
-                <li><button data-target="banque" class="tab-button"><i class="fas fa-piggy-bank"></i> Banque</button></li>
+                <li><button id="banquebutton"data-target="banque" class="tab-button"><i class="fas fa-piggy-bank"></i> Banque</button></li>
             </ul>
         </div>
 
@@ -59,7 +59,11 @@
             </div>
         </div>
 
-        <div class="footer-bar">Connecté en tant que Patron : <span id="footer-job-name"></span></div>
+        <div id="footertypeoforganisationname" class="footer-bar">
+            <span id="footer-role-text">Connecté en tant que Patron :</span>
+            <span id="footer-job-name"></span>
+        </div>
+
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

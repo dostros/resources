@@ -29,3 +29,14 @@ Config.BossMenu = {
         blipColor = 28,
     }
 }
+
+Config.GangMenu = {
+    lostmc = {
+        label = 'The Lost MC',
+        bossmenu = vector3(123.4, 567.8, 90.1) 
+    },
+    ballas = {
+        label = 'Ballas',
+        bossmenu = vector3(118.67, -1951.05, 20.75)
+    },
+}

@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (target === "employes") updateEmployees();
             if (target === "banque") updateBanque();
-            if (target === "grade") updateGrade();
+            if (target === "grade") updateGrade(currentisgang);
         });
     });
 
@@ -25,16 +25,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
 let currentJobLabel = null;
 let currentJobId = null;
+let currentisgang = null
 
-function display(show, joblabel, jobid) {
+function display(show, joblabel, jobid, isgang) {
     document.body.style.display = show ? 'flex' : 'none';
+    currentisgang = isgang
     if (show) {
         currentJobLabel = joblabel;
         currentJobId = jobid;
         document.getElementById("header-job").textContent = joblabel;
+        if (isgang) {
+            document.getElementById("footer-role-text").textContent = "Connecté en tant que Boss de gang :";
+            document.getElementById('banquebutton').style.display="none"
+            document.getElementById('annoncesbutton').style.display="none"
+        
+        } else {
+            document.getElementById("footer-role-text").textContent = "Connecté en tant que Patron :";
+            document.getElementById('banquebutton').style.display="block"
+            document.getElementById('annoncesbutton').style.display="block"
+        }
+        
         document.getElementById("footer-job-name").textContent = joblabel;
-        updateEmployees();
+        updateEmployees(isgang);
     }
+
+
 }
 
 display(false);
@@ -48,7 +63,7 @@ window.addEventListener('message', (event) => {
 
     switch (item.type) {
         case 'ui':
-            display(item.status, item.joblabel, item.jobid);
+            display(item.status, item.joblabel, item.jobid, item.isgang);
             break;
         case 'ui:jobinfo':
             renderEmployees(item.listemployee);
@@ -76,9 +91,9 @@ function postData(endpoint, data = {}) {
 }
 
 // ========== EMPLOYES ==========
-function updateEmployees() {
+function updateEmployees(isgang) {
     if (!currentJobId) return;
-    postData('getJobInfo', { JobId: currentJobId });
+    postData('getJobInfo', { JobId: currentJobId, isgang : isgang });
 }
 
 function renderEmployees(employeeList) {
@@ -110,8 +125,9 @@ function updateBanque() {
 }
 
 // ========== GRADES ==========
-function updateGrade() {
-    postData('getGradeInfo', { JobId: currentJobId })
+function updateGrade(isgang) {
+    console.log(isgang)
+    postData('getGradeInfo', { JobId: currentJobId, isgang: isgang })
         .then(res => res.json())
         .then(data => {
             const tbody = document.querySelector('#grade table tbody');

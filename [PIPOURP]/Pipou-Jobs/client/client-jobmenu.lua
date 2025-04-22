@@ -3,7 +3,10 @@ local QBCore = exports['qb-core']:GetCoreObject()
 -- OUVERTURE/FERMETURE DU MENU GARAGE
 display = false
 
-function SetDisplay(bool, joblabel, jobid)
+function SetDisplay(bool, joblabel, jobid,isgang)
+    if isgang == nil then
+        isgang=false
+    end
     display= bool
     SetNuiFocus(bool, bool)
     SendNUIMessage({
@@ -11,6 +14,7 @@ function SetDisplay(bool, joblabel, jobid)
         status = bool,
         joblabel = joblabel,
         jobid = jobid,
+        isgang = isgang
     })
 
 end

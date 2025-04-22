@@ -19,7 +19,7 @@ end)
 Citizen.CreateThread(function()
     while true do
         DisplayRadar(true)
-        Wait(000)
+        Wait(00)
     end   
 end)
 
@@ -205,7 +205,7 @@ function LoadGarages()
                 EndTextCommandSetBlipName(blip)
             end
 
-        if garagetype == "private" then
+        elseif garagetype == "private" then
             if isOwner then
                 local blip = AddBlipForCoord(garagespawnpoint[1])
                 SetBlipSprite(blip, 357)
@@ -403,8 +403,9 @@ function DGarageGetIn(garagelabel, category, garagejob, garagetype)
 
     local plate = GetVehicleNumberPlateText(closestVehicle)
     local hash = GetEntityModel(closestVehicle)
-    local model = GetLabelText(GetDisplayNameFromVehicleModel(GetEntityModel(closestVehicle)))
-
+    local model = GetDisplayNameFromVehicleModel(GetEntityModel(closestVehicle))
+    local label = GetLabelText(model) 
+    
     local mods = json.encode(QBCore.Functions.GetVehicleProperties(closestVehicle))
     local garage = garagelabel
 
@@ -731,7 +732,7 @@ end, false)
 
 
 
--- Dans d-garage/server.lua (ou shared, selon l’archi)
+
 function AddPrivateGarage(name, label, spawnPoint, getInPoint, property)
     if Config.Garages[name] then
         print("^3[Garage] Le garage privé '" .. name .. "' existe déjà. Ignoré.^0")
@@ -749,7 +750,6 @@ function AddPrivateGarage(name, label, spawnPoint, getInPoint, property)
 
     print("^2[Garage] Garage privé ajouté : " .. name .. "^0")
 end
-
 exports('AddPrivateGarage', AddPrivateGarage)
 
 

@@ -4,6 +4,8 @@ let GarageDoorCoords = ''
 let GarageOutCoords = ''
 let pendingDeleteId = null;
 let allProperties = [];
+let currentFurnitureList = [];
+let currentSellFurnitureList = [];
 
 
 // FUNCTION
@@ -67,51 +69,38 @@ document.addEventListener("DOMContentLoaded", function () {
         if (item.type === 'notify') {
         }
         if (event.data.type === 'showFurnitureMenu') {
-            document.body.style.display = 'flex'; // ✅ garde le body actif
-            hideAllMenus(); // ✅ ferme tout proprement avant d’ouvrir le bon menu
-
+            document.body.style.display = 'flex'; // Affiche le body
+            hideAllMenus(); // Ferme tous les autres menus
+        
             const menuimmo = document.getElementById("menu");
             if (menuimmo) menuimmo.style.display = "none";
-
+        
             const menu = document.getElementById("furnitureMenu");
             const container = document.getElementById("furnitureList");
-
+        
             if (!menu || !container) {
                 console.error("[Pipou-Immo] furnitureMenu ou furnitureList introuvable !");
                 return;
             }
-
-            container.innerHTML = ""; // Nettoie les anciens meubles
-
+        
+            container.innerHTML = ""; // Vide les meubles précédents
+        
             if (event.data.furnitureList.length === 0) {
                 container.innerHTML = "<p>Aucun meuble disponible.</p>";
                 return;
             }
-
-            menu.classList.add("visible"); // Affiche le menu
-            menu.style.display = "block"; // 🔓 force l'affichage visuellement
-
-            // Remplit le menu avec les meubles disponibles
-            event.data.furnitureList.forEach((item) => {
-                const div = document.createElement("div");
-                div.className = "furniture-item";
-                div.innerHTML = `
-                    <strong>${item.label}</strong>
-                    <small>${item.object}</small>
-                    <span class="quantity">Quantité : ${item.quantity}</span>
-                    <button onclick="placeFurniture('${item.object}', '${item.label}', ${item.quantity})">Placer</button>
-                `;
-
-                container.appendChild(div);
-            });
-            if (event.data.furnitureList.length === 0) {
-                container.innerHTML = "<p style='text-align:center;color:white;'>Aucun meuble disponible.</p>";
-            }
+        
+            menu.classList.add("visible"); // Ajoute la classe visible
+            menu.style.display = "block";  // Affiche le menu
+        
+            // ✅ C’est ici que tu peux capturer la liste pour la recherche
+            currentFurnitureList = event.data.furnitureList; // <-- À ajouter si tu veux la recherche
+            renderFurnitureList(currentFurnitureList);       // <-- À ajouter aussi (fonction de rendu personnalisée)
         }
+        
         if (event.data.type === 'showFurnitureSellMenu') {
-            document.body.style.display = 'flex'; // ✅ garde le body actif
-            hideAllMenus(); // ✅ ferme tout proprement avant d’ouvrir le bon menu
-
+            document.body.style.display = 'flex'; // Affiche le body
+            hideAllMenus(); // Ferme les autres menus
         
             const menuimmo = document.getElementById("menu");
             if (menuimmo) menuimmo.style.display = "none";
@@ -120,24 +109,26 @@ document.addEventListener("DOMContentLoaded", function () {
             const container = document.getElementById("furnitureSellList");
         
             if (!menu || !container) {
-                console.error("[Pipou-Immo] furnitureMenu ou furnitureList introuvable !");
+                console.error("[Pipou-Immo] furnitureSellMenu ou furnitureSellList introuvable !");
                 return;
             }
         
-            container.innerHTML = "";
+            container.innerHTML = ""; // Vide la liste actuelle
         
             menu.classList.add("visible");
             menu.style.display = "block";
         
+            // 📦 Gestion des catégories + affichage initial
             if (event.data.furnitureCategories) {
-                populateFurnitureCategories(event.data.furnitureCategories);
+                populateFurnitureCategories(event.data.furnitureCategories); // Affiche les catégories
         
-                // Charge automatiquement tous les meubles par défaut
+                // Charge tous les meubles dès l'ouverture
                 loadAllFurniture(event.data.furnitureCategories);
             } else {
                 container.innerHTML = "<p style='text-align:center;color:white;'>Aucun meuble disponible.</p>";
             }
         }
+        
         
         
     });
@@ -470,17 +461,21 @@ document.addEventListener("DOMContentLoaded", function () {
     function loadAllFurniture(furnitureData) {
         const list = document.getElementById('furnitureSellList');
         list.innerHTML = '';
+    
         fetch(`https://${GetParentResourceName()}/clearPreview`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({})
         });
-        
+    
+        // Préparation de la liste complète pour la recherche
+        const allItems = [];
     
         Object.keys(furnitureData).forEach((catKey) => {
             furnitureData[catKey].items.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'furniture-sell-item';
+                div.setAttribute('data-category', catKey); // utile pour filtrer par catégorie
                 div.innerHTML = `
                     <strong>${item.label}</strong>
                     <small>Objet: ${item.object}</small>
@@ -489,9 +484,23 @@ document.addEventListener("DOMContentLoaded", function () {
                     <button onclick="buyFurniture('${item.object}', ${item.price})">Acheter</button>
                 `;
                 list.appendChild(div);
+    
+                // Stocker dans une liste globale pour la recherche
+                allItems.push({
+                    label: item.label,
+                    object: item.object,
+                    quantity: item.quantity || 1,
+                    price: item.price,
+                    category: catKey
+                });
             });
         });
+    
+        // ⬅️ Très important : met à jour la liste utilisée par le champ de recherche
+        currentSellFurnitureList = allItems;
+        renderSellFurnitureList(allItems);
     }
+    
     
     function hideAllMenus() {
         const allMenuIds = [
@@ -520,8 +529,67 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     
+
+    function renderFurnitureList(list) {
+        const container = document.getElementById("furnitureList");
+        container.innerHTML = "";
+    
+        if (list.length === 0) {
+            container.innerHTML = "<p>Aucun meuble disponible.</p>";
+            return;
+        }
+    
+        list.forEach((item) => {
+            const div = document.createElement("div");
+            div.className = "furniture-item";
+            div.innerHTML = `
+                <strong>${item.label}</strong>
+                <small>${item.object}</small>
+                <span class="quantity">Quantité : ${item.quantity}</span>
+                <button onclick="placeFurniture('${item.object}', '${item.label}', ${item.quantity})">Placer</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    document.getElementById('furnitureSearch').addEventListener('input', () => {
+        const query = document.getElementById('furnitureSearch').value.toLowerCase();
+        const filtered = currentFurnitureList.filter(item =>
+            item.label.toLowerCase().includes(query)
+        );
+        renderFurnitureList(filtered);
+    });
+    
+    function renderSellFurnitureList(list) {
+        const container = document.getElementById("furnitureSellList");
+        container.innerHTML = "";
+    
+        if (list.length === 0) {
+            container.innerHTML = "<p>Aucun meuble disponible.</p>";
+            return;
+        }
+    
+        list.forEach((item) => {
+            const div = document.createElement("div");
+            div.className = "furniture-item";
+            div.innerHTML = `
+                <strong>${item.label}</strong>
+                <small>${item.object}</small>
+                <span class="quantity">Quantité : ${item.quantity}</span>
+                <button onclick="sellFurniture('${item.object}', '${item.label}', ${item.quantity})">Vendre</button>
+            `;
+            container.appendChild(div);
+        });
+    }
     
     
+    document.getElementById('furnitureSellSearch').addEventListener('input', () => {
+        const query = document.getElementById('furnitureSellSearch').value.toLowerCase();
+        const filtered = currentSellFurnitureList.filter(item =>
+            item.label.toLowerCase().includes(query)
+        );
+        renderSellFurnitureList(filtered);
+    });
     
       
     
