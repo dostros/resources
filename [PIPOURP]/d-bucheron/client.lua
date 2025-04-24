@@ -882,3 +882,40 @@ end
 RegisterCommand("plank", function()
     TriggerServerEvent("qb-timber:server:storePlank")
 end, false)
+
+
+-- local mainMenu = nil
+-- local settingsMenu = nil
+-- local checkboxState = false
+-- local volumeValue = 5
+
+-- RegisterCommand("menutest", function()
+--     local menuId = exports['PipouUI']:CreateMenu("Menu Principal", "Bienvenue dans le menu test")
+
+--     exports['PipouUI']:AddButton(menuId, "Dire Bonjour", function()
+--         print("Bonjour ! 👋")
+--     end)
+
+--     exports['PipouUI']:AddOption(menuId, "checkbox", "Activer mode", {checked = false}, function()
+--         print("Mode activé/désactivé ✅")
+--     end)
+
+--     exports['PipouUI']:AddOption(menuId, "slider", "Volume", {value = 3, min = 0, max = 10, step = 1}, function()
+--         print("Volume modifié 🔊")
+--     end)
+
+--     exports['PipouUI']:OpenMenu(menuId)
+-- end)
+
+-- -- Sous-menu de paramètres
+-- CreateThread(function()
+--     settingsMenu = exports['PipouUI']:CreateMenu("Paramètres", "Réglages secondaires")
+
+--     exports['PipouUI']:AddOption(settingsMenu, "slider", "Luminosité", {value = 5, min = 1, max = 10, step = 1}, function()
+--         print("☀️ Luminosité modifiée")
+--     end)
+
+--     exports['PipouUI']:AddButton(settingsMenu, "Retour ⬅️", function()
+--         exports['PipouUI']:OpenMenu(mainMenu)
+--     end)
+-- end)

@@ -1,6 +1,6 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-QBCore.Functions.CreateCallback('Pipou-Jobs:server:getJobInfo', function(source, cb, job, isgang)
+QBCore.Functions.CreateCallback('Pipou-Core:server:getJobInfo', function(source, cb, job, isgang)
     local employees = {} 
 
     if not isgang then 
@@ -38,7 +38,7 @@ QBCore.Functions.CreateCallback('Pipou-Jobs:server:getJobInfo', function(source,
     end
 end)
 
-QBCore.Functions.CreateCallback('Pipou-Jobs:server:getBanqueInfo', function(source, cb, job)
+QBCore.Functions.CreateCallback('Pipou-Core:server:getBanqueInfo', function(source, cb, job)
     local bankaccount = 0; 
 
     MySQL.query('SELECT account_balance FROM bank_accounts WHERE account_name = ? AND account_type = ?', {job, "job"
@@ -60,7 +60,7 @@ end)
 
 
 
-QBCore.Functions.CreateCallback('Pipou-Jobs:server:Fireplayer', function(source, cb, firstName, lastName, jobname)
+QBCore.Functions.CreateCallback('Pipou-Core:server:Fireplayer', function(source, cb, firstName, lastName, jobname)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
 

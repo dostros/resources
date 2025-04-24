@@ -33,6 +33,25 @@ QBCore.Functions.CreateCallback('server-d-get-owner', function(source, data, pla
 
 end)
 
+
+QBCore.Functions.CreateCallback('server-d-getjobowner', function(source, data, plate)
+
+    MySQL.query('SELECT `job` FROM `player_vehicles` WHERE `plate` = @plate', {
+    ['@plate'] = plate
+    }, function(response)
+
+        if  response[1] == nil then
+            print("pas de véhicule trouvé")
+            data (false)
+        else 
+            data (response[1].job)
+        end
+    end)
+
+end)
+
+
+
 RegisterServerEvent('d-garage:server:getinvehicle')
 AddEventHandler('d-garage:server:getinvehicle', function(plate, model, garage, mods, garagejob)
     local Player = QBCore.Functions.GetPlayer(source)
@@ -95,6 +114,19 @@ QBCore.Functions.CreateCallback('server-d-get-listothervehicle', function(source
 
     MySQL.query('SELECT `model`, `plate`, `garage` FROM `player_vehicles` WHERE `citizenid` = @citizenid AND `garage` != @excludedGarage AND `garage` != "outside"', {
         ['@citizenid'] = Player.PlayerData.citizenid,
+        ['@excludedGarage'] = namegarage
+    }, function(response)
+        data(response)
+    end)
+
+end)
+
+QBCore.Functions.CreateCallback('server-getlistothervehiclejob', function(source, data, namegarage,garagejob)
+
+    local Player = QBCore.Functions.GetPlayer(source)
+
+    MySQL.query('SELECT `model`, `plate`, `garage` FROM `player_vehicles` WHERE `job` = @garagejob AND `garage` != @excludedGarage AND `garage` != "outside"', {
+        ['@garagejob'] = garagejob,
         ['@excludedGarage'] = namegarage
     }, function(response)
         data(response)

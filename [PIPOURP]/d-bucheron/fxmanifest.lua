@@ -17,5 +17,6 @@ server_scripts {
 
 dependencies {
     'qb-core',
-    'qb-target'
+    'qb-target',
+    'PipouUI',
 }

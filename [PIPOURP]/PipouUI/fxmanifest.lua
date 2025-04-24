@@ -9,4 +9,10 @@ files {
     'html/script.js'
 }
 
-client_script 'client.lua'
+client_script 'pipouui.lua'
+
+exports {
+    'CreateMenu',
+    'AddButton',
+    'OpenMenu'
+}

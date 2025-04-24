@@ -85,7 +85,7 @@ document.addEventListener('keyup', function (event) {
 
 // ========== FETCH UTILS ==========
 function postData(endpoint, data = {}) {
-    return fetch(`https://Pipou-Jobs/${endpoint}`, {
+    return fetch(`https://Pipou-Core/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

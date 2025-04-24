@@ -409,12 +409,24 @@ function DGarageGetIn(garagelabel, category, garagejob, garagetype)
     local mods = json.encode(QBCore.Functions.GetVehicleProperties(closestVehicle))
     local garage = garagelabel
 
-    print("Garage : " .. garage)
+
+    if garagetype == 'job' then
+        QBCore.Functions.TriggerCallback('server-d-getjobowner', function(data)
+            print(data)
+            if data == garagejob then
+                local ownerLabel = (garagejob ~= nil and garagejob ~= "" and garagetype ~= "private") and garagejob or ""
+                TriggerServerEvent('d-garage:server:getinvehicle', plate, model, garage, mods, ownerLabel)
+                QBCore.Functions.Notify("Véhicule rangé : " .. model, "primary", 3000)
+                DeleteEntity(closestVehicle)
+            else
+                QBCore.Functions.Notify("🚫 Ce véhicule ne vous appartient pas", "error", 3000)
+            end
+        end, plate)
 
 
+    else
 
-    -- ✅ Toujours vérifier le propriétaire du véhicule
-    QBCore.Functions.TriggerCallback('server-d-get-owner', function(isOwner)
+        QBCore.Functions.TriggerCallback('server-d-get-owner', function(isOwner)
         if isOwner then
             local ownerLabel = (garagejob ~= nil and garagejob ~= "" and garagetype ~= "private") and garagejob or ""
             TriggerServerEvent('d-garage:server:getinvehicle', plate, model, garage, mods, ownerLabel)
@@ -423,7 +435,8 @@ function DGarageGetIn(garagelabel, category, garagejob, garagetype)
         else
             QBCore.Functions.Notify("🚫 Ce véhicule ne vous appartient pas", "error", 3000)
         end
-    end, plate)
+        end, plate)
+    end
 end
 
 
@@ -524,20 +537,41 @@ end)
 RegisterNUICallback('getOtherList', function(data, cb)
 
     local namegarage = data.label
-    
-    QBCore.Functions.TriggerCallback('server-d-get-listothervehicle', function(result)
-        for k,v in pairs(result) do
-        
+    local garagejob = data.garagejob
+
+    if garagejob ~= nil then
+        print(1)
+        QBCore.Functions.TriggerCallback('server-getlistothervehiclejob', function(result)
+            for k,v in pairs(result) do
             
-            SendNUIMessage({
-                type='addOtherVehicleonlist',
-                model = result[k].model,
-                plate = result[k].plate,
-                garage = result[k].garage,
-            })
-        end
-        cb(result)
-    end, namegarage)
+                
+                SendNUIMessage({
+                    type='addOtherVehicleonlist',
+                    model = result[k].model,
+                    plate = result[k].plate,
+                    garage = result[k].garage,
+                })
+            end
+            cb(result)
+        end, namegarage,garagejob)
+
+
+    else
+        print(2)
+        QBCore.Functions.TriggerCallback('server-d-get-listothervehicle', function(result)
+            for k,v in pairs(result) do
+            
+                
+                SendNUIMessage({
+                    type='addOtherVehicleonlist',
+                    model = result[k].model,
+                    plate = result[k].plate,
+                    garage = result[k].garage,
+                })
+            end
+            cb(result)
+        end, namegarage)
+    end
 end)
 
 RegisterNUICallback('getOutsideList', function(data, cb)
@@ -712,9 +746,13 @@ RegisterCommand("savevehicle", function()
 
     local player = PlayerPedId()
     local vehicle = GetVehiclePedIsIn(player, false)
-
     local plate = GetVehicleNumberPlateText(vehicle)
+    local hash = GetEntityModel(vehicle)
     local model = GetDisplayNameFromVehicleModel(GetEntityModel(vehicle))
+    local label = GetLabelText(model) 
+
+
+
     local garage = "outside"
     local mods = json.encode(QBCore.Functions.GetVehicleProperties(vehicle))
 

@@ -9,7 +9,7 @@ RegisterNUICallback('getJobInfo', function(data, cb)
     local isgang = data.isgang
     
 
-    QBCore.Functions.TriggerCallback('Pipou-Jobs:server:getJobInfo', function(result)
+    QBCore.Functions.TriggerCallback('Pipou-Core:server:getJobInfo', function(result)
         -- "result" est la table d'employés retournée depuis le serveur
         if result then
 
@@ -37,7 +37,7 @@ RegisterNUICallback('getBanqueInfo', function(data, cb)
     local playerjob = data.JobId
     
 
-    QBCore.Functions.TriggerCallback('Pipou-Jobs:server:getBanqueInfo', function(result)
+    QBCore.Functions.TriggerCallback('Pipou-Core:server:getBanqueInfo', function(result)
         if result then
 
             SendNUIMessage({
@@ -145,7 +145,7 @@ RegisterNuiCallback('FireSomeone', function(data, cb)
 
     local firstName, lastName = playername:match("^(%S+) (%S+)$")
 
-    QBCore.Functions.TriggerCallback('Pipou-Jobs:server:Fireplayer', function(result)
+    QBCore.Functions.TriggerCallback('Pipou-Core:server:Fireplayer', function(result)
         if result then
             QBCore.Functions.Notify("Vous avez licencié " .. playername .. " du job " .. jobname, "success")
             
