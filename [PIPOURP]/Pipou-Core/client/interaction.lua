@@ -1,71 +1,125 @@
+local targetedPlayers = {}
+local QBCore = exports['qb-core']:GetCoreObject()
+
 CreateThread(function()
     while true do
         Wait(5000)
         for _, playerId in ipairs(GetActivePlayers()) do
             local ped = GetPlayerPed(playerId)
-            if ped ~= PlayerPedId() then
-                exports['qb-target']:AddTargetEntity(ped, {
-                    options = {
-                        {
-                            num = 1,
-                            type = "client",
-                            event = "Test:Event",
-                            icon = 'fa-solid fa-grip-lines',
-                            targeticon = 'fa-solid fa-file-signature', 
-                            label = 'Engager la personne',
-                            action = function(data)
-                                local targetPed = data.entity
-                                if not IsPedAPlayer(targetPed) then return end
 
-                                local targetPlayer = NetworkGetPlayerIndexFromPed(targetPed)
-                                if targetPlayer == -1 then return end
+            if ped ~= PlayerPedId() and DoesEntityExist(ped) then
+                local serverId = GetPlayerServerId(playerId)
 
-                                local serverId = GetPlayerServerId(targetPlayer)
-                                local playerData = QBCore.Functions.GetPlayerData()
-                                local jobName = playerData.job.name
+                if not targetedPlayers[serverId] then
+                    exports['qb-target']:AddTargetEntity(ped, {
+                        options = {
+                            {
+                                type = "client",
+                                event = "PipouJobs:client:EngagePlayer",
+                                icon = "fas fa-user-plus",
+                                label = "Engager la personne",
+                                action = function(data)
+                                    if not data or not data.entity or not DoesEntityExist(data.entity) then return end
+                                    local ped = data.entity
+                                    if not IsPedAPlayer(ped) then return end
 
-                                TriggerEvent('PipouJobs:client:Engage', serverId, jobName)
-                            end,
+                                    local targetPlayer = NetworkGetPlayerIndexFromPed(ped)
+                                    if targetPlayer == -1 then return end
 
-                            canInteract = function(data)
-                                local ped = data.entity
-                                if not IsPedAPlayer(ped) then return false end
-                                local playerData = QBCore.Functions.GetPlayerData()
-                                return playerData.job and playerData.job.isboss
-                            end,
+                                    local serverId = GetPlayerServerId(targetPlayer)
+                                    local playerData = QBCore.Functions.GetPlayerData()
+                                    local jobName = playerData.job and playerData.job.name or nil
+
+                                    if serverId and jobName then
+                                        TriggerEvent('PipouJobs:client:Engage', serverId, jobName)
+                                    end
+                                end,
+                                canInteract = function(entity)
+                                    if not entity or not DoesEntityExist(entity) then
+                                        return false
+                                    end
+                                    if not IsPedAPlayer(entity) then
+                                        return false
+                                    end
+                                    local playerData = QBCore.Functions.GetPlayerData()
+                                    if not playerData or not playerData.job then
+                                        return false
+                                    end
+                                    return playerData.job.isboss == true
+                                end,
+                            },
+                            {
+                                type = "client",
+                                event = "PipouJobs:client:BillPlayer",
+                                icon = "fas fa-file-invoice-dollar",
+                                label = "Facturer la personne",
+                                action = function(data)
+                                    if not data or not data.entity or not DoesEntityExist(data.entity) then return end
+                                    local ped = data.entity
+                                    if not IsPedAPlayer(ped) then return end
+
+                                    local targetPlayer = NetworkGetPlayerIndexFromPed(ped)
+                                    if targetPlayer == -1 then return end
+
+                                    local serverId = GetPlayerServerId(targetPlayer)
+                                    if serverId then
+                                        QBCore.Functions.Notify("Vous avez facturé la personne.", "success")
+                                    end
+                                end,
+                                canInteract = function(entity)
+                                    if not entity or not DoesEntityExist(entity) then
+                                        return false
+                                    end
+                                    if not IsPedAPlayer(entity) then
+                                        return false
+                                    end
+                                    local playerData = QBCore.Functions.GetPlayerData()
+                                    if not playerData or not playerData.job then
+                                        return false
+                                    end
+                                    return playerData.job.isboss == true
+                                end,
+                            }
                         },
-                        {
-                            num = 2,
-                            type = "client",
-                            event = "Test:Event",
-                            icon = 'fa-solid fa-grip-lines',
-                            label = 'facturer la personne',
-                            targeticon = 'fa-solid fa-credit-card',
-                            action = function(data)
-                                local targetPed = data.entity
-                                if not IsPedAPlayer(targetPed) then return end
+                        distance = 2.0
+                    })
 
-                                local targetPlayer = NetworkGetPlayerIndexFromPed(targetPed)
-                                if targetPlayer == -1 then return end
-
-                                local serverId = GetPlayerServerId(targetPlayer)
-                                local playerData = QBCore.Functions.GetPlayerData()
-                                local jobName = playerData.job.name
-
-                                QBCore.Functions.Notify("Vous essayez de facturer quelqu'un qui n'a rien demandé", "error")
-                            end,
-
-                            -- canInteract = function(data)
-                            --     local ped = data.entity
-                            --     if not IsPedAPlayer(ped) then return false end
-                            --     local playerData = QBCore.Functions.GetPlayerData()
-                            --     return playerData.job and playerData.job.isboss
-                            -- end,
-                        }
-                    },
-                    distance = 1.5,
-                })
+                    -- Marquer que ce joueur a été ciblé pour éviter double ajout
+                    targetedPlayers[serverId] = true
+                end
             end
         end
+    end
+end)
+
+RegisterNetEvent('PipouJobs:client:EngagePlayer', function(data)
+    if not data or not data.entity or not DoesEntityExist(data.entity) then return end
+    local ped = data.entity
+    if not IsPedAPlayer(ped) then return end
+
+    local targetPlayer = NetworkGetPlayerIndexFromPed(ped)
+    if targetPlayer == -1 then return end
+
+    local serverId = GetPlayerServerId(targetPlayer)
+    local playerData = QBCore.Functions.GetPlayerData()
+    local jobName = playerData.job and playerData.job.name or nil
+
+    if serverId and jobName then
+        TriggerEvent('PipouJobs:client:Engage', serverId, jobName)
+    end
+end)
+
+RegisterNetEvent('PipouJobs:client:BillPlayer', function(data)
+    if not data or not data.entity or not DoesEntityExist(data.entity) then return end
+    local ped = data.entity
+    if not IsPedAPlayer(ped) then return end
+
+    local targetPlayer = NetworkGetPlayerIndexFromPed(ped)
+    if targetPlayer == -1 then return end
+
+    local serverId = GetPlayerServerId(targetPlayer)
+
+    if serverId then
+        QBCore.Functions.Notify("Vous avez facturé la personne.", "success")
     end
 end)

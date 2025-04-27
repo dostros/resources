@@ -590,8 +590,6 @@ RegisterNetEvent("PipouImmo:server:togglePublicAccess", function(propertyName)
     local Player = QBCore.Functions.GetPlayer(src)
     if not Player then return end
 
-    print("[TOGGLE PUBLIC] Reçu pour "..propertyName.." par "..Player.PlayerData.citizenid)
-
     local citizenid = Player.PlayerData.citizenid
 
     MySQL.Async.fetchAll([[
@@ -610,15 +608,15 @@ RegisterNetEvent("PipouImmo:server:togglePublicAccess", function(propertyName)
             MySQL.Async.execute("UPDATE properties SET public_access = @state WHERE id = @id", {
                 ['@state'] = newState,
                 ['@id'] = result[1].id
-            }, function(rows)
-                print("[IMMO] Mise à jour état public_access →", newState, " (rows affected: ", rows, ")")
-                TriggerClientEvent("QBCore:Notify", src, newState == 1 and "✅ La maison est maintenant ouverte à tous." or "🚪 Accès libre désactivé.", "primary")
+            }, function(rowsChanged)
+                if rowsChanged and rowsChanged > 0 then
+                    TriggerClientEvent("PipouImmo:client:publicAccessChanged", src, propertyName, newState)
+                end
             end)
-        else
-            TriggerClientEvent("QBCore:Notify", src, "❌ Vous n'êtes pas propriétaire de cette maison", "error")
         end
     end)
 end)
+
 
 
 QBCore.Functions.CreateCallback("PipouImmo:server:isPropertyPublic", function(source, cb, propertyName)

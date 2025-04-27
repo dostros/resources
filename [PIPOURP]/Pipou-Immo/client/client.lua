@@ -12,6 +12,7 @@ local activeZones = {}
 
 
 
+
 function GetInstanceZ(level)
     return -100 - (level * 50)
 end
@@ -587,19 +588,36 @@ RegisterNetEvent('Pipou-Immo:toggleLight', function()
 end)
 
 
-function SetShellLightState(state)
-    if spawnedShell and DoesEntityExist(spawnedShell) then
-        -- Activation de la lumière artificielle autour du shell
-        -- Cela simule un éclairage ON/OFF
-        if state then
-            SetArtificialLightsState(false)
-        else
-            SetArtificialLightsState(true)
-        end
+local LightThread = nil
 
-        isLightOn = state
+local LightThread = nil
+
+function SetShellLightState(state)
+    if not spawnedShell or not DoesEntityExist(spawnedShell) then return end
+
+    isLightOn = state
+
+    if LightThread then
+        LightThread = nil
+    end
+
+    if state then
+        -- 🔆 Lumière allumée ➔ normal
+        ClearTimecycleModifier()
+        SetArtificialLightsState(false)
+    else
+        -- 🌙 Lumière éteinte ➔ ambiance tamisée spéciale intérieur
+        SetTimecycleModifier("int_extlght_smokey")
+        SetTimecycleModifierStrength(0.5)
+        SetArtificialLightsState(true)
     end
 end
+
+
+
+
+
+
 
 
 RegisterNetEvent("Pipou-Immo:reopenMainMenu", function()
@@ -1502,3 +1520,14 @@ RegisterNetEvent("PipouImmo:togglePublicAccess", function()
     end
 end)
 
+RegisterNetEvent("PipouImmo:client:publicAccessChanged", function(propertyName, newState)
+    if getCurrentPlayerProperty() == propertyName then
+        local isPublic = newState == 1
+
+        -- Notifie le joueur
+        QBCore.Functions.Notify(isPublic and "🏡 La maison est maintenant OUVERTE à tous." or "🏡 La maison est maintenant FERMÉE.", "primary")
+
+        -- Recharge le menu principal
+        TriggerEvent("Pipou-Immo:openMainMenu")
+    end
+end)
