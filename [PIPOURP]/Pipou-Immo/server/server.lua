@@ -239,7 +239,7 @@ QBCore.Functions.CreateCallback('PipouImmo:server:getTenants', function(source, 
     MySQL.Async.fetchAll([[
         SELECT po.citizenid, c.charinfo, po.access_type
         FROM property_owners po
-        JOIN players c ON po.citizenid = c.citizenid
+        JOIN players c ON CONVERT(po.citizenid USING utf8mb4) COLLATE utf8mb4_unicode_ci = CONVERT(c.citizenid USING utf8mb4) COLLATE utf8mb4_unicode_ci
         JOIN properties p ON p.id = po.property_id
         WHERE p.name = @name
     ]], {
@@ -257,6 +257,7 @@ QBCore.Functions.CreateCallback('PipouImmo:server:getTenants', function(source, 
         cb(tenants)
     end)
 end)
+
 
 RegisterNetEvent('PipouImmo:server:removeTenantByCitizenId', function(propertyName, targetCitizenId)
     local src = source
@@ -319,7 +320,7 @@ QBCore.Functions.CreateCallback('PipouImmo:server:getAllPropertiesWithID', funct
             JSON_UNQUOTE(JSON_EXTRACT(pl.charinfo, '$.lastname')) AS lastname
         FROM properties p
         LEFT JOIN property_owners po ON po.property_id = p.id AND po.access_type = 'owner'
-        LEFT JOIN players pl ON po.citizenid = pl.citizenid
+        LEFT JOIN players pl ON CONVERT(po.citizenid USING utf8mb4) COLLATE utf8mb4_unicode_ci = CONVERT(pl.citizenid USING utf8mb4) COLLATE utf8mb4_unicode_ci
     ]], {}, function(results)
         local props = {}
 
@@ -336,6 +337,9 @@ QBCore.Functions.CreateCallback('PipouImmo:server:getAllPropertiesWithID', funct
         cb(props)
     end)
 end)
+
+
+
 
 
 RegisterNetEvent("PipouImmo:server:deleteProperty")

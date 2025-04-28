@@ -42,6 +42,9 @@ const openMenu = (options = [], title = "", subtitle = "") => {
             case "slider":
                 html += getSliderRender(option.label, index, option.data?.value, option.data?.min, option.data?.max, index === selectedIndex);
                 break;
+            case "buttonWithDescription":
+                html += getButtonWithDescription(option.label, option.data?.description || "", index, index === selectedIndex);
+                break;
             default:
                 html += getButtonRender(option.label, index, index === selectedIndex);
         }
@@ -60,18 +63,27 @@ const openMenu = (options = [], title = "", subtitle = "") => {
 function sendSelectOption(index) {
     $.post(`https://${GetParentResourceName()}/selectOption`, JSON.stringify({
         index: index,
-    }));
-    closeMenu();
+    }), function(response) {
+        if (response && response.close) {
+            closeMenu();
+        }
+    });
 }
+
 
 const closeMenu = () => {
     $("#buttons").html("");
     $('#imageHover').hide();
-    document.getElementById('container').classList.remove("active");
 
+    document.getElementById('container').classList.remove("active");
+    setTimeout(() => {
+    document.getElementById("buttons").innerHTML = "";
+    $('#imageHover').hide();
     menuOptions = [];
     selectedIndex = 0;
-};
+    }, 300); // Attend 300ms pour reset proprement
+}
+
 
 document.addEventListener('keydown', (e) => {
     if (menuOptions.length === 0) return;
@@ -102,8 +114,10 @@ document.addEventListener('keydown', (e) => {
             if (key === 'ArrowLeft') current.data.value = Math.max(current.data.min, current.data.value - step);
             if (key === 'ArrowRight') current.data.value = Math.min(current.data.max, current.data.value + step);
             updateSelection();
+            sendSliderChange(selectedIndex, current.data.value); // << ICI
         }
-    } else if (key === 'Escape') {
+    }
+    else if (key === 'Escape') {
         $.post(`https://${GetParentResourceName()}/closeMenu`);
         closeMenu();
     }
@@ -113,6 +127,13 @@ function updateSelection() {
     document.querySelectorAll('.menu-item').forEach((el, i) => {
         el.classList.toggle('active', i === selectedIndex);
     });
+}
+
+function sendSliderChange(index, value) {
+    $.post(`https://${GetParentResourceName()}/sliderChange`, JSON.stringify({
+        index: index,
+        value: value,
+    }));
 }
 
 
@@ -136,6 +157,15 @@ function getSliderRender(header, id, value, min, max, isActive = false) {
     return `
         <div class="menu-item slider ${isActive ? "active" : ""}" id="${id}">
             <div class="header">${header}: ${value}</div>
+        </div>
+    `;
+}
+
+function getButtonWithDescription(header, description, id, isActive = false) {
+    return `
+        <div class="menu-item button ${isActive ? "active" : ""}" id="${id}">
+            <div class="header">${header}</div>
+            <div class="description">${description}</div>
         </div>
     `;
 }

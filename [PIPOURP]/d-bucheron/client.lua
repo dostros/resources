@@ -884,38 +884,54 @@ RegisterCommand("plank", function()
 end, false)
 
 
--- local mainMenu = nil
--- local settingsMenu = nil
--- local checkboxState = false
--- local volumeValue = 5
+local mainMenu = nil
+local settingsMenu = nil
 
--- RegisterCommand("menutest", function()
---     local menuId = exports['PipouUI']:CreateMenu("Menu Principal", "Bienvenue dans le menu test")
+local checkboxState = false
+local volumeValue = 5
 
---     exports['PipouUI']:AddButton(menuId, "Dire Bonjour", function()
---         print("Bonjour ! 👋")
---     end)
+RegisterCommand("menutest", function()
+    mainMenu = exports['PipouUI']:CreateMenu("Menu Principal", "Bienvenue sur PipouUI 🚀")
 
---     exports['PipouUI']:AddOption(menuId, "checkbox", "Activer mode", {checked = false}, function()
---         print("Mode activé/désactivé ✅")
---     end)
+    -- Bouton simple
+    exports['PipouUI']:AddButton(mainMenu, "Dire Bonjour 👋", function()
+        print("✅ Bonjour envoyé !")
+    end)
 
---     exports['PipouUI']:AddOption(menuId, "slider", "Volume", {value = 3, min = 0, max = 10, step = 1}, function()
---         print("Volume modifié 🔊")
---     end)
+    -- Checkbox dynamique
+    exports['PipouUI']:AddOption(mainMenu, "checkbox", "Activer Mode", {checked = checkboxState}, function()
+        checkboxState = not checkboxState
+        print("🛡️ Mode Activé :", checkboxState)
+    end)
 
---     exports['PipouUI']:OpenMenu(menuId)
--- end)
+    -- Slider volume
+    exports['PipouUI']:AddOption(mainMenu, "slider", "Volume", {value = volumeValue, min = 0, max = 10, step = 1}, function(newValue)
+        volumeValue = newValue
+        print("🔊 Volume réglé à :", volumeValue)
+    end)
 
--- -- Sous-menu de paramètres
--- CreateThread(function()
---     settingsMenu = exports['PipouUI']:CreateMenu("Paramètres", "Réglages secondaires")
+    -- Bouton vers Paramètres
+    exports['PipouUI']:AddButton(mainMenu, "Paramètres ⚙️", function()
+        exports['PipouUI']:OpenMenu(settingsMenu)
+        return false -- <<< Important pour NE PAS fermer immédiatement
+    end)
+    
+    exports['PipouUI']:OpenMenu(mainMenu)
+end)
 
---     exports['PipouUI']:AddOption(settingsMenu, "slider", "Luminosité", {value = 5, min = 1, max = 10, step = 1}, function()
---         print("☀️ Luminosité modifiée")
---     end)
+-- Sous-menu Paramètres
+CreateThread(function()
+    settingsMenu = exports['PipouUI']:CreateMenu("Paramètres", "Réglages avancés")
 
---     exports['PipouUI']:AddButton(settingsMenu, "Retour ⬅️", function()
---         exports['PipouUI']:OpenMenu(mainMenu)
---     end)
--- end)
+    -- Slider luminosité
+    exports['PipouUI']:AddOption(settingsMenu, "slider", "Luminosité", {value = 5, min = 1, max = 10, step = 1}, function(newValue)
+        print("☀️ Luminosité réglée à :", newValue)
+    end)
+
+    -- Bouton retour
+    exports['PipouUI']:AddButton(settingsMenu, "Retour ⬅️", function()
+        exports['PipouUI']:OpenMenu(mainMenu)
+        return false -- 🔥 Très important ! Ne pas fermer ici
+    end)
+    
+end)

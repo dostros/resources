@@ -54,7 +54,8 @@ end)
 
 -- Ouvrir le menu
 function PipouUI:Open()
-    SetNuiFocus(true, true)
+    SetNuiFocus(true, false)
+    SetNuiFocusKeepInput(true)
     SendNUIMessage({
         action = "OPEN_MENU",
         title = self.title,
@@ -76,14 +77,37 @@ end)
 RegisterNUICallback("selectOption", function(data, cb)
     local index = data.index + 1
     local menu = PipouUI.currentMenu
+    local shouldClose = true
     if menu and menu.callbacks[index] then
-        menu.callbacks[index]()
+        local result = menu.callbacks[index]()
+        if result == false then
+            shouldClose = false
+        end
     end
-    SetNuiFocus(false, false)
-    cb({})
+
+    if shouldClose then
+        SetNuiFocus(false, false)
+    end
+
+    cb({ close = shouldClose })
 end)
+
+
+
 
 RegisterNUICallback("closeMenu", function(_, cb)
     SetNuiFocus(false, false)
     cb({})
 end)
+
+RegisterNUICallback("sliderChange", function(data, cb)
+    local index = data.index + 1
+    local value = data.value
+    local menu = PipouUI.currentMenu
+    if menu and menu.callbacks[index] then
+        menu.callbacks[index](value)
+    end
+    cb({})
+end)
+
+
