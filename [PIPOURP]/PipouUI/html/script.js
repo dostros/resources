@@ -1,11 +1,14 @@
 let selectedIndex = 0;
 let menuOptions = [];
+let menuIsOpen = false;
 
 window.addEventListener("message", (event) => {
     const data = event.data;
 
     switch (data.action) {
         case "OPEN_MENU":
+            document.getElementById("buttons").innerHTML = "";
+            menuIsOpen = true;
             return openMenu(data.options, data.title, data.subtitle);
         case "CLOSE_MENU":
             return closeMenu();
@@ -76,17 +79,19 @@ const closeMenu = () => {
     $('#imageHover').hide();
 
     document.getElementById('container').classList.remove("active");
+    menuIsOpen = false; // <<< ICI, marquer menu fermé immédiatement
+
     setTimeout(() => {
-    document.getElementById("buttons").innerHTML = "";
-    $('#imageHover').hide();
-    menuOptions = [];
-    selectedIndex = 0;
-    }, 300); // Attend 300ms pour reset proprement
+        document.getElementById("buttons").innerHTML = "";
+        $('#imageHover').hide();
+        menuOptions = [];
+        selectedIndex = 0;
+    }, 300);
 }
 
 
 document.addEventListener('keydown', (e) => {
-    if (menuOptions.length === 0) return;
+    if (!menuIsOpen) return;
 
     const key = e.key;
 
@@ -117,17 +122,33 @@ document.addEventListener('keydown', (e) => {
             sendSliderChange(selectedIndex, current.data.value); // << ICI
         }
     }
-    else if (key === 'Escape') {
-        $.post(`https://${GetParentResourceName()}/closeMenu`);
+    else if (menuIsOpen && event.key === "Escape") {
+        $.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
         closeMenu();
+        menuIsOpen = false;
     }
 });
 
 function updateSelection() {
     document.querySelectorAll('.menu-item').forEach((el, i) => {
         el.classList.toggle('active', i === selectedIndex);
+
+        const option = menuOptions[i];
+        if (option.type === "slider") {
+            const valueElement = el.querySelector('.value');
+            if (valueElement) {
+                valueElement.textContent = option.data.value; // <-- Mise à jour visuelle du slider
+            }
+        }
+        if (option.type === "checkbox") {
+            const headerElement = el.querySelector('.header');
+            if (headerElement) {
+                headerElement.innerHTML = `${option.label} [${option.data.checked ? '✔' : '✖'}]`; // <-- Mise à jour visuelle de la checkbox aussi
+            }
+        }
     });
 }
+
 
 function sendSliderChange(index, value) {
     $.post(`https://${GetParentResourceName()}/sliderChange`, JSON.stringify({
@@ -156,10 +177,16 @@ function getCheckboxRender(header, id, checked, isActive = false) {
 function getSliderRender(header, id, value, min, max, isActive = false) {
     return `
         <div class="menu-item slider ${isActive ? "active" : ""}" id="${id}">
-            <div class="header">${header}: ${value}</div>
+            <div class="header">${header}</div>
+            <div class="slider-controls">
+                <span class="arrow">⬅️</span>
+                <span class="value">${value}</span>
+                <span class="arrow">➡️</span>
+            </div>
         </div>
     `;
 }
+
 
 function getButtonWithDescription(header, description, id, isActive = false) {
     return `

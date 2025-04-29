@@ -1,7 +1,7 @@
 PipouUI = {}
 PipouUI.__index = PipouUI
-PipouUI.menus = {}  -- Les menus seront stockés ici, indexés par leur id
-
+PipouUI.menus = {}
+PipouUI.navigationStack = {}
 local menuCounter = 0
 
 -- Création du menu : retourne un id (chaîne) pour identifier le menu
@@ -65,6 +65,11 @@ function PipouUI:Open()
     PipouUI.currentMenu = self
 end
 exports('OpenMenu', function(menuId)
+    if PipouUI.currentMenu then
+        table.insert(PipouUI.navigationStack, PipouUI.currentMenu.id)
+        PipouUI:CloseMenu()
+    end
+
     local menu = PipouUI.menus[menuId]
     if menu then
         menu:Open()
@@ -72,6 +77,8 @@ exports('OpenMenu', function(menuId)
         print("[ERROR] Menu non trouvé pour OpenMenu: " .. tostring(menuId))
     end
 end)
+
+
 
 -- Gestion des clics depuis la NUI
 RegisterNUICallback("selectOption", function(data, cb)
@@ -86,8 +93,10 @@ RegisterNUICallback("selectOption", function(data, cb)
     end
 
     if shouldClose then
+        PipouUI:CloseMenu()
         SetNuiFocus(false, false)
     end
+    
 
     cb({ close = shouldClose })
 end)
@@ -110,4 +119,42 @@ RegisterNUICallback("sliderChange", function(data, cb)
     cb({})
 end)
 
+
+function PipouUI:CloseMenu()
+    PipouUI.currentMenu = nil
+end
+
+exports('CloseMenu', function()
+    PipouUI:CloseMenu()
+    SetNuiFocus(false, false) 
+end)
+
+
+function PipouUI:OpenSimpleMenu(title, subtitle, buttonList)
+    local menuId = PipouUI.CreateMenu(title, subtitle)
+    for _, v in ipairs(buttonList) do
+        exports['PipouUI']:AddButton(menuId, v.label, v.action)
+    end
+    exports['PipouUI']:OpenMenu(menuId)
+end
+exports('OpenSimpleMenu', function(title, subtitle, buttonList)
+    PipouUI:OpenSimpleMenu(title, subtitle, buttonList)
+end)
+
+
+function PipouUI:Back()
+    local lastMenuId = table.remove(PipouUI.navigationStack)
+    if lastMenuId then
+        local menu = PipouUI.menus[lastMenuId]
+        if menu then
+            menu:Open()
+        end
+    else
+        TriggerEvent("Pipou-Immo:openMainMenu")
+    end
+end
+
+exports('Back', function()
+    PipouUI:Back()
+end)
 

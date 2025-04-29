@@ -905,10 +905,11 @@ RegisterCommand("menutest", function()
     end)
 
     -- Slider volume
-    exports['PipouUI']:AddOption(mainMenu, "slider", "Volume", {value = volumeValue, min = 0, max = 10, step = 1}, function(newValue)
-        volumeValue = newValue
+    exports['PipouUI']:AddOption(mainMenu, "slider", "Volume", { value = volumeValue, min = 0, max = 10, step = 1 }, function(newValue)
+        volumeValue = newValue -- 🛠️ mettre à jour la variable Lua côté client
         print("🔊 Volume réglé à :", volumeValue)
     end)
+    
 
     -- Bouton vers Paramètres
     exports['PipouUI']:AddButton(mainMenu, "Paramètres ⚙️", function()

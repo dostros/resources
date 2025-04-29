@@ -1,14 +1,14 @@
-local QBCore = exports['qb-core']:GetCoreObject()
-local spawnedShell = nil
-local createdZones = {}
-local cachedProperties = {}
-local IsInInstance = false
-local currentPropertyName = nil
-local isLightOn = true
-local previewProp = nil
-local previewRotationThread = nil
-local spawnedFurniture = {}
-local activeZones = {}
+-- local QBCore = exports['qb-core']:GetCoreObject()
+-- local spawnedShell = nil
+-- local createdZones = {}
+-- local cachedProperties = {}
+-- local IsInInstance = false
+-- local currentPropertyName = nil
+-- local isLightOn = true
+-- local previewProp = nil
+-- local previewRotationThread = nil
+-- local spawnedFurniture = {}
+-- local activeZones = {}
 
 
 
@@ -455,130 +455,6 @@ end)
 
 
 
-CreateThread(function()
-    while true do
-        Wait(0)
-
-        if IsInInstance and IsControlJustReleased(0, 38) then
-            local propertyName = getCurrentPlayerProperty()
-            if not propertyName then return end
-        
-            QBCore.Functions.TriggerCallback("PipouImmo:server:isPropertyPublic", function(isPublic)
-                local menuData = {
-                    {
-                        header = "Gestion immobilière",
-                        isMenuHeader = true,
-                    },
-                    {
-                        header = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
-                        txt = "Contrôle de la luminosité",
-                        params = {
-                            event = "Pipou-Immo:toggleLight",
-                        }
-                    },
-                    {
-                        header = "Clefs de la maison",
-                        txt = "Gérer les clefs de la maison",
-                        params = {
-                            event = "Pipou-Immo:openKeyMenu"
-                        }
-                    },
-                    {
-                        header = "Décorer la maison",
-                        txt = "Accéder au menu de décoration",
-                        params = {
-                            event = "Pipou-Immo:openDecorationMenu"
-                        }
-                    },
-                    {
-                        header = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous",
-                        txt = isPublic and "Révoquer l’accès libre" or "Permettre l’entrée à tout le monde",
-                        params = {
-                            event = "PipouImmo:togglePublicAccess"
-                        }
-                    },
-                    {
-                        header = "Fermer le menu",
-                        txt = "Retourner au jeu",
-                        params = {
-                            event = "qb-menu:closeMenu"
-                        }
-                    }
-                }
-        
-                exports['qb-menu']:openMenu(menuData)
-            end, propertyName)
-        end
-        
-    end
-end)
-
-RegisterNetEvent("Pipou-Immo:openKeyMenu", function()
-    local keyMenu = {
-        {
-            header = "🔑 Gestion des clefs",
-            isMenuHeader = true,
-        },
-        {
-            header = "👥 Voir les colocataires",
-            txt = "Voir la liste des personnes ayant accès",
-            params = {
-                event = "Pipou-Immo:showTenantList"
-            }
-        },
-        
-        {
-            header = "Ajouter un locataire",
-            txt = "Donner accès en tant que locataire",
-            params = {
-                event = "Pipou-Immo:addTenant"
-            }
-        },
-        {
-            header = "Retirer un colocataire",
-            txt = "Supprimer l'accès d’un joueur proche",
-            params = {
-                event = "Pipou-Immo:removeTenant"
-            }
-        },        
-        {
-            header = "Retour",
-            txt = "Retour au menu principal",
-            params = {
-                event = "Pipou-Immo:reopenMainMenu"
-            }
-        }
-    }
-
-    exports['qb-menu']:openMenu(keyMenu)
-end)
-
-RegisterNetEvent("Pipou-Immo:openDecorationMenu", function()
-    local DecorationMenu = {
-        {
-            header = "🛋️ Mode décoration",
-            isMenuHeader = true
-        },
-        {
-            header = "📦 Placer un objet",
-            txt = "Choisir un meuble à placer",
-            params = {
-                event = "PipouImmo:openFurnitureUI"
-            }
-        },
-        {
-            header = "❌ Fermer",
-            params = {
-                event = "qb-menu:closeMenu"
-            }
-        }
-    }
-
-    exports['qb-menu']:openMenu(DecorationMenu)
-end)
-
-
-
 
 
 RegisterNetEvent('Pipou-Immo:toggleLight', function()
@@ -615,65 +491,6 @@ end
 
 
 
-
-
-
-
-
-RegisterNetEvent("Pipou-Immo:reopenMainMenu", function()
-    TriggerEvent("Pipou-Immo:openMainMenu")
-end)
-
-RegisterNetEvent("Pipou-Immo:openMainMenu", function()
-    local propertyName = getCurrentPlayerProperty()
-    if not propertyName then return end
-
-    QBCore.Functions.TriggerCallback("PipouImmo:server:isPropertyPublic", function(isPublic)
-        local menuData = {
-            {
-                header = "Gestion immobilière",
-                isMenuHeader = true,
-            },
-            {
-                header = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
-                txt = "Contrôle de la luminosité",
-                params = {
-                    event = "Pipou-Immo:toggleLight"
-                }
-            },
-            {
-                header = "Clefs de la maison",
-                txt = "Gérer les clefs de la maison",
-                params = {
-                    event = "Pipou-Immo:openKeyMenu"
-                }
-            },
-            {
-                header = "Décorer la maison",
-                txt = "Accéder au menu de décoration",
-                params = {
-                    event = "Pipou-Immo:decorateMenu"
-                }
-            },
-            {
-                header = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous",
-                txt = isPublic and "Révoquer l’accès libre" or "Permettre l’entrée à tout le monde",
-                params = {
-                    event = "PipouImmo:togglePublicAccess"
-                }
-            },
-            {
-                header = "Fermer le menu",
-                txt = "Retourner au jeu",
-                params = {
-                    event = "qb-menu:closeMenu"
-                }
-            }
-        }
-
-        exports['qb-menu']:openMenu(menuData)
-    end, propertyName)
-end)
 
 
 
@@ -739,132 +556,11 @@ function DrawText3D(x, y, z, text)
     end
 end
 
-RegisterNetEvent("Pipou-Immo:addTenant", function()
-    local playerPed = PlayerPedId()
-    local coords = GetEntityCoords(playerPed)
-    local closestPlayer, closestDistance = -1, 999.0
-
-    for _, player in pairs(GetActivePlayers()) do
-        local target = GetPlayerPed(player)
-        if target ~= playerPed then
-            local dist = #(coords - GetEntityCoords(target))
-            if dist < closestDistance and dist <= 3.0 then
-                closestPlayer = player
-                closestDistance = dist
-            end
-        end
-    end
-
-    if closestPlayer ~= -1 then
-        local targetId = GetPlayerServerId(closestPlayer)
-        local propName = getCurrentPlayerProperty() -- à toi de définir la logique
-
-        if propName then
-            QBCore.Functions.TriggerCallback('PipouImmo:server:addTenant', function(success, msg)
-                QBCore.Functions.Notify(msg, success and "success" or "error")
-                TriggerNetEvent("PipouImmo:refreshProperties")
-            end, targetId, propName)
-        else
-            QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
-        end
-    else
-        QBCore.Functions.Notify("❌ Aucun joueur proche.", "error")
-    end
-end)
-
-RegisterNetEvent("Pipou-Immo:removeTenant", function()
-    local playerPed = PlayerPedId()
-    local coords = GetEntityCoords(playerPed)
-    local closestPlayer, closestDistance = -1, 999.0
-
-    for _, player in pairs(GetActivePlayers()) do
-        local target = GetPlayerPed(player)
-        if target ~= playerPed then
-            local dist = #(coords - GetEntityCoords(target))
-            if dist < closestDistance and dist <= 3.0 then
-                closestPlayer = player
-                closestDistance = dist
-            end
-        end
-    end
-
-    if closestPlayer ~= -1 then
-        local targetId = GetPlayerServerId(closestPlayer)
-        local propName = getCurrentPlayerProperty() -- 🔧 À implémenter selon ton contexte
-
-        if propName then
-            QBCore.Functions.TriggerCallback('PipouImmo:server:removeTenant', function(success, msg)
-                QBCore.Functions.Notify(msg, success and "success" or "error")
-                TriggerNetEvent("PipouImmo:refreshProperties")
-            end, targetId, propName)
-        else
-            QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
-        end
-    else
-        QBCore.Functions.Notify("❌ Aucun joueur proche.", "error")
-    end
-end)
 
 function getCurrentPlayerProperty()
     return currentPropertyName
 end
 
-RegisterNetEvent("Pipou-Immo:showTenantList", function()
-    local propertyName = getCurrentPlayerProperty()
-    if not propertyName then
-        QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
-        return
-    end
-
-    QBCore.Functions.TriggerCallback('PipouImmo:server:getTenants', function(tenants)
-        if not tenants or #tenants == 0 then
-            QBCore.Functions.Notify("Aucun colocataire trouvé.", "error")
-            return
-        end
-
-        local menu = {
-            {
-                header = "👥 Liste des colocataires",
-                isMenuHeader = true
-            }
-        }
-
-        for _, tenant in pairs(tenants) do
-            local headerText = tenant.name .. " (" .. tenant.access_type .. ")"
-        
-            if tenant.access_type == "owner" then
-                table.insert(menu, {
-                    header = headerText,
-                    txt = "🔒 Propriétaire principal – accès protégé",
-                    isMenuHeader = true
-                })
-            else
-                table.insert(menu, {
-                    header = headerText,
-                    txt = "Cliquer pour retirer l’accès",
-                    params = {
-                        event = "Pipou-Immo:confirmRemoveTenant",
-                        args = {
-                            propertyName = propertyName,
-                            citizenid = tenant.citizenid,
-                            name = tenant.name
-                        }
-                    }
-                })
-            end
-        end
-        
-
-        table.insert(menu, {
-            header = "Retour",
-            params = {
-                event = "Pipou-Immo:openKeyMenu"
-            }
-        })
-
-        exports['qb-menu']:openMenu(menu)
-    end, propertyName)
-end)
 
 RegisterNetEvent("Pipou-Immo:confirmRemoveTenant", function(data)
     local confirmMenu = {
@@ -1409,6 +1105,7 @@ function StartFurniturePlacement(entity, itemData, isNew, onConfirm, onCancel)
                 SetEntityAlpha(entity, 255, false)
                 FreezeEntityPosition(entity, true)
                 placing = false
+                table.insert(spawnedFurniture, entity) -- AJOUTE CECI
                 onConfirm(pos, rot)
             end
 

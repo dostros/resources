@@ -114,3 +114,24 @@ body {
     height: auto;
     border-radius: 10px;
 }
+
+
+.menu-item.slider .slider-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.menu-item.slider .arrow {
+    font-size: 18px;
+    margin: 0 10px;
+    user-select: none;
+}
+
+.menu-item.slider .value {
+    font-size: 18px;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
+}

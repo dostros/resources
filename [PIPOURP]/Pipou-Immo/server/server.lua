@@ -456,7 +456,7 @@ AddEventHandler("PipouImmo:saveObjectPlacement", function(data)
 
     local citizenid = Player.PlayerData.citizenid
 
-        MySQL.Async.execute([[
+    MySQL.Async.execute([[
         INSERT INTO furniture_placements 
         (citizenid, property_name, object_model, x, y, z, heading, pitch, roll)
         VALUES 
@@ -474,11 +474,20 @@ AddEventHandler("PipouImmo:saveObjectPlacement", function(data)
         ['@p'] = data.rotation.x,
         ['@r'] = data.rotation.y, 
         ['@h'] = data.rotation.z, 
-
     })
-    TriggerEvent("PipouImmo:server:broadcastFurniture", data.property)
 
+    MySQL.Async.execute([[
+        UPDATE player_furnitures 
+        SET quantity = quantity - 1 
+        WHERE citizenid = @citizenid AND object_model = @object
+    ]], {
+        ['@citizenid'] = citizenid,
+        ['@object'] = data.object
+    })
+
+    TriggerEvent("PipouImmo:server:broadcastFurniture", data.property)
 end)
+
 
 RegisterNetEvent("PipouImmo:updateFurniturePlacement")
 AddEventHandler("PipouImmo:updateFurniturePlacement", function(data)

@@ -10,3 +10,7 @@ previewRotationThread = nil
 currentPropertyName = nil
 isLightOn = true
 IsInInstance = false
+createdZones = {}
+IsInInstance = false 
+
+

@@ -3,6 +3,7 @@ local json = require("json")
 local garagePeds = {}
 local playerOwnedProperties = {}
 local isLoadingGarages = false
+local garageBlips = {}
 
 
 RegisterNetEvent("PipouImmo:client:SendPropertiesToGarage", function(properties)
@@ -49,6 +50,17 @@ end)
 
 
 function LoadGarages()
+
+    if garageBlips then
+        for _, blip in ipairs(garageBlips) do
+            if blip and DoesBlipExist(blip) then
+                RemoveBlip(blip)
+            end
+        end
+        garageBlips = {}
+    end
+
+
     if isLoadingGarages then return end
     isLoadingGarages = true
     -- 🔁 Supprimer les anciens PNJ
@@ -191,6 +203,7 @@ function LoadGarages()
             BeginTextCommandSetBlipName("STRING")
             AddTextComponentString("Garage de Faction")
             EndTextCommandSetBlipName(blip)
+            table.insert(garageBlips, blip)
 
         elseif garagetype == "job" then
             if playerData.job and garagejob == playerData.job.name then
@@ -203,6 +216,7 @@ function LoadGarages()
                 BeginTextCommandSetBlipName("STRING")
                 AddTextComponentString("Garage " .. garagejob)
                 EndTextCommandSetBlipName(blip)
+                table.insert(garageBlips, blip)
             end
 
         elseif garagetype == "private" then
@@ -216,6 +230,7 @@ function LoadGarages()
                 BeginTextCommandSetBlipName("STRING")
                 AddTextComponentString("🏠 Garage personnel")
                 EndTextCommandSetBlipName(blip)
+                table.insert(garageBlips, blip)
             end         
         else
             local blip = AddBlipForCoord(garagespawnpoint[1])
@@ -227,7 +242,9 @@ function LoadGarages()
             BeginTextCommandSetBlipName("STRING")
             AddTextComponentString("Garage publique")
             EndTextCommandSetBlipName(blip)
+            table.insert(garageBlips, blip)
         end
+        
     end
     isLoadingGarages = false
 end
