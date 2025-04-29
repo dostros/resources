@@ -23,7 +23,8 @@ body {
     align-items: center;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
     opacity: 0;
-    transition: opacity 0.4s ease, transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(20px);
 }
 
 
@@ -33,16 +34,17 @@ body {
     display: flex;
     opacity: 1;
     transform: scale(1.02); /* Juste un effet de léger zoom */
+    transform: translateY(0px);
 }
 
 
 /* Titre principal */
 #menu-title {
-    width: 365px;
+    width: 375px;
     background: rgba(255, 87, 34, 0.9);
     padding: 10px 20px;
     border-radius: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     color: #ffffff;
     font-size: 24px;
     font-weight: 700;

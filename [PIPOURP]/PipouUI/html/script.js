@@ -1,13 +1,35 @@
 let selectedIndex = 0;
 let menuOptions = [];
 let menuIsOpen = false;
+let menuHistory = [];
+let isInputOpen = false;
+
+const buttonsContainer = document.getElementById("buttons");
+const container = document.getElementById("container");
+const menuTitle = document.getElementById("menu-title");
+const menuSubtitle = document.getElementById("menu-subtitle");
+
+
+buttonsContainer.addEventListener('click', (event) => {
+    if (!menuIsOpen) return;
+    const target = event.target.closest('.menu-item');
+    if (!target) return;
+    
+    const id = target.id;
+    if (id.startsWith('list_')) {
+        const index = parseInt(id.replace('list_', ''), 10);
+        $.post(`https://${GetParentResourceName()}/selectListOption`, JSON.stringify({index}));
+        closeMenu();
+    }
+});
+
 
 window.addEventListener("message", (event) => {
     const data = event.data;
 
     switch (data.action) {
         case "OPEN_MENU":
-            document.getElementById("buttons").innerHTML = "";
+            buttonsContainer.innerHTML = "";
             menuIsOpen = true;
             return openMenu(data.options, data.title, data.subtitle);
         case "CLOSE_MENU":
@@ -15,7 +37,7 @@ window.addEventListener("message", (event) => {
         case "OPEN_INPUT":
             return openInput(data.title, data.subtitle);
         case "OPEN_LIST_MENU":
-            document.getElementById("buttons").innerHTML = "";
+            buttonsContainer.innerHTML = "";
             menuIsOpen = true;
             openList(data.title, data.subtitle, data.options);
             break;
@@ -24,50 +46,42 @@ window.addEventListener("message", (event) => {
     }
 });
 
-function getButtonRender(header, id, isActive = false) {
-    return `
-        <div class="menu-item button ${isActive ? "active" : ""}" id="${id}">
-            <div class="header">${header}</div>
-        </div>
-    `;
-}
 
-const openMenu = (options = [], title = "", subtitle = "") => {
-    console.log("📦 Menu reçu :", { title, subtitle, options });
+const openMenu = (options, title, subtitle, fromHistory = false) => {
+    if (menuIsOpen && !fromHistory) {
+        menuHistory.push({
+            options: menuOptions,
+            title: menuTitle.textContent,
+            subtitle: menuSubtitle.textContent,
+            selectedIndex: selectedIndex
+        });
+    }
 
     menuOptions = options;
     selectedIndex = 0;
 
-    // Séparer le titre et le sous-titre en dehors du HTML injecté
-    document.getElementById("menu-title").textContent = title;
-    document.getElementById("menu-subtitle").textContent = subtitle || "";
+    menuTitle.textContent = title;
+    menuSubtitle.textContent = subtitle || "";
 
-    let html = "";
 
-    options.forEach((option, index) => {
-        switch (option.type) {
+    buttonsContainer.innerHTML = options.map((opt, idx) => {
+        switch(opt.type) {
             case "checkbox":
-                html += getCheckboxRender(option.label, index, option.data?.checked, index === selectedIndex);
-                break;
+                return getCheckboxRender(opt.label, idx, opt.checked, idx === selectedIndex);
             case "slider":
-                html += getSliderRender(option.label, index, option.data?.value, option.data?.min, option.data?.max, index === selectedIndex);
-                break;
-            case "buttonWithDescription":
-                html += getButtonWithDescription(option.label, option.data?.description || "", index, index === selectedIndex);
-                break;
+                return getSliderRender(opt.label, idx, opt.value, opt.min, opt.max, idx === selectedIndex);
             default:
-                html += getButtonRender(option.label, index, index === selectedIndex);
+                return getButtonRender(opt.label, idx, idx === selectedIndex);
         }
-    });
+    }).join("");
 
-    document.getElementById("buttons").innerHTML = html;
-    document.getElementById("container").classList.add("active");
-
-    $(".menu-item").click(function () {
-        const targetId = $(this).attr("id");
-        sendSelectOption(parseInt(targetId));
-    });
+    container.classList.add("active");
+    menuIsOpen = true;
+    updateSelection();
 };
+
+
+
 
 
 function sendSelectOption(index) {
@@ -82,76 +96,81 @@ function sendSelectOption(index) {
 
 
 const closeMenu = () => {
-    $("#buttons").html("");
-    $('#imageHover').hide();
-
-    document.getElementById('container').classList.remove("active");
-    menuIsOpen = false; // <<< ICI, marquer menu fermé immédiatement
-
+    container.classList.remove("active");
+    menuIsOpen = false;
     setTimeout(() => {
-        document.getElementById("buttons").innerHTML = "";
+        buttonsContainer.innerHTML = "";
         $('#imageHover').hide();
         menuOptions = [];
         selectedIndex = 0;
+        menuHistory = [];
+        isInputOpen = false;
     }, 300);
-}
+};
+
 
 
 document.addEventListener('keydown', (e) => {
-    if (!menuIsOpen) return;
+    if (!menuIsOpen || isInputOpen) return;
 
-    const key = e.key;
+    switch(e.key) {
+        case 'ArrowDown':
+            playSound('navigate');
+            selectedIndex = (selectedIndex + 1) % menuOptions.length;
+            updateSelection();
+            break;
 
-    if (key === 'ArrowDown') {
-        selectedIndex = (selectedIndex + 1) % menuOptions.length;
-        updateSelection();
-    } else if (key === 'ArrowUp') {
-        selectedIndex = (selectedIndex - 1 + menuOptions.length) % menuOptions.length;
-        updateSelection();
-    } else if (key === 'Enter') {
-        const current = menuOptions[selectedIndex];
-        if (current.type === "checkbox") {
-            current.data.checked = !current.data.checked;
+        case 'ArrowUp':
+            playSound('navigate');
+            selectedIndex = (selectedIndex - 1 + menuOptions.length) % menuOptions.length;
             updateSelection();
-            sendSelectOption(selectedIndex);
-        } else if (current.type === "slider") {
-            // Pas avec Enter mais avec ← →
-        } else {
-            sendSelectOption(selectedIndex);
-        }
-    } else if (key === 'ArrowLeft' || key === 'ArrowRight') {
-        const current = menuOptions[selectedIndex];
-        if (current.type === "slider") {
-            const step = current.data.step || 1;
-            if (key === 'ArrowLeft') current.data.value = Math.max(current.data.min, current.data.value - step);
-            if (key === 'ArrowRight') current.data.value = Math.min(current.data.max, current.data.value + step);
-            updateSelection();
-            sendSliderChange(selectedIndex, current.data.value); // << ICI
-        }
-    }
-    else if (menuIsOpen && event.key === "Escape") {
-        $.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
-        closeMenu();
-        menuIsOpen = false;
+            break;
+
+        case 'Enter':
+            playSound('select');
+            handleMenuEnter();
+            break;
+
+        case 'ArrowLeft':
+        case 'ArrowRight':
+            playSound('navigate');
+            handleSliderChange(e.key === 'ArrowLeft' ? -1 : 1);
+            break;
+
+        case 'Escape':
+        case 'Backspace':
+            playSound('back');
+            if (menuHistory.length > 0) {
+                const lastMenu = menuHistory.pop();
+                if (lastMenu && lastMenu.options && lastMenu.options.length > 0) {
+                    openMenu(lastMenu.options, lastMenu.title, lastMenu.subtitle, true); // <= true important
+                    selectedIndex = lastMenu.selectedIndex || 0;
+                    updateSelection();
+                } else {
+                    $.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
+                    closeMenu();
+                }
+            } else {
+                $.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
+                closeMenu();
+            }
+        break;
     }
 });
+
+
 
 function updateSelection() {
     document.querySelectorAll('.menu-item').forEach((el, i) => {
         el.classList.toggle('active', i === selectedIndex);
-
         const option = menuOptions[i];
+        if (!option) return;
+
         if (option.type === "slider") {
-            const valueElement = el.querySelector('.value');
-            if (valueElement) {
-                valueElement.textContent = option.data.value; // <-- Mise à jour visuelle du slider
-            }
+            el.querySelector('.value').textContent = option.value;
         }
         if (option.type === "checkbox") {
-            const headerElement = el.querySelector('.header');
-            if (headerElement) {
-                headerElement.innerHTML = `${option.label} [${option.data.checked ? '✔' : '✖'}]`; // <-- Mise à jour visuelle de la checkbox aussi
-            }
+            el.querySelector('.header').textContent = `${option.label} [${option.checked ? '✔' : '✖'}]`;
         }
     });
 }
@@ -206,18 +225,19 @@ function getButtonWithDescription(header, description, id, isActive = false) {
 
 
 const openInput = (title, subtitle) => {
-    document.getElementById("container").classList.add("active");
+    container.classList.add("active");
 
 
     menuOptions = [];
     selectedIndex = 0;
+    isInputOpen = true;
 
 
     // Tu crées dynamiquement ton input ici
-    document.getElementById("menu-title").textContent = title;
-    document.getElementById("menu-subtitle").textContent = subtitle || "";
+    menuTitle.textContent = title;
+    menuSubtitle.textContent = subtitle || "";
 
-    document.getElementById("buttons").innerHTML = `
+    buttonsContainer.innerHTML = `
         <input id="textInput" type="text" class="input-text" placeholder="Votre texte ici...">
         <div class="menu-item button" id="submitInput">Valider</div>
     `;
@@ -235,7 +255,7 @@ const openInput = (title, subtitle) => {
 
 
 const openList = (title, subtitle, list) => {
-    document.getElementById("container").classList.add("active");
+    container.classList.add("active");
 
     menuOptions = list.map((label, index) => ({
         type: "button",
@@ -244,8 +264,8 @@ const openList = (title, subtitle, list) => {
     }));
     selectedIndex = 0;
 
-    document.getElementById("menu-title").textContent = title;
-    document.getElementById("menu-subtitle").textContent = subtitle || "";
+    menuTitle.textContent = title;
+    menuSubtitle.textContent = subtitle || "";
 
     let html = "";
 
@@ -257,18 +277,37 @@ const openList = (title, subtitle, list) => {
         `;
     });
 
-    document.getElementById("buttons").innerHTML = html;
+    buttonsContainer.innerHTML = html;
 
-    // Sélection initiale
     updateSelection();
-
-    list.forEach((_, index) => {
-        document.getElementById(`list_${index}`).addEventListener("click", function() {
-            $.post(`https://${GetParentResourceName()}/selectListOption`, JSON.stringify({
-                index: index
-            }));
-            closeMenu();
-        });
-    });
 }
 
+function handleMenuEnter() {
+    const current = menuOptions[selectedIndex];
+    if (!current) return;
+
+    if (current.type === "checkbox") {
+        current.checked = !current.checked;
+        updateSelection();
+        sendSelectOption(selectedIndex);
+    } else if (current.type === "button") {
+        sendSelectOption(selectedIndex);
+    }
+}
+
+function handleSliderChange(direction) {
+    const current = menuOptions[selectedIndex];
+    if (current && current.type === "slider" && typeof current.value === "number") {
+        const step = current.step || 1;
+        current.value = Math.min(Math.max(current.value + direction * step, current.min), current.max);
+        updateSelection();
+        sendSliderChange(selectedIndex, current.value);
+    }
+}
+
+
+function playSound(name) {
+    $.post(`https://${GetParentResourceName()}/playSound`, JSON.stringify({
+        name: name
+    }));
+}

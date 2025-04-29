@@ -217,3 +217,17 @@ RegisterNUICallback("selectListOption", function(data, cb)
     PipouUI.currentListCallback = nil
     cb({})
 end)
+
+
+RegisterNUICallback('playSound', function(data, cb)
+    if data.name == 'navigate' then
+        PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+    elseif data.name == 'select' then
+        PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+    elseif data.name == 'back' then
+        PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+    elseif data.name == 'error' then
+        PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+    end
+    if cb then cb('ok') end
+end)

@@ -1,52 +1,61 @@
 CreateThread(function()
     while true do
         Wait(0)
-
         if IsInInstance and IsControlJustReleased(0, 38) then
-            local propertyName = getCurrentPlayerProperty()
-            if not propertyName then return end
-        
-            QBCore.Functions.TriggerCallback("PipouImmo:server:isPropertyPublic", function(isPublic)
-                exports['PipouUI']:OpenSimpleMenu("Gestion Immobilière", "", {
-                    {
-                        label = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
-                        action = function()
-                            TriggerEvent('Pipou-Immo:toggleLight')
-                        end
-                    },
-                    {
-                        label = "Clefs de la maison",
-                        action = function()
-                            TriggerEvent('Pipou-Immo:openKeyMenu')
-                            return false
-                        end
-                    },
-                    {
-                        label = "Décorer la maison",
-                        action = function()
-                            TriggerEvent('Pipou-Immo:openDecorationMenu')
-                            return false
-                        end
-                    },
-                    {
-                        label = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous",
-                        action = function()
-                            TriggerEvent('PipouImmo:togglePublicAccess')
-                        end
-                    },
-                    {
-                        label = "Fermer le menu",
-                        action = function()
-                            exports['PipouUI']:CloseMenu()
-                        end
-                    }
-                })
-            end, propertyName)
-            
+            openMainPropertyMenu() 
         end
-        
     end
 end)
+
+
+function openMainPropertyMenu()
+    local propertyName = getCurrentPlayerProperty()
+    if not propertyName then return end
+
+    QBCore.Functions.TriggerCallback("PipouImmo:server:isPropertyPublic", function(isPublic)
+        exports['PipouUI']:OpenSimpleMenu("Gestion Immobilière", "", {
+            {
+                label = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
+                action = function()
+                    TriggerEvent('Pipou-Immo:toggleLight')
+                    Wait(100) 
+                    openMainPropertyMenu()
+                    return false
+                end
+            },
+            {
+                label = "Clefs de la maison",
+                action = function()
+                    TriggerEvent('Pipou-Immo:openKeyMenu')
+                    return false
+                end
+            },
+            {
+                label = "Décorer la maison",
+                action = function()
+                    TriggerEvent('Pipou-Immo:openDecorationMenu')
+                    return false
+                end
+            },
+            {
+                label = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous",
+                action = function()
+                    TriggerEvent('PipouImmo:togglePublicAccess')
+                    Wait(100)
+                    openMainPropertyMenu()
+                    return false
+                end
+            },
+            {
+                label = "Fermer le menu",
+                action = function()
+                    exports['PipouUI']:CloseMenu()
+                end
+            }
+        })
+    end, propertyName)
+end
+
 
 RegisterNetEvent("Pipou-Immo:openKeyMenu", function()
     
@@ -105,53 +114,53 @@ end)
 
 
 
-RegisterNetEvent("Pipou-Immo:reopenMainMenu", function()
-    TriggerEvent("Pipou-Immo:openMainMenu")
-end)
+-- RegisterNetEvent("Pipou-Immo:reopenMainMenu", function()
+--     TriggerEvent("Pipou-Immo:openMainMenu")
+-- end)
 
-RegisterNetEvent("Pipou-Immo:openMainMenu", function()
-    local propertyName = getCurrentPlayerProperty()
-    if not propertyName then return end
+-- RegisterNetEvent("Pipou-Immo:openMainMenu", function()
+--     local propertyName = getCurrentPlayerProperty()
+--     if not propertyName then return end
 
-    QBCore.Functions.TriggerCallback("PipouImmo:server:isPropertyPublic", function(isPublic)
-        exports['PipouUI']:OpenSimpleMenu("Gestion Immobilière", "", {
-            {
-                label = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
-                action = function()
-                    TriggerEvent('Pipou-Immo:toggleLight')
-                    return false
-                end
-            },
-            {
-                label = "Clefs de la maison",
-                action = function()
-                    TriggerEvent('Pipou-Immo:openKeyMenu')
-                    return false
-                end
-            },
-            {
-                label = "Décorer la maison",
-                action = function()
-                    TriggerEvent('Pipou-Immo:openDecorationMenu')
-                    return false
-                end
-            },
-            {
-                label = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous",
-                action = function()
-                    TriggerEvent('PipouImmo:togglePublicAccess')
-                    return false
-                end
-            },
-            {
-                label = "Fermer le menu",
-                action = function()
-                    exports['PipouUI']:CloseMenu()
-                end
-            }
-        })
-    end, propertyName)
-end)
+--     QBCore.Functions.TriggerCallback("PipouImmo:server:isPropertyPublic", function(isPublic)
+--         exports['PipouUI']:OpenSimpleMenu("Gestion Immobilière", "", {
+--             {
+--                 label = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
+--                 action = function()
+--                     TriggerEvent('Pipou-Immo:toggleLight')
+--                     return false
+--                 end
+--             },
+--             {
+--                 label = "Clefs de la maison",
+--                 action = function()
+--                     TriggerEvent('Pipou-Immo:openKeyMenu')
+--                     return false
+--                 end
+--             },
+--             {
+--                 label = "Décorer la maison",
+--                 action = function()
+--                     TriggerEvent('Pipou-Immo:openDecorationMenu')
+--                     return false
+--                 end
+--             },
+--             {
+--                 label = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous",
+--                 action = function()
+--                     TriggerEvent('PipouImmo:togglePublicAccess')
+--                     return false
+--                 end
+--             },
+--             {
+--                 label = "Fermer le menu",
+--                 action = function()
+--                     exports['PipouUI']:CloseMenu()
+--                 end
+--             }
+--         })
+--     end, propertyName)
+-- end)
 
 
 

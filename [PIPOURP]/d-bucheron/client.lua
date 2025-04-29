@@ -883,72 +883,103 @@ RegisterCommand("plank", function()
     TriggerServerEvent("qb-timber:server:storePlank")
 end, false)
 
-
-local mainMenu = nil
-local settingsMenu = nil
-
 local checkboxState = false
 local volumeValue = 5
 
 RegisterCommand("menutest", function()
-    mainMenu = exports['PipouUI']:CreateMenu("Menu Principal", "Bienvenue sur PipouUI 🚀")
-
-    -- Bouton simple
-    exports['PipouUI']:AddButton(mainMenu, "Dire Bonjour 👋", function()
-        print("✅ Bonjour envoyé !")
-    end)
-
-    -- Checkbox dynamique
-    exports['PipouUI']:AddOption(mainMenu, "checkbox", "Activer Mode", {checked = checkboxState}, function()
-        checkboxState = not checkboxState
-        print("🛡️ Mode Activé :", checkboxState)
-    end)
-
-    -- Slider volume
-    exports['PipouUI']:AddOption(mainMenu, "slider", "Volume", { value = volumeValue, min = 0, max = 10, step = 1 }, function(newValue)
-        volumeValue = newValue
-        print("🔊 Volume réglé à :", volumeValue)
-    end)
-
-    -- ✅ Correctement déclenché sur clic :
-    exports['PipouUI']:AddButton(mainMenu, "🏡 Définir un prix", function()
-        exports['PipouUI']:OpenInputMenu("🏡 Définir un prix", "Entrez le montant souhaité :", function(result)
-            print("Résultat saisi :", result)
-        end)
-        return false -- ne pas fermer le menu immédiatement
-    end)
-
-    -- ✅ Correctement déclenché sur clic :
-    exports['PipouUI']:AddButton(mainMenu, "🚗 Choisir une voiture", function()
-        exports['PipouUI']:OpenListMenu("🚗 Choisissez une voiture", "Liste disponible :", {
-            "Sultan RS",
-            "Elegy RH8",
-            "Banshee",
-            "Comet"
-        }, function(selectedIndex)
-            print("Voiture choisie :", selectedIndex)
-        end)
-        return false
-    end)
-
-    -- Bouton vers Paramètres
-    exports['PipouUI']:AddButton(mainMenu, "Paramètres ⚙️", function()
-        exports['PipouUI']:OpenMenu(settingsMenu)
-        return false
-    end)
-
-    exports['PipouUI']:OpenMenu(mainMenu)
+    openMainMenu()
 end)
 
-CreateThread(function()
-    settingsMenu = exports['PipouUI']:CreateMenu("Paramètres", "Réglages avancés")
+function openMainMenu()
+    exports['PipouUI']:OpenSimpleMenu("Menu Principal", "Bienvenue sur PipouUI 🚀", {
+        {
+            label = "Dire Bonjour 👋",
+            action = function()
+                print("✅ Bonjour envoyé !")
+            end
+        },
+        {
+            label = "Activer Mode 🛡️ [" .. (checkboxState and "✔" or "✖") .. "]",
+            type = "checkbox",
+            checked = checkboxState,
+            action = function()
+                checkboxState = not checkboxState
+                print("🛡️ Mode Activé :", checkboxState)
+            end
+        },
+        {
+            label = "Volume 🔊 : " .. volumeValue,
+            type = "slider",
+            value = volumeValue,
+            min = 0,
+            max = 10,
+            step = 1,
+            action = function(newValue)
+                volumeValue = newValue
+                print("🔊 Volume réglé à :", volumeValue)
+                return false
+            end
+        },
+        {
+            label = "🏡 Définir un prix",
+            action = function()
+                exports['PipouUI']:OpenInputMenu("🏡 Définir un prix", "Entrez le montant souhaité :", function(result)
+                    print("Résultat saisi :", result)
+                end)
+                return false
+            end
+        },
+        {
+            label = "🚗 Choisir une voiture",
+            action = function()
+                exports['PipouUI']:OpenListMenu("🚗 Choisissez une voiture", "Liste disponible :", {
+                    "Sultan RS",
+                    "Elegy RH8",
+                    "Banshee",
+                    "Comet"
+                }, function(selectedIndex)
+                    print("Voiture choisie :", selectedIndex)
+                end)
+                return false
+            end
+        },
+        {
+            label = "Paramètres ⚙️",
+            action = function()
+                openSettingsMenu()
+                return false
+            end
+        },
+        {
+            label = "Fermer 🚪",
+            action = function()
+                exports['PipouUI']:CloseMenu()
+            end
+        }
+    })
+end
 
-    exports['PipouUI']:AddOption(settingsMenu, "slider", "Luminosité", {value = 5, min = 1, max = 10, step = 1}, function(newValue)
-        print("☀️ Luminosité réglée à :", newValue)
-    end)
+function openSettingsMenu()
+    exports['PipouUI']:OpenSimpleMenu("Paramètres", "Réglages avancés", {
+        {
+            label = "Luminosité ☀️",
+            type = "slider",
+            value = 5,
+            min = 1,
+            max = 10,
+            step = 1,
+            action = function(newValue)
+                print("☀️ Luminosité réglée à :", newValue)
+            end
+        },
+        {
+            label = "Retour ⬅️",
+            action = function()
+                exports['PipouUI']:Back()
+                return false
+            end
+        }
+    })
+end
 
-    exports['PipouUI']:AddButton(settingsMenu, "Retour ⬅️", function()
-        exports['PipouUI']:OpenMenu(mainMenu)
-        return false
-    end)
-end)
+
