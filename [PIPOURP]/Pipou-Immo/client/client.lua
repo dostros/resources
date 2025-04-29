@@ -92,7 +92,7 @@ CreateThread(function()
             -- Application des offsets pour positionner correctement le joueur et la sortie
             local shellConfig = Config.InteriorTypes[propData.type] or { diffx = 0.0, diffy = 0.0, diffz = 0.0 }
             local playerSpawn = shellCoords + vector3(shellConfig.diffx, shellConfig.diffy, shellConfig.diffz + 1.0)
-            local exitZoneCenter = shellCoords + vector3(shellConfig.diffx, shellConfig.diffy, shellConfig.diffz)
+            local exitZoneCenter = shellCoords + vector3(shellConfig.diffx, shellConfig.diffy, shellConfig.diffz+2.7)
 
             SetEntityCoords(ped, playerSpawn)
             createShellExitPoint(exitZoneCenter, propData.entrance)
@@ -273,8 +273,10 @@ RegisterNetEvent('Pipou-Immo:enterHouse', function(data)
 
 
             -- 🚪 Créer le point de sortie à cet endroit
-            local exitZoneCenter = shellCoords + vector3(shellConfig.diffx, shellConfig.diffy, shellConfig.diffz)
+            local exitZoneCenter = shellCoords + vector3(shellConfig.diffx, shellConfig.diffy, shellConfig.diffz+2.7)
             createShellExitPoint(exitZoneCenter, houseCoords)
+        
+    
 
             -- QBCore.Functions.TriggerCallback("PipouImmo:getPlayerFurniture", function(furnitures)
             --     for _, item in pairs(furnitures) do
