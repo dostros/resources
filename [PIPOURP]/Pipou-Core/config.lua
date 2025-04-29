@@ -17,7 +17,7 @@ Config.BossMenu = {
         blipcoords = vector3(-551.73, -193.31, 38.47),
         blipName = 'Gouvernement',
         blipNumber = 419,
-        blipColor = 21,
+        blipColor = 0,
     },
     realestate = {
         label = 'Agence Immobiliere',

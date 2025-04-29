@@ -12,6 +12,13 @@ window.addEventListener("message", (event) => {
             return openMenu(data.options, data.title, data.subtitle);
         case "CLOSE_MENU":
             return closeMenu();
+        case "OPEN_INPUT":
+            return openInput(data.title, data.subtitle);
+        case "OPEN_LIST_MENU":
+            document.getElementById("buttons").innerHTML = "";
+            menuIsOpen = true;
+            openList(data.title, data.subtitle, data.options);
+            break;
         default:
             return;
     }
@@ -196,3 +203,72 @@ function getButtonWithDescription(header, description, id, isActive = false) {
         </div>
     `;
 }
+
+
+const openInput = (title, subtitle) => {
+    document.getElementById("container").classList.add("active");
+
+
+    menuOptions = [];
+    selectedIndex = 0;
+
+
+    // Tu crées dynamiquement ton input ici
+    document.getElementById("menu-title").textContent = title;
+    document.getElementById("menu-subtitle").textContent = subtitle || "";
+
+    document.getElementById("buttons").innerHTML = `
+        <input id="textInput" type="text" class="input-text" placeholder="Votre texte ici...">
+        <div class="menu-item button" id="submitInput">Valider</div>
+    `;
+
+    document.getElementById("submitInput").addEventListener("click", function() {
+        const value = document.getElementById("textInput").value;
+        $.post(`https://${GetParentResourceName()}/submitInput`, JSON.stringify({
+            text: value
+        }));
+        closeMenu();
+    });
+}
+
+
+
+
+const openList = (title, subtitle, list) => {
+    document.getElementById("container").classList.add("active");
+
+    menuOptions = list.map((label, index) => ({
+        type: "button",
+        label: label,
+        data: { index: index }
+    }));
+    selectedIndex = 0;
+
+    document.getElementById("menu-title").textContent = title;
+    document.getElementById("menu-subtitle").textContent = subtitle || "";
+
+    let html = "";
+
+    list.forEach((option, index) => {
+        html += `
+            <div class="menu-item button" id="list_${index}">
+                <div class="header">${option}</div>
+            </div>
+        `;
+    });
+
+    document.getElementById("buttons").innerHTML = html;
+
+    // Sélection initiale
+    updateSelection();
+
+    list.forEach((_, index) => {
+        document.getElementById(`list_${index}`).addEventListener("click", function() {
+            $.post(`https://${GetParentResourceName()}/selectListOption`, JSON.stringify({
+                index: index
+            }));
+            closeMenu();
+        });
+    });
+}
+

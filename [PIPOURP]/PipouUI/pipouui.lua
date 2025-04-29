@@ -158,3 +158,62 @@ exports('Back', function()
     PipouUI:Back()
 end)
 
+
+
+function PipouUI:OpenInputMenu(title, subtitle, callback)
+    SetNuiFocus(true, true)
+    SetNuiFocusKeepInput(false)
+
+    SendNUIMessage({
+        action = "OPEN_INPUT",
+        title = title,
+        subtitle = subtitle
+    })
+
+    PipouUI.currentInputCallback = callback
+end
+exports('OpenInputMenu', function(title, subtitle, callback)
+    PipouUI:OpenInputMenu(title, subtitle, callback)
+end)
+
+RegisterNUICallback("submitInput", function(data, cb)
+    SetNuiFocus(false, false)
+
+    if PipouUI.currentInputCallback then
+        PipouUI.currentInputCallback(data.text)
+    end
+
+    PipouUI.currentInputCallback = nil
+    cb({})
+end)
+
+
+function PipouUI:OpenListMenu(title, subtitle, options, callback)
+    SetNuiFocus(true, false)
+    SetNuiFocusKeepInput(true)
+
+    SendNUIMessage({
+        action = "OPEN_LIST_MENU",
+        title = title,
+        subtitle = subtitle,
+        options = options
+    })
+
+    PipouUI.currentListCallback = callback 
+end
+exports('OpenListMenu', function(title, subtitle, options, cb)
+    PipouUI:OpenListMenu(title, subtitle, options, cb)
+end)
+
+
+
+RegisterNUICallback("selectListOption", function(data, cb)
+    SetNuiFocus(false, false)
+
+    if PipouUI.currentListCallback then
+        PipouUI.currentListCallback(data.index)
+    end
+
+    PipouUI.currentListCallback = nil
+    cb({})
+end)

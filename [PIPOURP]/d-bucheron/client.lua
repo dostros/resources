@@ -906,33 +906,49 @@ RegisterCommand("menutest", function()
 
     -- Slider volume
     exports['PipouUI']:AddOption(mainMenu, "slider", "Volume", { value = volumeValue, min = 0, max = 10, step = 1 }, function(newValue)
-        volumeValue = newValue -- 🛠️ mettre à jour la variable Lua côté client
+        volumeValue = newValue
         print("🔊 Volume réglé à :", volumeValue)
     end)
-    
+
+    -- ✅ Correctement déclenché sur clic :
+    exports['PipouUI']:AddButton(mainMenu, "🏡 Définir un prix", function()
+        exports['PipouUI']:OpenInputMenu("🏡 Définir un prix", "Entrez le montant souhaité :", function(result)
+            print("Résultat saisi :", result)
+        end)
+        return false -- ne pas fermer le menu immédiatement
+    end)
+
+    -- ✅ Correctement déclenché sur clic :
+    exports['PipouUI']:AddButton(mainMenu, "🚗 Choisir une voiture", function()
+        exports['PipouUI']:OpenListMenu("🚗 Choisissez une voiture", "Liste disponible :", {
+            "Sultan RS",
+            "Elegy RH8",
+            "Banshee",
+            "Comet"
+        }, function(selectedIndex)
+            print("Voiture choisie :", selectedIndex)
+        end)
+        return false
+    end)
 
     -- Bouton vers Paramètres
     exports['PipouUI']:AddButton(mainMenu, "Paramètres ⚙️", function()
         exports['PipouUI']:OpenMenu(settingsMenu)
-        return false -- <<< Important pour NE PAS fermer immédiatement
+        return false
     end)
-    
+
     exports['PipouUI']:OpenMenu(mainMenu)
 end)
 
--- Sous-menu Paramètres
 CreateThread(function()
     settingsMenu = exports['PipouUI']:CreateMenu("Paramètres", "Réglages avancés")
 
-    -- Slider luminosité
     exports['PipouUI']:AddOption(settingsMenu, "slider", "Luminosité", {value = 5, min = 1, max = 10, step = 1}, function(newValue)
         print("☀️ Luminosité réglée à :", newValue)
     end)
 
-    -- Bouton retour
     exports['PipouUI']:AddButton(settingsMenu, "Retour ⬅️", function()
         exports['PipouUI']:OpenMenu(mainMenu)
-        return false -- 🔥 Très important ! Ne pas fermer ici
+        return false
     end)
-    
 end)
