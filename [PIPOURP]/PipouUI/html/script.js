@@ -159,7 +159,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 
-
 function updateSelection() {
     document.querySelectorAll('.menu-item').forEach((el, i) => {
         el.classList.toggle('active', i === selectedIndex);
@@ -173,7 +172,33 @@ function updateSelection() {
             el.querySelector('.header').textContent = `${option.label} [${option.checked ? '✔' : '✖'}]`;
         }
     });
+
+    const activeElement = document.querySelector('.menu-item.active');
+    if (activeElement) {
+        const offsetTop = activeElement.offsetTop;
+        const offsetBottom = offsetTop + activeElement.offsetHeight;
+        const scrollTop = buttonsContainer.scrollTop;
+        const containerHeight = buttonsContainer.clientHeight;
+
+        const margin = 20;
+        const headerHeight = menuTitle.offsetHeight + menuSubtitle.offsetHeight + 20; // 20px de padding/marge extra
+
+        if (selectedIndex === 0) {
+            buttonsContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        else if (offsetTop < scrollTop + margin + headerHeight) {
+            // Prendre en compte la hauteur du titre et sous-titre
+            buttonsContainer.scrollTo({ top: offsetTop - headerHeight - margin, behavior: 'smooth' });
+        } 
+        else if (offsetBottom > scrollTop + containerHeight - margin) {
+            buttonsContainer.scrollTo({ top: offsetBottom - containerHeight + margin, behavior: 'smooth' });
+        }
+    }
 }
+
+
+
+
 
 
 function sendSliderChange(index, value) {
@@ -311,3 +336,7 @@ function playSound(name) {
         name: name
     }));
 }
+
+buttonsContainer.addEventListener('wheel', (e) => {
+    buttonsContainer.scrollTop += e.deltaY;
+});

@@ -94,8 +94,8 @@ document.addEventListener("DOMContentLoaded", function () {
             menu.style.display = "block";  // Affiche le menu
         
             // ✅ C’est ici que tu peux capturer la liste pour la recherche
-            currentFurnitureList = event.data.furnitureList; 
-            setupFurnitureLazyLoading(currentFurnitureList);
+            currentFurnitureList = event.data.furnitureList; // <-- À ajouter si tu veux la recherche
+            renderFurnitureList(currentFurnitureList);       // <-- À ajouter aussi (fonction de rendu personnalisée)
         }
         
         if (event.data.type === 'showFurnitureSellMenu') {
@@ -552,8 +552,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-
-
     document.getElementById('furnitureSearch').addEventListener('input', () => {
         const query = document.getElementById('furnitureSearch').value.toLowerCase();
         const filtered = currentFurnitureList.filter(item =>
@@ -684,51 +682,4 @@ window.buyFurniture = function(objectName, price) {
         })
     })
     .then(res => res.json())
-}
-
-
-
-
-let lazyLoadStartIndex = 0;
-const lazyLoadChunkSize = 50; // Nombre d'items chargés par vague
-
-function renderFurnitureListLazy(data) {
-    const container = document.getElementById('furnitureList');
-    if (!container) return;
-
-    const nextItems = data.slice(lazyLoadStartIndex, lazyLoadStartIndex + lazyLoadChunkSize);
-
-    nextItems.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'furniture-item';
-        div.innerHTML = `
-            <strong>${item.label}</strong>
-            <small>${item.object}</small>
-            <span class="quantity">Quantité : ${item.quantity}</span>
-            <button onclick="placeFurniture('${item.object}', '${item.label}', ${item.quantity})">Placer</button>
-        `;
-        container.appendChild(div);
-    });
-
-    lazyLoadStartIndex += lazyLoadChunkSize;
-}
-
-
-function setupFurnitureLazyLoading(data) {
-    const container = document.getElementById('furnitureList');
-    if (!container) return;
-
-    // Reset scroll
-    container.removeEventListener('scroll', lazyScrollHandler); // <--- on supprime avant
-    container.addEventListener('scroll', lazyScrollHandler);
-
-    function lazyScrollHandler() {
-        if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
-            renderFurnitureListLazy(data);
-        }
-    }
-
-    lazyLoadStartIndex = 0;
-    container.innerHTML = '';
-    renderFurnitureListLazy(data);
 }

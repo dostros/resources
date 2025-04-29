@@ -581,7 +581,7 @@ AddEventHandler("PipouImmo:server:broadcastFurniture", function(propertyName)
     end)
 end)
 
-QBCore.Functions.CreateCallback("PipouImmo:server:buyFurniture", function(source, cb, furnitureName, price)
+QBCore.Functions.CreateCallback("PipouImmo:server:buyFurniture", function(source, cb, furnitureName, price, label)
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return cb(false, "Joueur introuvable") end
 
@@ -590,7 +590,7 @@ QBCore.Functions.CreateCallback("PipouImmo:server:buyFurniture", function(source
         MySQL.Async.execute("INSERT INTO player_furnitures (citizenid, object_model, label, quantity) VALUES (@citizenid, @object, @label, 1) ON DUPLICATE KEY UPDATE quantity = quantity + 1", {
             ['@citizenid'] = Player.PlayerData.citizenid,
             ['@object'] = furnitureName,
-            ['@label'] = furnitureName -- tu peux mettre un label si tu veux
+            ['@label'] = label
         })
         cb(true, "✅ Meuble acheté !")
     else

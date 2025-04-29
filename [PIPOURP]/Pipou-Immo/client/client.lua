@@ -565,28 +565,17 @@ end
 
 
 RegisterNetEvent("Pipou-Immo:confirmRemoveTenant", function(data)
-    local confirmMenu = {
-        {
-            header = "❌ Retirer " .. data.name .. " ?",
-            txt = "Cette action est irréversible.",
-            isMenuHeader = true
-        },
-        {
-            header = "✅ Oui, retirer",
-            params = {
-                event = "Pipou-Immo:removeTenantConfirmed",
-                args = data
-            }
-        },
-        {
-            header = "🔙 Annuler",
-            params = {
-                event = "Pipou-Immo:showTenantList"
-            }
-        }
-    }
 
-    exports['qb-menu']:openMenu(confirmMenu)
+    exports['PipouUI']:OpenSimpleMenu("❌ Retirer " .. data.name .. " ?", "", {
+        { label = "✅ Oui, retirer", action = function()
+            TriggerEvent("Pipou-Immo:removeTenantConfirmed", data)
+            return false
+        end },
+        { label = "🔙 Annuler", action = function()
+            TriggerEvent("Pipou-Immo:showTenantList")
+            return false
+        end }
+    })
 end)
 
 RegisterNetEvent("Pipou-Immo:removeTenantConfirmed", function(data)
@@ -684,29 +673,21 @@ RegisterNetEvent('PipouImmo:openFurnitureList', function()
             return
         end
 
-        local menu = {
-            { header = "🪑 Meubles disponibles", isMenuHeader = true }
-        }
+        local buttonList = {}
 
         for _, item in ipairs(furnitureList) do
-            table.insert(menu, {
-                header = item.label .. " (x" .. item.quantity .. ")",
-                txt = "Modèle : " .. item.object,
-                params = {
-                    event = "PipouImmo:startPlacingFurniture",
-                    args = item
-                }
+            table.insert(buttonList, {
+                label = item.label .. " (x" .. item.quantity .. ")",
+                action = function()
+                    TriggerEvent('PipouImmo:startPlacingFurniture', item)
+                end
             })
         end
 
-        table.insert(menu, {
-            header = "❌ Fermer",
-            params = { event = "qb-menu:closeMenu" }
-        })
-
-        exports['qb-menu']:openMenu(menu)
+        exports['PipouUI']:OpenSimpleMenu("🪑 Meubles disponibles", "Sélectionnez un meuble à placer", buttonList)
     end)
 end)
+
 
 
 -- 📦 Placement de mobilier avec modes Déplacement / Rotation
@@ -1199,7 +1180,7 @@ RegisterNUICallback("PipouImmo:buyFurniture", function(data, cb)
             QBCore.Functions.Notify(message or "❌ Achat échoué.", "error")
             cb({ success = false, message = message })
         end
-    end, object, price)
+    end, object, price, label)
 end)
 
 

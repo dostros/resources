@@ -14,6 +14,7 @@ body {
     right: 7%;
     width: 400px;
     min-height: 300px;
+    max-height: 70%;
     background: linear-gradient(135deg, rgba(30,30,30,0.95) 0%, rgba(20,20,20,0.95) 100%);
     border-radius: 18px;
     padding: 25px;
@@ -61,6 +62,29 @@ body {
     box-shadow: 0 1px 5px rgba(0,0,0,0.4);
 }
 
+#buttons {
+    overflow: auto;
+    max-height: calc(70vh - 160px);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 140, 0, 0.9) rgba(255, 255, 255, 0.1);
+    overflow-x: hidden;
+    padding-right: 15px;
+}
+
+#buttons::-webkit-scrollbar {
+    width: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+#buttons::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.9);
+    border-radius: 10px;
+}
+#buttons::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 1);
+}
+
 /* Boutons */
 .menu-item {
     width: 365px;
@@ -77,6 +101,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+
 }
 
 .menu-item:hover,

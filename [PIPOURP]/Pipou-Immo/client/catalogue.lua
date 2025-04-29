@@ -56,33 +56,23 @@ end)
 
 -- Menu catalogue
 RegisterNetEvent("Pipou-Immo:openInteriorCatalogue", function()
-    local menu = {
-        {
-            header = "🏠 Catalogue des Intérieurs",
-            isMenuHeader = true
-        }
-    }
+    local options = {}
 
     for key, interior in pairs(Config.InteriorTypes) do
-        table.insert(menu, {
-            header = interior.label,
-            txt = "Type: " .. key,
-            params = {
-                event = "Pipou-Immo:previewInterior",
-                args = { shell = key }
-            }
+        table.insert(options, {
+            label = interior.label,
+            action = function()
+                TriggerEvent('Pipou-Immo:previewInterior', { shell = key })
+                Wait(100)
+                exports['PipouUI']:CloseMenu()
+            end
         })
     end
 
-    table.insert(menu, {
-        header = "❌ Fermer",
-        params = {
-            event = "qb-menu:closeMenu"
-        }
-    })
 
-    exports['qb-menu']:openMenu(menu)
+    exports['PipouUI']:OpenSimpleMenu("Catalogue des Intérieurs", "Visitez et choisissez votre futur logement !", options)
 end)
+
 
 -- Prévisualisation d’un shell
 RegisterNetEvent("Pipou-Immo:previewInterior", function(data)
