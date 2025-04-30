@@ -4,7 +4,7 @@ QBCore = exports['qb-core']:GetCoreObject()
 
 RegisterNetEvent('qb-helicopter:client:ropedown', function()
 
-    QBCore.Functions.Notify("Corde déployée", "success", 1500)
+    exports['PipouUI']:Notify("Corde déployée", "success", 1500)
 
     local propHash <const> = "p_cs_15m_rope_s";
     local player = PlayerPedId();
@@ -75,7 +75,7 @@ RegisterNetEvent('qb-helicopter-getup', function(vehicle, rope)
         SetPedIntoVehicle(player, vehicle, 1)
         FreezeEntityPosition(player, false)
     else 
-        QBCore.Functions.Notify("Toutes les places sont occupées", "error", 1500)
+        exports['PipouUI']:Notify("Toutes les places sont occupées", "error", 1500)
     end
 
 end)

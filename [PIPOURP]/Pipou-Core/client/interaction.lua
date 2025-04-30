@@ -63,7 +63,7 @@ CreateThread(function()
 
                                     local serverId = GetPlayerServerId(targetPlayer)
                                     if serverId then
-                                        QBCore.Functions.Notify("Vous avez facturé la personne.", "success")
+                                        exports['PipouUI']:Notify("Vous avez facturé la personne.", "success")
                                     end
                                 end,
                                 canInteract = function(entity)
@@ -120,6 +120,6 @@ RegisterNetEvent('PipouJobs:client:BillPlayer', function(data)
     local serverId = GetPlayerServerId(targetPlayer)
 
     if serverId then
-        QBCore.Functions.Notify("Vous avez facturé la personne.", "success")
+        exports['PipouUI']:Notify("Vous avez facturé la personne.", "success")
     end
 end)

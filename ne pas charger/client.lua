@@ -403,7 +403,7 @@ function DGarageGetIn(garagelabel, category, garagejob, garagetype)
     local closestVehicle, distance = QBCore.Functions.GetClosestVehicle(coords)
 
     if closestVehicle == 0 or distance > 5.0 then
-        exports['PipouUI']:Notify("Aucun véhicule à ranger", "error", 3000)
+        QBCore.Functions.Notify("Aucun véhicule à ranger", "error", 3000)
         return
     end
 
@@ -414,7 +414,7 @@ function DGarageGetIn(garagelabel, category, garagejob, garagetype)
     end
 
     if vehicletype ~= category then
-        exports['PipouUI']:Notify("Ce type de véhicule ne peut pas être rangé ici.", "error", 3000)
+        QBCore.Functions.Notify("Ce type de véhicule ne peut pas être rangé ici.", "error", 3000)
         return
     end
 
@@ -433,10 +433,10 @@ function DGarageGetIn(garagelabel, category, garagejob, garagetype)
             if data == garagejob then
                 local ownerLabel = (garagejob ~= nil and garagejob ~= "" and garagetype ~= "private") and garagejob or ""
                 TriggerServerEvent('d-garage:server:getinvehicle', plate, model, garage, mods, ownerLabel)
-                exports['PipouUI']:Notify("Véhicule rangé : " .. model, "info", 3000)
+                QBCore.Functions.Notify("Véhicule rangé : " .. model, "primary", 3000)
                 DeleteEntity(closestVehicle)
             else
-                exports['PipouUI']:Notify("Ce véhicule ne vous appartient pas", "error", 3000)
+                QBCore.Functions.Notify("🚫 Ce véhicule ne vous appartient pas", "error", 3000)
             end
         end, plate)
 
@@ -447,10 +447,10 @@ function DGarageGetIn(garagelabel, category, garagejob, garagetype)
         if isOwner then
             local ownerLabel = (garagejob ~= nil and garagejob ~= "" and garagetype ~= "private") and garagejob or ""
             TriggerServerEvent('d-garage:server:getinvehicle', plate, model, garage, mods, ownerLabel)
-            exports['PipouUI']:Notify("Véhicule rangé : " .. model, "info", 3000)
+            QBCore.Functions.Notify("Véhicule rangé : " .. model, "primary", 3000)
             DeleteEntity(closestVehicle)
         else
-            exports['PipouUI']:Notify("Ce véhicule ne vous appartient pas", "error", 3000)
+            QBCore.Functions.Notify("🚫 Ce véhicule ne vous appartient pas", "error", 3000)
         end
         end, plate)
     end
@@ -734,7 +734,7 @@ RegisterNUICallback("d-spawnVehicle", function(data, cb)
             TriggerServerEvent('d-garage:server:spawnedVehicle', plate, model, data.currentgarage)
         end)
 
-        exports['PipouUI']:Notify("Véhicule sorti : " .. model, "info", length)
+        QBCore.Functions.Notify("Véhicule sorti : " .. model, "primary", length)
     end, plate)
 end)
 
@@ -750,7 +750,7 @@ RegisterNUICallback('client_set_gps_outside', function(data,cb)
 
         SetNewWaypoint(x,y)
 
-        exports['PipouUI']:Notify("Un point GPS a été placé", "info", length)
+        QBCore.Functions.Notify("Un point GPS a été placé", "primary", length)
 
         
     end, data.plate)
@@ -775,10 +775,10 @@ RegisterCommand("savevehicle", function()
 
     QBCore.Functions.TriggerCallback('server-d-get-owner', function(result)
         if result == true then
-            exports['PipouUI']:Notify("Le véhicule est déja enregistré", "error", length)
+            QBCore.Functions.Notify("Le véhicule est déja enregistré", "error", length)
         else
             TriggerServerEvent('d-garage:server:registervehicle', data, plate,model, garage,mods)
-            exports['PipouUI']:Notify("Le véhicule vous appartient désormais", "info", length)
+            QBCore.Functions.Notify("Le véhicule vous appartient désormais", "primary", length)
         end
 
     end, plate)

@@ -9,7 +9,7 @@ RegisterNetEvent('timber:client:openstash', function()
     if PlayerData.job and PlayerData.job.name == "timber" then
         TriggerServerEvent("timber:OpenSellStash")
     else
-        QBCore.Functions.Notify("🚫 Vous n'avez pas accès à ce coffre !", "error")
+        exports['PipouUI']:Notify("Vous n'avez pas accès à ce coffre !", "error")
     end
 end)
 

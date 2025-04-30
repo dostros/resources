@@ -38,7 +38,7 @@ Citizen.CreateThread(function()
                             if PlayerData.gang and PlayerData.gang.grade and PlayerData.gang.grade.isboss then
                                 TriggerEvent('OpenGangMenu:event', ganglabel, gangid)
                             else
-                                QBCore.Functions.Notify("Vous n'êtes pas le boss de ce gang.", "error")
+                                exports['PipouUI']:Notify("Vous n'êtes pas le boss de ce gang.", "error")
                             end
                         end,
                         gang = gang,

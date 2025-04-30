@@ -57,7 +57,7 @@ RegisterNetEvent('restaurant:client:spawnTable', function()
         TriggerServerEvent('restaurant:server:spawnObject', 'table')
     end, function() -- Cancel
         StopAnimTask(PlayerPedId(), 'anim@narcotics@trash', 'drop_front', 1.0)
-        QBCore.Functions.Notify("Pas assez de cuillères !", 'error')
+        exports['PipouUI']:Notify("Pas assez de cuillères !", 'error')
     end)
 end)
 
@@ -79,7 +79,7 @@ RegisterNetEvent('restaurant:client:deleteObject', function()
             TriggerServerEvent('restaurant:server:deleteObject', objectId)
         end, function() -- Cancel
             StopAnimTask(PlayerPedId(), 'weapons@first_person@aim_rng@generic@projectile@thermal_charge@', 'plant_floor', 1.0)
-            QBCore.Functions.Notify("Erreur", 'error')
+            exports['PipouUI']:Notify("Erreur", 'error')
         end)
     end
 end)

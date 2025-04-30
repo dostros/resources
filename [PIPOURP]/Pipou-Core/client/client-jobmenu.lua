@@ -78,7 +78,7 @@ Citizen.CreateThread(function()
                             if PlayerData.job.isboss then
                                 TriggerEvent('OpenBossMenu:event', joblabel, jobid)
                             else
-                                QBCore.Functions.Notify("Vous n'êtes pas le patron de ce job.", "error")
+                                exports['PipouUI']:Notify("Vous n'êtes pas le patron de ce job.", "error")
                             end
                         end,
                         job = job,

@@ -293,7 +293,7 @@ AddEventHandler('d-CarryLog', function(treelog, logcoords)
 
     -- Vérifier si le joueur porte déjà un tronc
     if iswearinglog then
-        QBCore.Functions.Notify("Vous portez déjà un tronc !", "primary", length)
+        exports['PipouUI']:Notify("Vous portez déjà un tronc !", "error", 3000)
         return
     end
 
@@ -304,7 +304,7 @@ AddEventHandler('d-CarryLog', function(treelog, logcoords)
         false, true, false, false, 2, true
     )
 
-    QBCore.Functions.Notify("Vous portez le tronc !\nAppuyez sur [E] pour relâcher.", "primary", length)
+    exports['PipouUI']:Notify("Vous portez le tronc !\nAppuyez sur [E] pour relâcher.", "info", length)
     iswearinglog = true
     logweared = treelog
 
@@ -332,7 +332,7 @@ AddEventHandler("StopDraggingLog", function(treelog)
     local player = PlayerPedId()
     iswearinglog = false
     DetachEntity(treelog, true, true)
-    QBCore.Functions.Notify("Vous avez relâché le tronc !", "primary", length)
+    exports['PipouUI']:Notify("Vous avez relâché le tronc !", "info", length)
 
     Wait(1500)
     FreezeEntityPosition(treelog,true)
@@ -461,12 +461,12 @@ AddEventHandler('d-putintrucklog', function(vehicleId)
             FreezeEntityPosition(logFound, true)
             SetEntityCollision(logFound, true, true)
 
-            QBCore.Functions.Notify("✅ Tronc placé dans le véhicule !", "primary", length)
+            exports['PipouUI']:Notify("Tronc placé dans le véhicule !", "info", length)
         else
-            QBCore.Functions.Notify("Tu ne peux pas charger plus ti es fada ou quoi !! Ca va benner sinon !", "error", length)
+            exports['PipouUI']:Notify("Tu ne peux pas charger plus ti es fada ou quoi !! Ca va benner sinon !", "error", length)
         end
     else
-        QBCore.Functions.Notify("❌ Aucun tronc trouvé à proximité", "error", length)
+        exports['PipouUI']:Notify("Aucun tronc trouvé à proximité", "error", length)
     end
 end)
 
@@ -525,7 +525,7 @@ end)
 --     isPlacingLog = false
 --     SetEntityAlpha(treelog, 255, false)
 --     SetEntityCoords(treelog, coords.x, coords.y, coords.z - 1.0, false, false, false, false)
---     QBCore.Functions.Notify("Vous avez déposé le tronc !", "primary", length)
+--     exports['PipouUI']:Notify("Vous avez déposé le tronc !", "info", length)
 -- end
 
 -- function RaycastFromCamera()
@@ -673,7 +673,7 @@ AddEventHandler('d-timber-put-tree-on-Conv', function ()
         end
         TriggerServerEvent("server-d-timber-SaveLog", numberoflog)
     else
-        QBCore.Functions.Notify("Pas de véhicule à proximité ou de rondins à décharger", "error", length)
+        exports['PipouUI']:Notify("Pas de véhicule à proximité ou de rondins à décharger", "error", length)
     end
 end)
 
@@ -769,7 +769,7 @@ RegisterNetEvent('qb-timber:client:openstash', function()
         TriggerServerEvent("timber:OpenStash")
         
     else
-        QBCore.Functions.Notify("🚫 Vous n'avez pas accès à ce coffre !", "error")
+        exports['PipouUI']:Notify("Vous n'avez pas accès à ce coffre !", "error")
     end
 end)
 
@@ -827,7 +827,7 @@ AddEventHandler('d-timber-put-plank-on-Conv', function ()
                 Citizen.Wait(1000)
             end
         else
-            QBCore.Functions.Notify("Pas de planches à récupérer", "error", length)
+            exports['PipouUI']:Notify("Pas de planches à récupérer", "error", length)
         end
     end)
 end)
@@ -895,7 +895,7 @@ function openMainMenu()
         {
             label = "Dire Bonjour 👋",
             action = function()
-                print("✅ Bonjour envoyé !")
+                print(" Bonjour envoyé !")
             end
         },
         {
@@ -983,3 +983,29 @@ function openSettingsMenu()
 end
 
 
+
+
+RegisterCommand('notification', function()
+    exports['PipouUI']:Notify("Véhicule rangé avec succès !", "success", 3500)
+    Wait(3500)
+    exports['PipouUI']:Notify("Véhicule rangé avec succès !", "error", 3500)
+    Wait(3500)
+    exports['PipouUI']:Notify("Véhicule rangé avec succès !", "info", 3500)
+    Wait(3500)
+    exports['PipouUI']:Notify("Intervention de la police en cours", "alert-police", 5000)
+    Wait(3500)
+    exports['PipouUI']:Notify("Un médecin est en route", "alert-ambulance", 5000)
+end, false)
+
+
+
+
+RegisterCommand('progressbar', function()
+    exports['PipouUI']:ProgressBar("Chargement...", 8000, function(cancelled)
+        if cancelled then
+            print("Annulé")
+        else
+            print("Terminé")
+        end
+    end)
+end, false)

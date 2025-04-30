@@ -100,7 +100,7 @@ RegisterNetEvent('qb-restaurant:client:takeorder', function(source)
 
         SetVehicleNumberPlateText(vehicule, "PIZZA")
         SetVehicleHasBeenOwnedByPlayer(vehicule, true)
-        SetVehicleCustomPrimaryColour(vehicule, 156, 17, 17)
+        SetVehicleCustominfoColour(vehicule, 156, 17, 17)
         SetVehicleCustomSecondaryColour(vehicule, 27, 65, 37)
         
         if modelvehicle =="hakuchou2" then
@@ -146,7 +146,7 @@ RegisterNetEvent('qb-restaurant:client:takeorder', function(source)
 
 
     else
-        QBCore.Functions.Notify("Vous avez déjà une commande", "error", 1500)
+        exports['PipouUI']:Notify("Vous avez déjà une commande", "error", 1500)
     end
 
 
@@ -162,12 +162,12 @@ RegisterNetEvent('qb-restaurant:client:storepizza', function()
         pizzaonbox = true;
         numberofpizzaonbox = numbertakedpizza
         numbertakedpizza = 0
-        QBCore.Functions.Notify("Pizza bien au chaud", "success", 1500)
+        exports['PipouUI']:Notify("Pizza bien au chaud", "success", 1500)
         
         deletepizza ()
 
     else
-        QBCore.Functions.Notify("Vous n'avez pas de pizza", "error", 1500)
+        exports['PipouUI']:Notify("Vous n'avez pas de pizza", "error", 1500)
     end
 
 
@@ -200,7 +200,7 @@ RegisterNetEvent('qb-restaurant:deliverpizza', function()
         ClearPedTasksImmediately(PlayerPedId())
         DeleteObject(pizzatogive)
 
-        QBCore.Functions.Notify("Merci beaucoup mec voilà ta thune !", "success", 1500)
+        exports['PipouUI']:Notify("Merci beaucoup mec voilà ta thune !", "success", 1500)
         TriggerServerEvent('qb-restaurant:server:payorder')
         RemoveBlip(blip)
         FreezeEntityPosition(customer, false)
@@ -219,7 +219,7 @@ RegisterNetEvent('qb-restaurant:deliverpizza', function()
         end
 
     else
-        QBCore.Functions.Notify("Vous n'avez pas de pizza", "error", 1500)
+        exports['PipouUI']:Notify("Vous n'avez pas de pizza", "error", 1500)
     
     end
 end)
@@ -293,7 +293,7 @@ RegisterNetEvent('qb-restaurant:client:backtorestaurant', function()
 
     local restaurant = Config.Locations["vehicle"][1]
 
-    QBCore.Functions.Notify("Retour à la pizzeria", "success", 1500)
+    exports['PipouUI']:Notify("Retour à la pizzeria", "success", 1500)
 
     --Afficher le blip
     SetNewWaypoint(restaurant.x,restaurant.y)

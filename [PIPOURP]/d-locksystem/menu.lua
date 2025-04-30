@@ -487,7 +487,7 @@ Citizen.CreateThread(function()
                                     updateDoorStatusLocally(doorEntity2, (v.status == 'open' and 'close' or 'open'))
 
                                 else
-                                    QBCore.Functions.Notify("Vous n'avez pas l'autorisation", "primary", length)
+                                    exports['PipouUI']:Notify("Vous n'avez pas l'autorisation", "info", length)
                                 end
                             end
 
@@ -515,7 +515,7 @@ Citizen.CreateThread(function()
                                     ToggleDoorLock(isDoorLocked, doorEntity, targetRotation,automaticornot)
                                     updateDoorStatusLocally(doorEntity, (v.status == 'open' and 'close' or 'open'))
                                 else
-                                    QBCore.Functions.Notify("Vous n'avez pas l'autorisation", "primary", length)
+                                    exports['PipouUI']:Notify("Vous n'avez pas l'autorisation", "info", length)
                                 end
                             end
 

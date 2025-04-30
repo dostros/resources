@@ -5,19 +5,21 @@ PipouUI.navigationStack = {}
 local menuCounter = 0
 
 -- Création du menu : retourne un id (chaîne) pour identifier le menu
-function PipouUI.CreateMenu(title, subtitle)
+function PipouUI.CreateMenu(title, subtitle, ttl)
     local menu = {
         id = tostring(menuCounter),
         title = title or "Menu",
         subtitle = subtitle or "",
         options = {},
-        callbacks = {}
+        callbacks = {},
+        expireAt = ttl and (GetGameTimer() + ttl) or nil 
     }
     setmetatable(menu, PipouUI)
     PipouUI.menus[menu.id] = menu
     menuCounter = menuCounter + 1
     return menu.id
 end
+
 exports('CreateMenu', PipouUI.CreateMenu)
 
 -- Ajout d'une option au menu
@@ -136,14 +138,20 @@ RegisterNUICallback("sliderChange", function(data, cb)
 end)
 
 
-function PipouUI:CloseMenu()
-    PipouUI.currentMenu = nil
+function PipouUI:CloseMenu(destroyAfterClose)
+    if PipouUI.currentMenu then
+        if destroyAfterClose then
+            PipouUI.menus[PipouUI.currentMenu.id] = nil
+        end
+        PipouUI.currentMenu = nil
+    end
 end
 
-exports('CloseMenu', function()
-    PipouUI:CloseMenu()
+exports('CloseMenu', function(destroyAfterClose)
+    PipouUI:CloseMenu(destroyAfterClose)
     SetNuiFocus(false, false) 
 end)
+
 
 
 function PipouUI:OpenSimpleMenu(title, subtitle, itemList)
@@ -308,3 +316,82 @@ exports('OpenTabbedMenu', function(title, subtitle, tabs)
     PipouUI:OpenTabbedMenu(title, subtitle, tabs)
 end)
 
+function PipouUI.DestroyMenu(menuId)
+    if PipouUI.menus[menuId] then
+        PipouUI.menus[menuId] = nil
+    end
+end
+
+exports('DestroyMenu', function(menuId)
+    PipouUI.DestroyMenu(menuId)
+end)
+
+
+
+
+CreateThread(function()
+    while true do
+        Wait(30000) -- toutes les 30 secondes
+        local now = GetGameTimer()
+        for id, menu in pairs(PipouUI.menus) do
+            if menu.expireAt and now > menu.expireAt then
+                PipouUI.menus[id] = nil
+                print("[PipouUI] Menu supprimé (expiré) : " .. id)
+            end
+        end
+    end
+end)
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--                            NOTIFY
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+function PipouUI:Notify(message, type, duration)
+    SendNUIMessage({
+        action = "SHOW_NOTIFICATION",
+        message = message,
+        type = type or "info", -- 'success', 'error', 'info'
+        duration = duration or 3000
+    })
+end
+
+exports('Notify', function(message, type, duration)
+    PipouUI:Notify(message, type, duration)
+end)
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--                            PROGRESSBAR
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+function PipouUI:ProgressBar(text, duration, cb, allowCancel)
+    SetNuiFocus(true, false)
+    SetNuiFocusKeepInput(true)
+
+    SendNUIMessage({
+        action = "SHOW_PROGRESSBAR",
+        text = text,
+        duration = duration,
+        allowCancel = allowCancel ~= false
+    })
+
+    PipouUI.currentProgressCallback = cb
+end
+
+exports('ProgressBar', function(text, duration, cb, allowCancel)
+    PipouUI:ProgressBar(text, duration, cb, allowCancel)
+end)
+
+
+RegisterNUICallback("cancelProgressbar", function(_, cb)
+    if PipouUI.currentProgressCallback then
+        PipouUI.currentProgressCallback(true)
+        PipouUI.currentProgressCallback = nil
+    end
+    cb({})
+end)

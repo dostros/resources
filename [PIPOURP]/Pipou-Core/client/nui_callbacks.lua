@@ -147,7 +147,7 @@ RegisterNuiCallback('FireSomeone', function(data, cb)
 
     QBCore.Functions.TriggerCallback('Pipou-Core:server:Fireplayer', function(result)
         if result then
-            QBCore.Functions.Notify("Vous avez licencié " .. playername .. " du job " .. jobname, "success")
+            exports['PipouUI']:Notify("Vous avez licencié " .. playername .. " du job " .. jobname, "success")
             
         else
             print("Aucun résultat ou erreur de réception.")

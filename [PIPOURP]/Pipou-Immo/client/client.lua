@@ -70,12 +70,12 @@ CreateThread(function()
     if coords.z <= -100 then
         QBCore.Functions.TriggerCallback('PipouImmo:server:getPropertyAtCoords', function(propData)
             if not propData then
-                QBCore.Functions.Notify("🚨 Intérieur inconnu, déplacement vers un lieu sûr...", "error")
+                exports['PipouUI']:Notify("🚨 Intérieur inconnu, déplacement vers un lieu sûr...", "error")
                 SetEntityCoords(ped, 200.0, -1000.0, 30.0) -- fallback safe zone
                 return
             end
 
-            QBCore.Functions.Notify("⛔ Vous avez été replacé dans votre intérieur", "primary")
+            exports['PipouUI']:Notify("Vous avez été replacé dans votre intérieur", "info")
 
             local shellModel = GetHashKey(propData.type)
             RequestModel(shellModel)
@@ -114,7 +114,7 @@ RegisterNUICallback('Pipou-Immo-createProperty', function(data, cb)
     local GarageOut = data.coords3
 
     if not propertyName or not propertyType or not Housecoords or not Housecoords.x then
-        QBCore.Functions.Notify("❌ Données invalides ou incomplètes", "error")
+        exports['PipouUI']:Notify("Données invalides ou incomplètes", "error")
         cb({ success = false })
         return
     end
@@ -147,11 +147,11 @@ RegisterNUICallback('Pipou-Immo-createProperty', function(data, cb)
 
     QBCore.Functions.TriggerCallback("PipouImmo:server:saveProperty", function(success)
         if success then
-            QBCore.Functions.Notify("✅ Propriété enregistrée avec succès !", "success")
+            exports['PipouUI']:Notify("Propriété enregistrée avec succès !", "success")
             SetDisplay(false)
             cb({ success = true })
         else
-            QBCore.Functions.Notify("❌ Erreur lors de la sauvegarde", "error")
+            exports['PipouUI']:Notify("Erreur lors de la sauvegarde", "error")
             cb({ success = false })
         end
     end, propertyName, propertyType, level, Housecoords, Garagecoords, GarageOut)
@@ -172,7 +172,7 @@ RegisterNUICallback("Pipou-Immo-setPropertyCoords", function(data, cb)
             if IsControlJustReleased(0, 38) then 
                 local playerCoords = GetEntityCoords(PlayerPedId())
                 PlaySoundFrontend(-1, "SELECT", "HUD_LIQUOR_STORE_SOUNDSET", true)
-                QBCore.Functions.Notify("📍 Point placé : " .. playerCoords.x .. ", " .. playerCoords.y)
+                exports['PipouUI']:Notify("📍 Point placé : " .. playerCoords.x .. ", " .. playerCoords.y)
 
                 SetNuiFocus(true, true)
                 SendNUIMessage({
@@ -202,16 +202,16 @@ RegisterCommand("givehouse", function(source, args)
     local targetId = tonumber(args[1]) or GetPlayerServerId(PlayerId())
     local propertyName = args[2]
     if not propertyName then
-        QBCore.Functions.Notify("Utilisation : /givehouse [id] [propertyName]", "error")
+        exports['PipouUI']:Notify("Utilisation : /givehouse [id] [propertyName]", "error")
         return
     end
 
     QBCore.Functions.TriggerCallback("PipouImmo:server:assignProperty", function(success, message)
         if success then
-            QBCore.Functions.Notify(message, "success")
+            exports['PipouUI']:Notify(message, "success")
             TriggerServerEvent("PipouImmo:server:getPlayerProperties")
         else
-            QBCore.Functions.Notify(message, "error")
+            exports['PipouUI']:Notify(message, "error")
         end
     end, targetId, propertyName)
 end)
@@ -308,12 +308,12 @@ RegisterNetEvent('Pipou-Immo:enterHouse', function(data)
             --                     end
             --                 },
             --                 {
-            --                     label = "❌ Supprimer le meuble",
+            --                     label = " Supprimer le meuble",
             --                     icon = "fas fa-trash",
             --                     action = function()
             --                         TriggerServerEvent("PipouImmo:server:removeFurniture", item.id)
             --                         DeleteEntity(obj)
-            --                         QBCore.Functions.Notify("🗑️ Meuble supprimé", "success")
+            --                         exports['PipouUI']:Notify("🗑️ Meuble supprimé", "success")
             --                     end
             --                 }
             --             },
@@ -331,9 +331,9 @@ RegisterNetEvent('Pipou-Immo:enterHouse', function(data)
 
 
         elseif hasAccess then
-            QBCore.Functions.Notify("🔒 Vous êtes locataire : l'accès est restreint.", "error")
+            exports['PipouUI']:Notify("🔒 Vous êtes locataire : l'accès est restreint.", "error")
         else
-            QBCore.Functions.Notify("🚫 Vous n'avez pas de droit d'accès à cette propriété.", "error")
+            exports['PipouUI']:Notify("Vous n'avez pas de droit d'accès à cette propriété.", "error")
         end
     end, propertyName)
 end)
@@ -384,7 +384,7 @@ end)
 -- 🧹 Nettoyage du shell
 RegisterCommand("removeappart", function()
     CleanInstance()
-    QBCore.Functions.Notify("🏠 Shell et meubles supprimés avec succès.", "success")
+    exports['PipouUI']:Notify("🏠 Shell et meubles supprimés avec succès.", "success")
 end)
 
 
@@ -431,7 +431,7 @@ RegisterCommand('spawnshell', function(source, args)
     SetEntityHeading(spawnedShell, 0.0)
     FreezeEntityPosition(spawnedShell, true)
 
-    QBCore.Functions.Notify("Shell spawned: " .. shellName, "success")
+    exports['PipouUI']:Notify("Shell spawned: " .. shellName, "success")
 end)    
 
 RegisterNetEvent('PipouImmo:client:addHouseEntryPoint', function(propertyName)
@@ -443,14 +443,14 @@ RegisterNetEvent('PipouImmo:client:addHouseEntryPoint', function(propertyName)
             end
             if cachedProperties[propertyName] then
                 createHousePoint(propertyName, cachedProperties[propertyName].coords)
-                QBCore.Functions.Notify("📦 Propriété reçue : " .. propertyName, "success")
+                exports['PipouUI']:Notify("📦 Propriété reçue : " .. propertyName, "success")
             else
-                QBCore.Functions.Notify("❌ Erreur : impossible d’ajouter la propriété", "error")
+                (" Erreur : impossible d’ajouter la propriété", "error")
             end
         end)
     else
         createHousePoint(propertyName, prop.coords)
-        QBCore.Functions.Notify("📦 Propriété reçue : " .. propertyName, "success")
+        exports['PipouUI']:Notify("📦 Propriété reçue : " .. propertyName, "success")
     end
 end)
 
@@ -462,7 +462,7 @@ end)
 RegisterNetEvent('Pipou-Immo:toggleLight', function()
     SetShellLightState(not isLightOn)
 
-    QBCore.Functions.Notify(isLightOn and "💡 Lumière allumée" or "💡 Lumière éteinte", "primary")
+    exports['PipouUI']:Notify(isLightOn and "💡 Lumière allumée" or "💡 Lumière éteinte", "info")
 end)
 
 
@@ -516,7 +516,7 @@ RegisterNetEvent("Pipou-Immo:giveKey", function()
         local targetPed = GetPlayerPed(closestPlayer)
         local targetId = GetPlayerServerId(closestPlayer)
 
-        QBCore.Functions.Notify("Appuyez sur ~g~E~s~ pour donner la clef à " .. GetPlayerName(closestPlayer), "primary")
+        exports['PipouUI']:Notify("Appuyez sur ~g~E~s~ pour donner la clef à " .. GetPlayerName(closestPlayer), "info")
 
         -- Affichage 3D du texte
         CreateThread(function()
@@ -529,12 +529,12 @@ RegisterNetEvent("Pipou-Immo:giveKey", function()
                 if IsControlJustReleased(0, 38) then -- Touche E
                     given = true
                     TriggerServerEvent("PipouImmo:server:giveKeyTo", targetId)
-                    QBCore.Functions.Notify("🔑 Clef donnée à " .. GetPlayerName(closestPlayer), "success")
+                    exports['PipouUI']:Notify("🔑 Clef donnée à " .. GetPlayerName(closestPlayer), "success")
                 end
             end
         end)
     else
-        QBCore.Functions.Notify("❌ Aucun joueur proche pour donner une clef.", "error")
+        exports['PipouUI']:Notify(" Aucun joueur proche pour donner une clef.", "error")
     end
 end)
 
@@ -566,8 +566,8 @@ end
 
 RegisterNetEvent("Pipou-Immo:confirmRemoveTenant", function(data)
 
-    exports['PipouUI']:OpenSimpleMenu("❌ Retirer " .. data.name .. " ?", "", {
-        { label = "✅ Oui, retirer", action = function()
+    exports['PipouUI']:OpenSimpleMenu(" Retirer " .. data.name .. " ?", "", {
+        { label = " Oui, retirer", action = function()
             TriggerEvent("Pipou-Immo:removeTenantConfirmed", data)
             return false
         end },
@@ -637,7 +637,7 @@ end)
 
 RegisterNUICallback("deleteProperty", function(data, cb)
     if not data.id then
-        print("[PipouImmo] ❌ ID manquant dans deleteProperty")
+        print("[PipouImmo]  ID manquant dans deleteProperty")
         return cb({ success = false, message = "ID manquant." })
     end
 
@@ -648,7 +648,7 @@ end)
 
 RegisterNUICallback("assignPropertyToPlayerId", function(data, cb)
     if not data.id or not data.target then
-        QBCore.Functions.Notify("❌ Données manquantes.", "error")
+        exports['PipouUI']:Notify(" Données manquantes.", "error")
         return cb({ success = false, message = "ID ou cible manquant." })
     end
 
@@ -658,9 +658,9 @@ end)
 
 RegisterNetEvent("PipouImmo:client:notifyPropertyDeleted", function(success)
     if success then
-        QBCore.Functions.Notify("✅ Propriété supprimée avec succès.", "success")
+        (" Propriété supprimée avec succès.", "success")
     else
-        QBCore.Functions.Notify("❌ Échec lors de la suppression.", "error")
+        exports['PipouUI']:Notify(" Échec lors de la suppression.", "error")
     end
 end)
 
@@ -669,7 +669,7 @@ end)
 RegisterNetEvent('PipouImmo:openFurnitureList', function()
     QBCore.Functions.TriggerCallback('PipouImmo:getPlayerFurnitureInventory', function(furnitureList)
         if not furnitureList or #furnitureList == 0 then
-            QBCore.Functions.Notify("❌ Vous n'avez aucun meuble.", "error")
+            exports['PipouUI']:Notify(" Vous n'avez aucun meuble.", "error")
             return
         end
 
@@ -708,7 +708,7 @@ RegisterNetEvent("PipouImmo:startPlacingFurniture", function(item)
     local obj = CreateObject(model, spawnX, spawnY, spawnZ, true, true, true)
 
     StartFurniturePlacement(obj, item, true, function(pos, rot)
-        QBCore.Functions.Notify("✅ Meuble placé !", "success")
+        exports['PipouUI']:Notify(" Meuble placé !", "success")
         TriggerServerEvent("PipouImmo:saveObjectPlacement", {
             object = item.object,
             coords = pos,
@@ -721,12 +721,12 @@ end)
 
 RegisterNetEvent("PipouImmo:startPlacingExistingFurniture", function(obj, item)
     if not item.id then
-        QBCore.Functions.Notify("❌ Impossible de modifier ce meuble (ID manquant)", "error")
+        exports['PipouUI']:Notify(" Impossible de modifier ce meuble (ID manquant)", "error")
         return
     end
 
     StartFurniturePlacement(obj, item, false, function(pos, rot)
-        QBCore.Functions.Notify("✅ Position mise à jour", "success")
+        exports['PipouUI']:Notify(" Position mise à jour", "success")
         TriggerServerEvent("PipouImmo:updateFurniturePlacement", {
             id = item.id,
             coords = pos,
@@ -815,7 +815,7 @@ RegisterNUICallback("placeFurniture", function(data, cb)
 
     -- Sécurité : Vérifie que l'objet est valide
     if not data.object then
-        QBCore.Functions.Notify("❌ Objet invalide.", "error")
+        exports['PipouUI']:Notify(" Objet invalide.", "error")
         cb("error")
         return
     end
@@ -837,7 +837,7 @@ RegisterNUICallback("previsualisatinFurniture", function(data, cb)
 
     -- Sécurité : Vérifie que l'objet est valide
     if not data.object then
-        QBCore.Functions.Notify("❌ Objet invalide.", "error")
+        exports['PipouUI']:Notify(" Objet invalide.", "error")
         cb("error")
         return
     end
@@ -1001,7 +1001,7 @@ end
 
 function StartFurniturePlacement(entity, itemData, isNew, onConfirm, onCancel)
     if not DoesEntityExist(entity) then
-        QBCore.Functions.Notify("❌ Entité non trouvée", "error")
+        exports['PipouUI']:Notify(" Entité non trouvée", "error")
         return
     end
 
@@ -1024,7 +1024,7 @@ function StartFurniturePlacement(entity, itemData, isNew, onConfirm, onCancel)
     PlaceObjectOnGroundProperly(entity)
 
     local placing = true
-    QBCore.Functions.Notify("🎮 " .. (isNew and "Placement" or "Modification") .. " de meuble... [Entrée] pour valider | [Retour] pour annuler", "primary")
+    exports['PipouUI']:Notify("🎮 " .. (isNew and "Placement" or "Modification") .. " de meuble... [Entrée] pour valider | [Retour] pour annuler", "info")
 
     CreateThread(function()
         while placing do
@@ -1046,13 +1046,13 @@ function StartFurniturePlacement(entity, itemData, isNew, onConfirm, onCancel)
             -- 🎮 Mode toggle
             if IsControlJustPressed(0, 45) then
                 modeRotation = not modeRotation
-                QBCore.Functions.Notify(modeRotation and "🎮 Mode rotation" or "🚶 Mode déplacement", "info")
+                exports['PipouUI']:Notify(modeRotation and "🎮 Mode rotation" or "🚶 Mode déplacement", "info")
             end
 
             -- 🔁 Axis change
             if IsControlJustPressed(0, 23) then
                 currentAxis = currentAxis == "yaw" and "pitch" or currentAxis == "pitch" and "roll" or "yaw"
-                QBCore.Functions.Notify("🌀 Axe : " .. currentAxis, "primary")
+                exports['PipouUI']:Notify("🌀 Axe : " .. currentAxis, "info")
             end
 
             -- ✨ Movement / Rotation logic
@@ -1083,7 +1083,7 @@ function StartFurniturePlacement(entity, itemData, isNew, onConfirm, onCancel)
             DrawInstructionUI(modeRotation, currentAxis)
             DrawText3D(pos.x, pos.y, pos.z + 1.4, "Mode : " .. (modeRotation and "Rotation" or "Déplacement") .. " | Axe : " .. currentAxis:upper())
 
-            -- ✅ Confirm
+            --  Confirm
             if IsControlJustReleased(0, 191) then
                 SetEntityAlpha(entity, 255, false)
                 FreezeEntityPosition(entity, true)
@@ -1092,9 +1092,9 @@ function StartFurniturePlacement(entity, itemData, isNew, onConfirm, onCancel)
                 onConfirm(pos, rot)
             end
 
-            -- ❌ Cancel
+            --  Cancel
             if IsControlJustReleased(0, 202) then
-                QBCore.Functions.Notify("❌ Annulé", "error")
+                exports['PipouUI']:Notify(" Annulé", "error")
                 placing = false
 
                 if isNew then
@@ -1155,7 +1155,7 @@ RegisterNetEvent("PipouImmo:client:loadFurnitureForAll", function(propertyName, 
                     end
                 },
                 {
-                    label = "❌ Supprimer le meuble",
+                    label = " Supprimer le meuble",
                     icon = "fas fa-trash",
                     action = function()
                         TriggerServerEvent("PipouImmo:server:removeFurniture", item.id)
@@ -1174,10 +1174,10 @@ RegisterNUICallback("PipouImmo:buyFurniture", function(data, cb)
 
     QBCore.Functions.TriggerCallback("PipouImmo:server:buyFurniture", function(success, message)
         if success then
-            QBCore.Functions.Notify(message or "✅ Meuble acheté !", "success")
+            exports['PipouUI']:Notify(message or " Meuble acheté !", "success")
             cb({ success = true })
         else
-            QBCore.Functions.Notify(message or "❌ Achat échoué.", "error")
+            exports['PipouUI']:Notify(message or " Achat échoué.", "error")
             cb({ success = false, message = message })
         end
     end, object, price, label)
@@ -1185,7 +1185,7 @@ end)
 
 
 RegisterNUICallback("notify", function(data, cb)
-    QBCore.Functions.Notify(data.message or "Notification", data.type or "primary")
+    exports['PipouUI']:Notify(data.message or "Notification", data.type or "info")
     cb("ok")
 end)
 
@@ -1205,7 +1205,7 @@ RegisterNetEvent("PipouImmo:client:publicAccessChanged", function(propertyName, 
         local isPublic = newState == 1
 
         -- Notifie le joueur
-        QBCore.Functions.Notify(isPublic and "🏡 La maison est maintenant OUVERTE à tous." or "🏡 La maison est maintenant FERMÉE.", "primary")
+        exports['PipouUI']:Notify(isPublic and "🏡 La maison est maintenant OUVERTE à tous." or "🏡 La maison est maintenant FERMÉE.", "info")
 
         -- Recharge le menu principal
         TriggerEvent("Pipou-Immo:openMainMenu")

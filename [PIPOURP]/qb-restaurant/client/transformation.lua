@@ -31,7 +31,7 @@ RegisterNUICallback('makeMargarita', function(data, cb)
     
         QBCore.Functions.TriggerCallback('qb-restaurant:server:loadIngredients', numberitem, function(result)
             if not result then 
-                QBCore.Functions.Notify("Manque d'ingrédient  !!!", "error", 1500)  
+                exports['PipouUI']:Notify("Manque d'ingrédient  !!!", "error", 1500)  
                 
             end
             
@@ -68,7 +68,7 @@ RegisterNetEvent("qb-restaurant-client-traire", function(source, entity)
         disableMouse = false,
         disableCombat = true
         }, {}, {}, {}, function()
-            QBCore.Functions.Notify("4 Mozzarellas Di Buffala ramassées", "success", 1500)
+            exports['PipouUI']:Notify("4 Mozzarellas Di Buffala ramassées", "success", 1500)
             FreezeEntityPosition(PlayerPedId(), false)
             FreezeEntityPosition(entity, false)
             TriggerServerEvent("qb-restaurant:server:receivemozzarella")

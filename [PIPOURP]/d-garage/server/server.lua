@@ -88,7 +88,7 @@ QBCore.Functions.CreateCallback('server-d-get-listvehicle', function(source, dat
 
 
     
-    if garagejob == "nojob" then
+    if not garagejob or garagejob == "nojob" or garagejob == "" then
         local Player = QBCore.Functions.GetPlayer(source)
 
 
@@ -109,8 +109,8 @@ QBCore.Functions.CreateCallback('server-d-get-listvehicle', function(source, dat
 end)
 
 QBCore.Functions.CreateCallback('server-d-get-listothervehicle', function(source, data, namegarage)
-
-    local Player = QBCore.Functions.GetPlayer(source)
+    print("[DEBUG] server-d-get-listvehicle appelé :", namegarage, garagejob)
+    local Player = QBCore.Functions.GetPlayer(source)   
 
     MySQL.query('SELECT `model`, `plate`, `garage` FROM `player_vehicles` WHERE `citizenid` = @citizenid AND `garage` != @excludedGarage AND `garage` != "outside"', {
         ['@citizenid'] = Player.PlayerData.citizenid,

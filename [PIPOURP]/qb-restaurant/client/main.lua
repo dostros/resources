@@ -105,7 +105,7 @@ RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
                             disableMouse = false,
                             disableCombat = true
                             }, {}, {}, {}, function()
-                                QBCore.Functions.Notify("10 tomates ramassées", "success", 1500)
+                                exports['PipouUI']:Notify("10 tomates ramassées", "success", 1500)
                                 FreezeEntityPosition(PlayerPedId(), false)
                                 
                                 TriggerServerEvent("qb-restaurant:server:receivetomato")
@@ -155,7 +155,7 @@ RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
                             disableMouse = false,
                             disableCombat = true
                             }, {}, {}, {}, function()
-                                QBCore.Functions.Notify("5 kg de farine ramassés", "success", 1500)
+                                exports['PipouUI']:Notify("5 kg de farine ramassés", "success", 1500)
                                 FreezeEntityPosition(PlayerPedId(), false)
                                 
                                 TriggerServerEvent("qb-restaurant:server:receiveflour")

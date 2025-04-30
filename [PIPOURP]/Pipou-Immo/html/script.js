@@ -53,15 +53,15 @@ document.addEventListener("DOMContentLoaded", function () {
             switch (item.propertyId) {
                 case 'button-inputsetupHouseDoor':
                     HouseDoorCoords = item.coords;
-                    document.getElementById('label-inputsetupHouseDoor').innerHTML = '✅';
+                    document.getElementById('label-inputsetupHouseDoor').innerHTML = '';
                     break;
                 case 'button-inputsetupGarageDoor':
                     GarageDoorCoords = item.coords;
-                    document.getElementById('label-inputsetupGarageDoor').innerHTML = '✅';
+                    document.getElementById('label-inputsetupGarageDoor').innerHTML = '';
                     break;
                 case 'button-inputsetupGarageOut':
                     GarageOutCoords = item.coords;
-                    document.getElementById('label-inputsetupGarageOut').innerHTML = '✅';
+                    document.getElementById('label-inputsetupGarageOut').innerHTML = '';
                     break;
             }
         }
@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
             menu.classList.add("visible"); // Ajoute la classe visible
             menu.style.display = "block";  // Affiche le menu
         
-            // ✅ C’est ici que tu peux capturer la liste pour la recherche
+            //  C’est ici que tu peux capturer la liste pour la recherche
             currentFurnitureList = event.data.furnitureList; // <-- À ajouter si tu veux la recherche
             renderFurnitureList(currentFurnitureList);       // <-- À ajouter aussi (fonction de rendu personnalisée)
         }
@@ -206,31 +206,31 @@ document.addEventListener("DOMContentLoaded", function () {
     
         // Vérification du nom
         if (!propertyName) {
-            notifyNUI("❌ Le nom de la propriété est requis.");
+            notifyNUI(" Le nom de la propriété est requis.");
             return;
         }
     
         // Vérification du type d’intérieur
         if (!typeinterior || typeinterior === 'none') {
-            notifyNUI("❌ Le type d’intérieur est requis.");
+            notifyNUI(" Le type d’intérieur est requis.");
             return;
         }
     
         // Vérification des coordonnées de la maison
         if (!coords1 || typeof coords1 !== 'object' || coords1.x === undefined || coords1.y === undefined || coords1.z === undefined) {
-            notifyNUI("❌ Le point d’entrée de la maison est requis.");
+            notifyNUI(" Le point d’entrée de la maison est requis.");
             return;
         }
     
         // Vérification des coordonnées du garage
         if (!coords2 || typeof coords2 !== 'object' || coords2.x === undefined || coords2.y === undefined || coords2.z === undefined) {
-            notifyNUI("❌ Le point du garage est requis.");
+            notifyNUI(" Le point du garage est requis.");
             return;
         }
     
         // Vérification des coordonnées de sortie du garage
         if (!coords3 || typeof coords3 !== 'object' || coords3.x === undefined || coords3.y === undefined || coords3.z === undefined) {
-            notifyNUI("❌ Le point de sortie du garage est requis.");
+            notifyNUI(" Le point de sortie du garage est requis.");
             return;
         }
     

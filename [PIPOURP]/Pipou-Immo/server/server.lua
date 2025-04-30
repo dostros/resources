@@ -4,12 +4,12 @@ local QBCore = exports['qb-core']:GetCoreObject()
 QBCore.Functions.CreateCallback('PipouImmo:server:saveProperty', function(source, cb, propertyName, propertyType, level, Housecoords, Garagecoords, GarageOut)
     -- 🚫 Validation des champs obligatoires
     if not propertyName or propertyName == "" or not propertyType or propertyType == "" or not level or not Housecoords or not Housecoords.x or not Housecoords.y or not Housecoords.z then
-        print("[IMMO] ❌ Données de propriété invalides reçues depuis client (manque des champs)")
+        print("[IMMO]  Données de propriété invalides reçues depuis client (manque des champs)")
         cb(false)
         return
     end
 
-    -- ✅ Insertion si toutes les conditions sont valides
+    --  Insertion si toutes les conditions sont valides
     MySQL.Async.execute('INSERT INTO properties (name, type, level, x, y, z, garage_x, garage_y, garage_z, out_x, out_y, out_z) VALUES (@name, @type, @level, @x, @y, @z, @gx, @gy, @gz, @ox, @oy, @oz)', {
         ['@name'] = propertyName,
         ['@type'] = propertyType,
@@ -25,10 +25,10 @@ QBCore.Functions.CreateCallback('PipouImmo:server:saveProperty', function(source
         ['@oz'] = GarageOut and GarageOut.z or 0.0,
     }, function(affectedRows)
         if affectedRows and affectedRows > 0 then
-            print("✅ Propriété sauvegardée avec succès.")
+            print(" Propriété sauvegardée avec succès.")
             cb(true)
         else
-            print("❌ Erreur lors de la sauvegarde de la propriété.")
+            print(" Erreur lors de la sauvegarde de la propriété.")
             cb(false)
         end
     end)
@@ -144,7 +144,7 @@ QBCore.Functions.CreateCallback('PipouImmo:server:getAllProperties', function(so
                     } or nil
                 })
             else
-                print(("❌ Erreur : Coordonnées invalides pour la propriété '%s'"):format(row.name))
+                print((" Erreur : Coordonnées invalides pour la propriété '%s'"):format(row.name))
             end
         end
 
@@ -272,7 +272,7 @@ RegisterNetEvent('PipouImmo:server:removeTenantByCitizenId', function(propertyNa
                 ['@pid'] = propertyId,
                 ['@cid'] = targetCitizenId
             }, function()
-                TriggerClientEvent("QBCore:Notify", src, "❌ Colocataire retiré.", "success")
+                TriggerClientEvent("QBCore:Notify", src, " Colocataire retiré.", "success")
             end)
         end
     end)
@@ -284,7 +284,7 @@ RegisterNetEvent("PipouImmo:server:getPlayerProperties", function()
     local Player = QBCore.Functions.GetPlayer(src)
 
     if not Player then
-        print("❌ Impossible de récupérer le joueur avec source: " .. tostring(src))
+        print(" Impossible de récupérer le joueur avec source: " .. tostring(src))
         return
     end
 
@@ -361,7 +361,7 @@ end)
 
 RegisterNetEvent("PipouImmo:server:assignPropertyToPlayerId")
 AddEventHandler("PipouImmo:server:assignPropertyToPlayerId", function(propertyId, targetId)
-    local src = source -- ✅ FIX ici
+    local src = source --  FIX ici
     local targetPlayer = QBCore.Functions.GetPlayer(tonumber(targetId))
 
     if targetPlayer then
@@ -377,15 +377,15 @@ AddEventHandler("PipouImmo:server:assignPropertyToPlayerId", function(propertyId
                 ['@cid'] = citizenid
             }, function(rows)
                 if rows > 0 then
-                    TriggerClientEvent('QBCore:Notify', src, "✅ Propriété assignée.", "success")
+                    TriggerClientEvent('QBCore:Notify', src, " Propriété assignée.", "success")
                     TriggerClientEvent('PipouImmo:client:addHouseEntryPoint', targetId, propertyId)
                 else
-                    TriggerClientEvent('QBCore:Notify', src, "❌ Attribution échouée", "error")
+                    TriggerClientEvent('QBCore:Notify', src, " Attribution échouée", "error")
                 end
             end)
         end)
     else
-        TriggerClientEvent('QBCore:Notify', source, "❌ Joueur introuvable.", "error")
+        TriggerClientEvent('QBCore:Notify', source, " Joueur introuvable.", "error")
     end
 end)
 
@@ -496,7 +496,7 @@ AddEventHandler("PipouImmo:updateFurniturePlacement", function(data)
     if not Player then return end
 
     if not data.id then
-        print(("[IMMOBILIER] ❌ Tentative sans ID valide par %s"):format(Player.PlayerData.citizenid))
+        print(("[IMMOBILIER]  Tentative sans ID valide par %s"):format(Player.PlayerData.citizenid))
         return
     end
     
@@ -555,10 +555,10 @@ RegisterNetEvent("PipouImmo:server:removeFurniture", function(furnitureId)
                 ['@id'] = furnitureId
             }, function(rowsAffected)
                 if rowsAffected > 0 then
-                    print(("[IMMO] ✅ Meuble supprimé (ID %s) par %s"):format(furnitureId, citizenid))
+                    print(("[IMMO]  Meuble supprimé (ID %s) par %s"):format(furnitureId, citizenid))
                     TriggerEvent("PipouImmo:server:broadcastFurniture", propertyName)
                 else
-                    print(("[IMMO] ❌ Échec suppression meuble ID %s"):format(furnitureId))
+                    print(("[IMMO]  Échec suppression meuble ID %s"):format(furnitureId))
                 end
             end)
         else
@@ -592,9 +592,9 @@ QBCore.Functions.CreateCallback("PipouImmo:server:buyFurniture", function(source
             ['@object'] = furnitureName,
             ['@label'] = label
         })
-        cb(true, "✅ Meuble acheté !")
+        cb(true, " Meuble acheté !")
     else
-        cb(false, "❌ Pas assez d'argent")
+        cb(false, " Pas assez d'argent")
     end
 end)
 

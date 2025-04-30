@@ -77,7 +77,7 @@ end)
 -- Prévisualisation d’un shell
 RegisterNetEvent("Pipou-Immo:previewInterior", function(data)
     if isPreviewing then
-        QBCore.Functions.Notify("⛔ Vous êtes déjà en prévisualisation.", "error")
+        exports['PipouUI']:Notify("Vous êtes déjà en prévisualisation.", "error")
         return
     end
 
@@ -107,7 +107,7 @@ RegisterNetEvent("Pipou-Immo:previewInterior", function(data)
     isPreviewing = true
     previewPlayers = previewPlayers + 1
 
-    QBCore.Functions.Notify("🏠 Vous visitez : " .. (Config.InteriorTypes[shellName].label or shellName), "success")
+    exports['PipouUI']:Notify("🏠 Vous visitez : " .. (Config.InteriorTypes[shellName].label or shellName), "success")
 
     exitZone = "previewExit_" .. math.random(1000, 9999)
     exports['qb-target']:AddBoxZone(exitZone, exitCoords, 1.0, 1.0, {
@@ -122,7 +122,7 @@ RegisterNetEvent("Pipou-Immo:previewInterior", function(data)
                 type = "client",
                 event = "Pipou-Immo:exitPreview",
                 icon = "fas fa-sign-out-alt",
-                label = "❌ Quitter la prévisualisation",
+                label = " Quitter la prévisualisation",
                 args = { zoneName = exitZone }
             }
         },
@@ -158,7 +158,7 @@ RegisterNetEvent("Pipou-Immo:exitPreview", function(data)
 
     isPreviewing = false
     DoScreenFadeIn(500)
-    QBCore.Functions.Notify("🔙 Retour à l'agence", "primary")
+    exports['PipouUI']:Notify("🔙 Retour à l'agence", "info")
 end)
 
 

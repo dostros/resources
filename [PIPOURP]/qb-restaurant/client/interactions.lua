@@ -142,7 +142,7 @@ options = {
       elseif ontakepizza then
         TriggerEvent('qb-restaurant:client:storepizza')
       else
-        QBCore.Functions.Notify("Il y a déjà des pizzas dans la boîte", "error")
+        exports['PipouUI']:Notify("Il y a déjà des pizzas dans la boîte", "error")
       end
     end,
     job = 'restaurant', -- This is the job, this option won't show up if the player doesn't have this job, this can also be done with multiple jobs and grades, if you want multiple jobs you always need a grade with it: job = {["police"] = 0, ["ambulance"] = 2},
@@ -161,11 +161,11 @@ options = {
           if pizzaonbox then
             TriggerEvent('qb-restaurant:client:getpizza')
           else
-            QBCore.Functions.Notify("Pas de pizzas au chaud ! Retourne en chercher", "error")
+            exports['PipouUI']:Notify("Pas de pizzas au chaud ! Retourne en chercher", "error")
             TriggerEvent('qb-restaurant:client:backtorestaurant')
           end
         else
-          QBCore.Functions.Notify("Tu as déjà une pizza dans les mains !", "error")
+          exports['PipouUI']:Notify("Tu as déjà une pizza dans les mains !", "error")
         end
       end,
       job = 'restaurant', -- This is the job, this option won't show up if the player doesn't have this job, this can also be done with multiple jobs and grades, if you want multiple jobs you always need a grade with it: job = {["police"] = 0, ["ambulance"] = 2},

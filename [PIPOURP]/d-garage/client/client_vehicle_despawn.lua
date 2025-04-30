@@ -152,7 +152,7 @@ function DRespawnVehicleOutside (coords, heading, ped)
             end)
         else
             print("Une erreur est survenue")
-            QBCore.Functions.Notify("Une erreur est survenue", "error", 5000)
+            exports['PipouUI']:Notify("Une erreur est survenue", "error", 5000)
         end
     end, coords)
 end

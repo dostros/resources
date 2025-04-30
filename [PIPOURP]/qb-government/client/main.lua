@@ -39,7 +39,7 @@ RegisterNetEvent('gov:client:spawnMalette', function()
         TriggerServerEvent('gov:server:spawnObject', 'malette')
     end, function() -- Cancel
         StopAnimTask(PlayerPedId(), 'anim@narcotics@trash', 'drop_front', 1.0)
-        QBCore.Functions.Notify(Lang:t('error.canceled'), 'error')
+        exports['PipouUI']:Notify(Lang:t('error.canceled'), 'error')
     end)
 end)
 
@@ -58,7 +58,7 @@ RegisterNetEvent('gov:client:spawnCash', function()
         TriggerServerEvent('gov:server:spawnObject', 'cash')
     end, function() -- Cancel
         StopAnimTask(PlayerPedId(), 'anim@narcotics@trash', 'drop_front', 1.0)
-        QBCore.Functions.Notify(Lang:t('error.canceled'), 'error')
+        exports['PipouUI']:Notify(Lang:t('error.canceled'), 'error')
     end)
 end)
 
@@ -77,7 +77,7 @@ RegisterNetEvent('gov:client:spawnFlag', function()
         TriggerServerEvent('gov:server:spawnObject', 'flag')
     end, function() -- Cancel
         StopAnimTask(PlayerPedId(), 'anim@narcotics@trash', 'drop_front', 1.0)
-        QBCore.Functions.Notify(Lang:t('error.canceled'), 'error')
+        exports['PipouUI']:Notify(Lang:t('error.canceled'), 'error')
     end)
 end)
 
@@ -96,7 +96,7 @@ RegisterNetEvent('gov:client:spawnTent', function()
         TriggerServerEvent('gov:server:spawnObject', 'tent')
     end, function() -- Cancel
         StopAnimTask(PlayerPedId(), 'anim@narcotics@trash', 'drop_front', 1.0)
-        QBCore.Functions.Notify(Lang:t('error.canceled'), 'error')
+        exports['PipouUI']:Notify(Lang:t('error.canceled'), 'error')
     end)
 end)
 
@@ -142,7 +142,7 @@ RegisterNetEvent('gov:client:deleteObject', function()
             TriggerServerEvent('gov:server:deleteObject', objectId)
         end, function() -- Cancel
             StopAnimTask(PlayerPedId(), 'weapons@first_person@aim_rng@generic@projectile@thermal_charge@', 'plant_floor', 1.0)
-            QBCore.Functions.Notify(Lang:t('error.canceled'), 'error')
+            exports['PipouUI']:Notify(Lang:t('error.canceled'), 'error')
         end)
     end
 end)

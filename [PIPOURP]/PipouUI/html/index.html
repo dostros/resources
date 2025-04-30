@@ -5,7 +5,9 @@
   <title>Custom Menu</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="script.js" defer></script>
+  <script src="menu.js" defer></script>
+  <script src="notify.js" defer></script>
+  <script src="progressbar.js" defer></script>
 </head>
 <body>
     <div id="container">
@@ -16,6 +18,16 @@
         <div id="imageHover">
           <img id="image" />
         </div>
-    </div>      
+    </div>
+    
+    <div id="notification-container"></div>
+    <div id="progressbar-container">
+      <div id="progressbar-background">
+        <div id="progressbar-fill"></div>
+        <div id="progressbar-text"></div>
+      </div>
+    </div>
+    
+
 </body>
 </html>

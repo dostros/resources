@@ -144,13 +144,13 @@ end)
 RegisterNetEvent("Pipou-Immo:showTenantList", function()
     local propertyName = getCurrentPlayerProperty()
     if not propertyName then
-        QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
+        exports['PipouUI']:Notify(" Propriété inconnue.", "error")
         return
     end
 
     QBCore.Functions.TriggerCallback('PipouImmo:server:getTenants', function(tenants)
         if not tenants or #tenants == 0 then
-            QBCore.Functions.Notify("Aucun colocataire trouvé.", "error")
+            exports['PipouUI']:Notify("Aucun colocataire trouvé.", "error")
             return
         end
 
@@ -164,7 +164,7 @@ RegisterNetEvent("Pipou-Immo:showTenantList", function()
                     type = "button",
                     label = label .. " 🔒",
                     action = function()
-                        QBCore.Functions.Notify("🔒 Propriétaire principal – accès protégé.", "error")
+                        exports['PipouUI']:Notify("🔒 Propriétaire principal – accès protégé.", "error")
                     end
                 })
             else
@@ -219,14 +219,14 @@ RegisterNetEvent("Pipou-Immo:addTenant", function()
 
         if propName then
             QBCore.Functions.TriggerCallback('PipouImmo:server:addTenant', function(success, msg)
-                QBCore.Functions.Notify(msg, success and "success" or "error")
+                exports['PipouUI']:Notify(msg, success and "success" or "error")
                 TriggerNetEvent("PipouImmo:refreshProperties")
             end, targetId, propName)
         else
-            QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
+            exports['PipouUI']:Notify(" Propriété inconnue.", "error")
         end
     else
-        QBCore.Functions.Notify("❌ Aucun joueur proche.", "error")
+        exports['PipouUI']:Notify(" Aucun joueur proche.", "error")
     end
 end)
 
@@ -252,14 +252,14 @@ RegisterNetEvent("Pipou-Immo:removeTenant", function()
 
         if propName then
             QBCore.Functions.TriggerCallback('PipouImmo:server:removeTenant', function(success, msg)
-                QBCore.Functions.Notify(msg, success and "success" or "error")
+                exports['PipouUI']:Notify(msg, success and "success" or "error")
                 TriggerNetEvent("PipouImmo:refreshProperties")
             end, targetId, propName)
         else
-            QBCore.Functions.Notify("❌ Propriété inconnue.", "error")
+            exports['PipouUI']:Notify(" Propriété inconnue.", "error")
         end
     else
-        QBCore.Functions.Notify("❌ Aucun joueur proche.", "error")
+        exports['PipouUI']:Notify(" Aucun joueur proche.", "error")
     end
 end)
 
@@ -281,7 +281,7 @@ RegisterCommand("testonglet", function()
                     label = "Activer lumière automatique",
                     data = { checked = true },
                     action = function()
-                        print("✅ Lumière auto modifiée")
+                        print(" Lumière auto modifiée")
                     end
                 }
             }

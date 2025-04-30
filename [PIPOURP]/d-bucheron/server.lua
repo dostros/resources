@@ -151,7 +151,7 @@ AddEventHandler("qb-timber:server:storePlank", function()
 
     -- Notification
     TriggerClientEvent('QBCore:Notify', src, "Vous avez ajouté "..amount.." planche(s) au coffre d'entreprise.", "success")
-    print("✅ "..amount.." planche(s) ajoutée(s) au coffre : "..stashName)
+    print(" "..amount.." planche(s) ajoutée(s) au coffre : "..stashName)
 
 end)
 
@@ -161,8 +161,8 @@ RegisterNetEvent("CreateFurnitureShop", function(shopName, config)
     local qbShops = exports['qb-shops']
     if qbShops and qbShops.AddShop then
         qbShops:AddShop(shopName, config)
-        print("✅ Shop '" .. shopName .. "' ajouté dynamiquement.")
+        print(" Shop '" .. shopName .. "' ajouté dynamiquement.")
     else
-        print("❌ L'export AddShop n'existe pas.")
+        print(" L'export AddShop n'existe pas.")
     end
 end)
