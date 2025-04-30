@@ -215,3 +215,44 @@ body {
         font-size: 20px;
     }
 }
+
+
+.menu-item.section {
+    background: transparent;
+    color: #ffa726;
+    font-weight: bold;
+    pointer-events: none;
+    cursor: default;
+    text-align: left;
+    justify-content: flex-start;
+}
+
+.menu-item.section .header {
+    font-size: 15px;
+    margin: 5px 0;
+}
+
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tab-button {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.tab-button:hover,
+.tab-button.active {
+    background-color: rgba(255, 140, 0, 0.9);
+}

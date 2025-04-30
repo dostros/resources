@@ -3,6 +3,8 @@ let menuOptions = [];
 let menuIsOpen = false;
 let menuHistory = [];
 let isInputOpen = false;
+let currentTabs = null;
+let activeTabIndex = 0;
 
 const buttonsContainer = document.getElementById("buttons");
 const container = document.getElementById("container");
@@ -41,14 +43,21 @@ window.addEventListener("message", (event) => {
             menuIsOpen = true;
             openList(data.title, data.subtitle, data.options);
             break;
+        case "OPEN_TAB_MENU":
+            buttonsContainer.innerHTML = "";
+            menuIsOpen = true;
+            renderTabs(data.tabs, 0);
+            openMenu(data.tabs[0].options, data.tabs[0].label, data.subtitle, false, data.tabs, 0);
+            break;
+        
         default:
             return;
     }
 });
 
 
-const openMenu = (options, title, subtitle, fromHistory = false) => {
-    if (menuIsOpen && !fromHistory) {
+const openMenu = (options, title, subtitle, fromHistory = false, tabs = null, activeTab = 0) => {
+    if (menuIsOpen && !fromHistory && !tabs) {
         menuHistory.push({
             options: menuOptions,
             title: menuTitle.textContent,
@@ -56,6 +65,7 @@ const openMenu = (options, title, subtitle, fromHistory = false) => {
             selectedIndex: selectedIndex
         });
     }
+
 
     menuOptions = options;
     selectedIndex = 0;
@@ -70,6 +80,9 @@ const openMenu = (options, title, subtitle, fromHistory = false) => {
                 return getCheckboxRender(opt.label, idx, opt.checked, idx === selectedIndex);
             case "slider":
                 return getSliderRender(opt.label, idx, opt.value, opt.min, opt.max, idx === selectedIndex);
+            case "section":
+                return getSectionRender(opt.label, idx);
+
             default:
                 return getButtonRender(opt.label, idx, idx === selectedIndex);
         }
@@ -77,6 +90,17 @@ const openMenu = (options, title, subtitle, fromHistory = false) => {
 
     container.classList.add("active");
     menuIsOpen = true;
+    
+    if (tabs) {
+        currentTabs = tabs;
+        activeTabIndex = activeTab;
+        renderTabs(tabs, activeTab);
+    } else {
+        currentTabs = null;
+        document.getElementById("menu-tabs").innerHTML = "";
+    }
+    
+
     updateSelection();
 };
 
@@ -131,19 +155,35 @@ document.addEventListener('keydown', (e) => {
             handleMenuEnter();
             break;
 
-        case 'ArrowLeft':
         case 'ArrowRight':
-            playSound('navigate');
-            handleSliderChange(e.key === 'ArrowLeft' ? -1 : 1);
+            if (isSliderSelected()) {
+                playSound('navigate');
+                handleSliderChange(1);
+            } else if (currentTabs && activeTabIndex < currentTabs.length - 1) {
+                playSound('navigate');
+                activeTabIndex++;
+                openMenu(currentTabs[activeTabIndex].options, currentTabs[activeTabIndex].label, menuSubtitle.textContent, false, currentTabs, activeTabIndex);
+            }
             break;
-
+        
+        case 'ArrowLeft':
+            if (isSliderSelected()) {
+                playSound('navigate');
+                handleSliderChange(-1);
+            } else if (currentTabs && activeTabIndex > 0) {
+                playSound('navigate');
+                activeTabIndex--;
+                openMenu(currentTabs[activeTabIndex].options, currentTabs[activeTabIndex].label, menuSubtitle.textContent, false, currentTabs, activeTabIndex);
+            }
+            break;
+            
         case 'Escape':
         case 'Backspace':
             playSound('back');
             if (menuHistory.length > 0) {
                 const lastMenu = menuHistory.pop();
                 if (lastMenu && lastMenu.options && lastMenu.options.length > 0) {
-                    openMenu(lastMenu.options, lastMenu.title, lastMenu.subtitle, true); // <= true important
+                    openMenu(lastMenu.options, lastMenu.title, lastMenu.subtitle, true); 
                     selectedIndex = lastMenu.selectedIndex || 0;
                     updateSelection();
                 } else {
@@ -154,6 +194,7 @@ document.addEventListener('keydown', (e) => {
                 $.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
                 closeMenu();
             }
+            
         break;
     }
 });
@@ -340,3 +381,34 @@ function playSound(name) {
 buttonsContainer.addEventListener('wheel', (e) => {
     buttonsContainer.scrollTop += e.deltaY;
 });
+
+function getSectionRender(header, id) {
+    return `
+        <div class="menu-item section" id="${id}">
+            <div class="header">${header}</div>
+        </div>
+    `;
+}
+
+function renderTabs(tabs, activeIndex = 0) {
+    const tabContainer = document.getElementById("menu-tabs");
+    tabContainer.innerHTML = "";
+
+    tabs.forEach((tab, index) => {
+        const btn = document.createElement("button");
+        btn.className = "tab-button" + (index === activeIndex ? " active" : "");
+        btn.textContent = tab.label || `Onglet ${index + 1}`;
+
+        btn.addEventListener("click", () => {
+            openMenu(tab.options, tab.label, "", false, tabs, index);
+        });
+
+        tabContainer.appendChild(btn);
+    });
+}
+
+
+function isSliderSelected() {
+    const current = menuOptions[selectedIndex];
+    return current && current.type === "slider";
+}

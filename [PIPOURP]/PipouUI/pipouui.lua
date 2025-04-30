@@ -22,13 +22,29 @@ exports('CreateMenu', PipouUI.CreateMenu)
 
 -- Ajout d'une option au menu
 function PipouUI:AddOption(optionType, label, data, callback)
-    table.insert(self.options, {
+    local option = {
         type = optionType or "button",
         label = label,
         data = data
-    })
-    table.insert(self.callbacks, callback)
+    }
+
+    -- Copier les donnés utiles à la racine (pour l'affichage dans la NUI)
+    if data and optionType == "slider" then
+        option.value = data.value or 0
+        option.min = data.min or 0
+        option.max = data.max or 10
+        option.step = data.step or 1
+    elseif data and optionType == "checkbox" then
+        option.checked = data.checked or false
+    elseif optionType == "section" then
+        callback = function() end
+    end
+
+    table.insert(self.options, option)
+    table.insert(self.callbacks, callback or function() end)
 end
+
+
 
 exports('AddOption', function(menuId, optionType, label, data, cb)
     local menu = PipouUI.menus[menuId]
@@ -130,13 +146,26 @@ exports('CloseMenu', function()
 end)
 
 
-function PipouUI:OpenSimpleMenu(title, subtitle, buttonList)
+function PipouUI:OpenSimpleMenu(title, subtitle, itemList)
     local menuId = PipouUI.CreateMenu(title, subtitle)
-    for _, v in ipairs(buttonList) do
-        exports['PipouUI']:AddButton(menuId, v.label, v.action)
+    local menu = PipouUI.menus[menuId]
+    if not menu then return end
+
+    for _, item in ipairs(itemList) do
+        local typ = item.type or "button"
+        local label = item.label or "Option"
+        local data = item.data or {}
+        local action = item.action or function() end
+
+        menu:AddOption(typ, label, data, action)
     end
+
     exports['PipouUI']:OpenMenu(menuId)
 end
+
+
+
+
 exports('OpenSimpleMenu', function(title, subtitle, buttonList)
     PipouUI:OpenSimpleMenu(title, subtitle, buttonList)
 end)
@@ -231,3 +260,51 @@ RegisterNUICallback('playSound', function(data, cb)
     end
     if cb then cb('ok') end
 end)
+
+function PipouUI:OpenTabbedMenu(title, subtitle, tabs)
+    SetNuiFocus(true, false)
+    SetNuiFocusKeepInput(true)
+
+    local tabData = {}
+
+    for _, tab in ipairs(tabs) do
+        local optList = {}
+        for _, opt in ipairs(tab.options or {}) do
+            local optCopy = {
+                type = opt.type or "button",
+                label = opt.label or "Option"
+            }
+
+            if opt.type == "slider" and opt.data then
+                optCopy.value = opt.data.value or 0
+                optCopy.min = opt.data.min or 0
+                optCopy.max = opt.data.max or 10
+                optCopy.step = opt.data.step or 1
+            elseif opt.type == "checkbox" and opt.data then
+                optCopy.checked = opt.data.checked or false
+            end
+
+            table.insert(optList, optCopy)
+        end
+
+        table.insert(tabData, {
+            label = tab.label or "Onglet",
+            options = optList
+        })
+    end
+
+    -- On garde les callbacks pour chaque onglet à part
+    PipouUI.tabbedCallbacks = tabs
+
+    SendNUIMessage({
+        action = "OPEN_TAB_MENU",
+        title = title,
+        subtitle = subtitle,
+        tabs = tabData
+    })
+end
+
+exports('OpenTabbedMenu', function(title, subtitle, tabs)
+    PipouUI:OpenTabbedMenu(title, subtitle, tabs)
+end)
+

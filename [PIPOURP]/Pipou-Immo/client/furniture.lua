@@ -7,23 +7,27 @@ CreateThread(function()
     end
 end)
 
-
 function openMainPropertyMenu()
     local propertyName = getCurrentPlayerProperty()
     if not propertyName then return end
 
     QBCore.Functions.TriggerCallback("PipouImmo:server:isPropertyPublic", function(isPublic)
+        local lightLabel = isLightOn and "Éteindre la lumière" or "Allumer la lumière"
+        local publicLabel = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous"
+
         exports['PipouUI']:OpenSimpleMenu("Gestion Immobilière", "", {
             {
-                label = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
+                type = "button",
+                label = lightLabel,
                 action = function()
                     TriggerEvent('Pipou-Immo:toggleLight')
-                    Wait(100) 
+                    Wait(100)
                     openMainPropertyMenu()
                     return false
                 end
             },
             {
+                type = "button",
                 label = "Clefs de la maison",
                 action = function()
                     TriggerEvent('Pipou-Immo:openKeyMenu')
@@ -31,6 +35,7 @@ function openMainPropertyMenu()
                 end
             },
             {
+                type = "button",
                 label = "Décorer la maison",
                 action = function()
                     TriggerEvent('Pipou-Immo:openDecorationMenu')
@@ -38,7 +43,8 @@ function openMainPropertyMenu()
                 end
             },
             {
-                label = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous",
+                type = "button",
+                label = publicLabel,
                 action = function()
                     TriggerEvent('PipouImmo:togglePublicAccess')
                     Wait(100)
@@ -46,7 +52,17 @@ function openMainPropertyMenu()
                     return false
                 end
             },
+            { type = "section", label = "🔧 Paramètres DE LAMOUR" },
             {
+                type = "slider",
+                label = "Luminosité",
+                data = { value = 5, min = 0, max = 10, step = 1 },
+                action = function(val)
+                    TriggerEvent('Pipou-Immo:setLightIntensity', val)
+                end
+            },
+            {
+                type = "button",
                 label = "Fermer le menu",
                 action = function()
                     exports['PipouUI']:CloseMenu()
@@ -61,6 +77,7 @@ RegisterNetEvent("Pipou-Immo:openKeyMenu", function()
     
     exports['PipouUI']:OpenSimpleMenu("🔑 Gestion des clefs", "", {
         {
+            type = "button",
             label = "Gestion colocataires",
             action = function()
                 TriggerEvent('Pipou-Immo:showTenantList')
@@ -68,6 +85,7 @@ RegisterNetEvent("Pipou-Immo:openKeyMenu", function()
             end
         },
         {
+            type = "button",
             label = "Ajouter un locataire",
             action = function()
                 TriggerEvent('Pipou-Immo:addTenant')
@@ -75,6 +93,7 @@ RegisterNetEvent("Pipou-Immo:openKeyMenu", function()
             end
         },
         {
+            type = "button",
             label = "Retirer un colocataire",
             action = function()
                 TriggerEvent('Pipou-Immo:removeTenant')
@@ -82,6 +101,7 @@ RegisterNetEvent("Pipou-Immo:openKeyMenu", function()
             end
         },
         {
+            type = "button",
             label = "Retour ⬅️",
             action = function()
                 exports['PipouUI']:Back()
@@ -96,12 +116,14 @@ end)
 RegisterNetEvent("Pipou-Immo:openDecorationMenu", function()
     exports['PipouUI']:OpenSimpleMenu("🛋️ Mode décoration", "", {
         {
+            type = "button",
             label = "📦 Placer un objet",
             action = function()
                 TriggerEvent('PipouImmo:openFurnitureUI')
             end
         },
         {
+            type = "button",
             label = "Retour ⬅️",
             action = function()
                 exports['PipouUI']:Back()
@@ -111,56 +133,6 @@ RegisterNetEvent("Pipou-Immo:openDecorationMenu", function()
     })
 end)
 
-
-
-
--- RegisterNetEvent("Pipou-Immo:reopenMainMenu", function()
---     TriggerEvent("Pipou-Immo:openMainMenu")
--- end)
-
--- RegisterNetEvent("Pipou-Immo:openMainMenu", function()
---     local propertyName = getCurrentPlayerProperty()
---     if not propertyName then return end
-
---     QBCore.Functions.TriggerCallback("PipouImmo:server:isPropertyPublic", function(isPublic)
---         exports['PipouUI']:OpenSimpleMenu("Gestion Immobilière", "", {
---             {
---                 label = isLightOn and "Éteindre la lumière" or "Allumer la lumière",
---                 action = function()
---                     TriggerEvent('Pipou-Immo:toggleLight')
---                     return false
---                 end
---             },
---             {
---                 label = "Clefs de la maison",
---                 action = function()
---                     TriggerEvent('Pipou-Immo:openKeyMenu')
---                     return false
---                 end
---             },
---             {
---                 label = "Décorer la maison",
---                 action = function()
---                     TriggerEvent('Pipou-Immo:openDecorationMenu')
---                     return false
---                 end
---             },
---             {
---                 label = isPublic and "🔒 Fermer la maison" or "🔓 Ouvrir à tous",
---                 action = function()
---                     TriggerEvent('PipouImmo:togglePublicAccess')
---                     return false
---                 end
---             },
---             {
---                 label = "Fermer le menu",
---                 action = function()
---                     exports['PipouUI']:CloseMenu()
---                 end
---             }
---         })
---     end, propertyName)
--- end)
 
 
 
@@ -189,6 +161,7 @@ RegisterNetEvent("Pipou-Immo:showTenantList", function()
         
             if tenant.access_type == "owner" then
                 table.insert(buttonList, {
+                    type = "button",
                     label = label .. " 🔒",
                     action = function()
                         QBCore.Functions.Notify("🔒 Propriétaire principal – accès protégé.", "error")
@@ -196,6 +169,7 @@ RegisterNetEvent("Pipou-Immo:showTenantList", function()
                 })
             else
                 table.insert(buttonList, {
+                    type = "button",
                     label = label,
                     action = function()
                         TriggerEvent("Pipou-Immo:confirmRemoveTenant", {
@@ -209,6 +183,7 @@ RegisterNetEvent("Pipou-Immo:showTenantList", function()
         end
 
         table.insert(buttonList, {
+            type = "button",
             label = "Retour ⬅️",
             action = function()
                 exports['PipouUI']:Back()
@@ -286,4 +261,94 @@ RegisterNetEvent("Pipou-Immo:removeTenant", function()
     else
         QBCore.Functions.Notify("❌ Aucun joueur proche.", "error")
     end
+end)
+
+
+
+RegisterCommand("testonglet", function()
+    exports['PipouUI']:OpenTabbedMenu("Gestion Immobilière", "Utilitaire de test", {
+        {
+            label = "🏠 Général",
+            options = {
+                { type = "section", label = "🔧 État général" },
+                {
+                    type = "button",
+                    label = "🔄 Rafraîchir",
+                    action = function() print("↻ Rafraîchissement en cours...") end
+                },
+                {
+                    type = "checkbox",
+                    label = "Activer lumière automatique",
+                    data = { checked = true },
+                    action = function()
+                        print("✅ Lumière auto modifiée")
+                    end
+                }
+            }
+        },
+        {
+            label = "🎚️ Réglages",
+            options = {
+                { type = "section", label = "🎛️ Audio" },
+                {
+                    type = "slider",
+                    label = "Volume général",
+                    data = { value = 5, min = 0, max = 10, step = 1 },
+                    action = function(val)
+                        print("🔊 Volume réglé sur :", val)
+                    end
+                },
+                {
+                    type = "slider",
+                    label = "Effets sonores",
+                    data = { value = 7, min = 0, max = 10, step = 1 },
+                    action = function(val)
+                        print("🎧 Effets réglés sur :", val)
+                    end
+                }
+            }
+        },
+        {
+            label = "🔐 Accès",
+            options = {
+                {
+                    type = "button",
+                    label = "🔑 Gérer les clefs",
+                    action = function()
+                        print("Gestion des clefs ouverte")
+                        -- ou TriggerEvent("Pipou-Immo:openKeyMenu")
+                    end
+                },
+                {
+                    type = "checkbox",
+                    label = "Mode sécurisé",
+                    data = { checked = false },
+                    action = function()
+                        print("🔐 Sécurité modifiée")
+                    end
+                }
+            }
+        },
+        {
+            label = "🧪 Débogage",
+            options = {
+                {
+                    type = "button",
+                    label = "🔍 Voir console",
+                    action = function()
+                        print("🖥️ Console activée")
+                    end
+                },
+                {
+                    type = "button",
+                    label = "💥 Forcer erreur",
+                    action = function()
+                        error("Erreur volontaire pour test")
+                    end
+                }
+            }
+        }
+    })
+    
+    
 end)
