@@ -5,11 +5,12 @@ PipouUI.navigationStack = {}
 local menuCounter = 0
 
 -- Création du menu : retourne un id (chaîne) pour identifier le menu
-function PipouUI.CreateMenu(title, subtitle, ttl)
+function PipouUI.CreateMenu(title, subtitle, ttl, position)
     local menu = {
         id = tostring(menuCounter),
         title = title or "Menu",
         subtitle = subtitle or "",
+        position = position or "menu-top-right", -- 👈 ici
         options = {},
         callbacks = {},
         expireAt = ttl and (GetGameTimer() + ttl) or nil 
@@ -19,6 +20,7 @@ function PipouUI.CreateMenu(title, subtitle, ttl)
     menuCounter = menuCounter + 1
     return menu.id
 end
+
 
 exports('CreateMenu', PipouUI.CreateMenu)
 
@@ -78,15 +80,20 @@ function PipouUI:Open()
         action = "OPEN_MENU",
         title = self.title,
         subtitle = self.subtitle,
-        options = self.options
+        options = self.options,
+        position = self.position -- 👈 ici
     })
     PipouUI.currentMenu = self
 end
+
 exports('OpenMenu', function(menuId)
     if PipouUI.currentMenu then
-        table.insert(PipouUI.navigationStack, PipouUI.currentMenu.id)
-        PipouUI:CloseMenu()
+        if #PipouUI.navigationStack == 0 or PipouUI.navigationStack[#PipouUI.navigationStack] ~= PipouUI.currentMenu.id then
+            table.insert(PipouUI.navigationStack, PipouUI.currentMenu.id)
+        end
+        PipouUI:CloseMenu(false, true)
     end
+    
 
     local menu = PipouUI.menus[menuId]
     if menu then
@@ -98,23 +105,31 @@ end)
 
 
 
+
 -- Gestion des clics depuis la NUI
 RegisterNUICallback("selectOption", function(data, cb)
     local index = data.index + 1
     local menu = PipouUI.currentMenu
+
+    if not menu or not menu.callbacks or not menu.callbacks[index] then
+        print("[PipouUI] Option invalide ou menu déjà fermé. Ignoré.")
+        cb({ close = true })
+        return
+    end
+
     local shouldClose = true
-    if menu and menu.callbacks[index] then
-        local result = menu.callbacks[index]()
-        if result == false then
-            shouldClose = false
-        end
+    local success, result = pcall(menu.callbacks[index])
+
+    if not success then
+        print("[PipouUI] Erreur dans le callback du menu:", result)
+    elseif result == false then
+        shouldClose = false
     end
 
     if shouldClose then
         PipouUI:CloseMenu()
         SetNuiFocus(false, false)
     end
-    
 
     cb({ close = shouldClose })
 end)
@@ -123,6 +138,7 @@ end)
 
 
 RegisterNUICallback("closeMenu", function(_, cb)
+    PipouUI:CloseMenu()
     SetNuiFocus(false, false)
     cb({})
 end)
@@ -138,14 +154,21 @@ RegisterNUICallback("sliderChange", function(data, cb)
 end)
 
 
-function PipouUI:CloseMenu(destroyAfterClose)
+function PipouUI:CloseMenu(destroyAfterClose, suppressNUI)
     if PipouUI.currentMenu then
         if destroyAfterClose then
             PipouUI.menus[PipouUI.currentMenu.id] = nil
         end
+
+        if not suppressNUI then
+            SendNUIMessage({ action = "CLOSE_MENU" })
+        end
+
         PipouUI.currentMenu = nil
     end
 end
+
+
 
 exports('CloseMenu', function(destroyAfterClose)
     PipouUI:CloseMenu(destroyAfterClose)
@@ -154,16 +177,29 @@ end)
 
 
 
-function PipouUI:OpenSimpleMenu(title, subtitle, itemList)
-    local menuId = PipouUI.CreateMenu(title, subtitle)
+
+function PipouUI:OpenSimpleMenu(title, subtitle, itemList, position, onSelect)
+    local menuId = PipouUI.CreateMenu(title, subtitle, nil, position)
     local menu = PipouUI.menus[menuId]
     if not menu then return end
+
+    -- Ajout de la vérification de `onSelect`
+    if onSelect and type(onSelect) ~= "function" then
+        print("^1[Erreur] 'onSelect' n'est pas une fonction valide!")
+        onSelect = nil -- On désactive onSelect s'il n'est pas valide
+    end
 
     for _, item in ipairs(itemList) do
         local typ = item.type or "button"
         local label = item.label or "Option"
         local data = item.data or {}
-        local action = item.action or function() end
+        local action = item.action or function()
+            if onSelect then
+                onSelect(item)
+            else
+                print("^1[Erreur] Aucune action définie pour l'option.")
+            end
+        end
 
         menu:AddOption(typ, label, data, action)
     end
@@ -174,22 +210,38 @@ end
 
 
 
-exports('OpenSimpleMenu', function(title, subtitle, buttonList)
-    PipouUI:OpenSimpleMenu(title, subtitle, buttonList)
+
+exports('OpenSimpleMenu', function(title, subtitle, buttonList, position, onSelect)
+    if PipouUI and PipouUI.OpenSimpleMenu then
+        PipouUI.OpenSimpleMenu(PipouUI, title, subtitle, buttonList, position, onSelect)
+    else
+        print("^1[PipouUI] Erreur : OpenSimpleMenu non trouvé ou PipouUI non défini.^7")
+    end
 end)
+
+
 
 
 function PipouUI:Back()
     local lastMenuId = table.remove(PipouUI.navigationStack)
     if lastMenuId then
         local menu = PipouUI.menus[lastMenuId]
-        if menu then
+        if menu and PipouUI.currentMenu ~= menu then
+            if PipouUI.currentMenu and PipouUI.currentMenu.temp then
+                PipouUI.menus[PipouUI.currentMenu.id] = nil
+            end
+            PipouUI.currentMenu = nil
             menu:Open()
         end
     else
-        TriggerEvent("Pipou-Immo:openMainMenu")
+        PipouUI:CloseMenu()
+        SetNuiFocus(false, false)
     end
 end
+
+
+
+
 
 exports('Back', function()
     PipouUI:Back()
@@ -343,6 +395,43 @@ CreateThread(function()
 end)
 
 
+CreateThread(function()
+    while true do
+        Wait(0)
+        if IsControlJustReleased(0, 177) then -- Backspace
+            if exports['PipouUI']:IsMenuOpen() then
+                exports['PipouUI']:Back()
+            end
+        end
+    end
+end)
+
+
+function PipouUI:IsMenuOpen()
+    return PipouUI.currentMenu ~= nil
+end
+
+exports('IsMenuOpen', function()
+    return PipouUI:IsMenuOpen()
+end)
+
+
+RegisterNUICallback("pipou_back", function(_, cb)
+    PipouUI:Back()
+    cb({})
+end)
+
+function PipouUI:FlushMenus()
+    PipouUI.menus = {}
+    PipouUI.navigationStack = {}
+    PipouUI.currentMenu = nil
+end
+
+exports('FlushMenus', function()
+    PipouUI:FlushMenus()
+end)
+
+
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -393,5 +482,23 @@ RegisterNUICallback("cancelProgressbar", function(_, cb)
         PipouUI.currentProgressCallback(true)
         PipouUI.currentProgressCallback = nil
     end
+    cb({})
+end)
+
+
+RegisterNUICallback("submitInput", function(data, cb)
+    SetNuiFocus(false, false)
+
+    if PipouUI.currentInputCallback then
+        PipouUI.currentInputCallback(data.text)
+    end
+
+    -- Ajout pour retour JS
+    SendNUIMessage({
+        action = "inputSubmitted",
+        value = data.text
+    })
+
+    PipouUI.currentInputCallback = nil
     cb({})
 end)

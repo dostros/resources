@@ -374,6 +374,7 @@ GetFreeAimEntity = function()
 end
 
 RunEntityViewThread = function()
+    print("[DEBUG] RunEntityViewThread triggered")
     EntityViewEnabled = true
     Citizen.CreateThread(function()
         while EntityViewEnabled do
@@ -398,6 +399,7 @@ RunEntityViewThread = function()
                 local color = { r = 255, g = 255, b = 255, a = 200 }
                 local position = GetEntityCoords(playerPed)
                 local hit, coords, entity = RayCastGamePlayCamera(1000.0)
+                print("[DEBUG] RayCast hit:", hit, "Entity:", entity)
                 -- If entity is found then verify entity
                 if IsControlJustReleased(0, 74) then -- Copy Coords
                     local x = QBCore.Shared.Round(coords.x, 2)

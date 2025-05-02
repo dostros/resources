@@ -13,7 +13,7 @@ function SetDisplay(bool)
 end
 
 
-RegisterKeyMapping("openAdminMenu", "Open Admin Menu", 'keyboard', 'F10')
+--RegisterKeyMapping("openAdminMenu", "Open Admin Menu", 'keyboard', 'F10')
 
 RegisterCommand("openAdminMenu", function()
     SetDisplay(not display)

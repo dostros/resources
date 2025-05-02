@@ -104,10 +104,12 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     end
 end)
 
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+AddEventHandler('ox:playerLoaded', function()
     exports.spawnmanager:setAutoSpawn(false)
+
     local ped = PlayerPedId()
     local player = PlayerId()
+
     CreateThread(function()
         Wait(5000)
         SetEntityMaxHealth(ped, 200)
@@ -115,28 +117,34 @@ RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
         SetPlayerHealthRechargeMultiplier(player, 0.0)
         SetPlayerHealthRechargeLimit(player, 0.0)
     end)
+
     CreateThread(function()
         Wait(1000)
-        QBCore.Functions.GetPlayerData(function(PlayerData)
-            PlayerJob = PlayerData.job
-            onDuty = PlayerData.job.onduty
-            SetPedArmour(PlayerPedId(), PlayerData.metadata['armor'])
-            if (not PlayerData.metadata['inlaststand'] and PlayerData.metadata['isdead']) then
-                deathTime = Config.ReviveInterval
-                OnDeath()
-                DeathTimer()
-            elseif (PlayerData.metadata['inlaststand'] and not PlayerData.metadata['isdead']) then
-                SetLaststand(true)
-            else
-                TriggerServerEvent('hospital:server:SetDeathStatus', false)
-                TriggerServerEvent('hospital:server:SetLaststandStatus', false)
-            end
-            if PlayerJob.name == 'ambulance' and onDuty then
-                TriggerServerEvent('hospital:server:AddDoctor', PlayerJob.name)
-            end
-        end)
+
+        local PlayerData = exports.ox_core:GetPlayer()
+        if not PlayerData then return end
+
+        PlayerJob = PlayerData.job
+        onDuty = PlayerData.job and PlayerData.job.onduty
+        SetPedArmour(ped, PlayerData.metadata and PlayerData.metadata.armor or 0)
+
+        if not PlayerData.metadata.inlaststand and PlayerData.metadata.isdead then
+            deathTime = Config.ReviveInterval
+            OnDeath()
+            DeathTimer()
+        elseif PlayerData.metadata.inlaststand and not PlayerData.metadata.isdead then
+            SetLaststand(true)
+        else
+            TriggerServerEvent('hospital:server:SetDeathStatus', false)
+            TriggerServerEvent('hospital:server:SetLaststandStatus', false)
+        end
+
+        if PlayerJob and PlayerJob.name == 'ambulance' and onDuty then
+            TriggerServerEvent('hospital:server:AddDoctor', PlayerJob.name)
+        end
     end)
 end)
+
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     if PlayerJob.name == 'ambulance' and onDuty then

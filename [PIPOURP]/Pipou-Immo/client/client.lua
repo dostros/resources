@@ -445,7 +445,7 @@ RegisterNetEvent('PipouImmo:client:addHouseEntryPoint', function(propertyName)
                 createHousePoint(propertyName, cachedProperties[propertyName].coords)
                 exports['PipouUI']:Notify("📦 Propriété reçue : " .. propertyName, "success")
             else
-                (" Erreur : impossible d’ajouter la propriété", "error")
+                exports['PipouUI']:Notify(" Erreur : impossible d’ajouter la propriété", "error")
             end
         end)
     else
@@ -658,7 +658,7 @@ end)
 
 RegisterNetEvent("PipouImmo:client:notifyPropertyDeleted", function(success)
     if success then
-        (" Propriété supprimée avec succès.", "success")
+        exports['PipouUI']:Notify(" Propriété supprimée avec succès.", "success")
     else
         exports['PipouUI']:Notify(" Échec lors de la suppression.", "error")
     end

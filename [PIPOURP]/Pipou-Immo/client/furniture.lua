@@ -52,15 +52,15 @@ function openMainPropertyMenu()
                     return false
                 end
             },
-            { type = "section", label = "🔧 Paramètres DE LAMOUR" },
-            {
-                type = "slider",
-                label = "Luminosité",
-                data = { value = 5, min = 0, max = 10, step = 1 },
-                action = function(val)
-                    TriggerEvent('Pipou-Immo:setLightIntensity', val)
-                end
-            },
+            -- { type = "section", label = "🔧 Paramètres DE LAMOUR" },
+            -- {
+            --     type = "slider",
+            --     label = "Luminosité",
+            --     data = { value = 5, min = 0, max = 10, step = 1 },
+            --     action = function(val)
+            --         TriggerEvent('Pipou-Immo:setLightIntensity', val)
+            --     end
+            -- },
             {
                 type = "button",
                 label = "Fermer le menu",
@@ -68,7 +68,7 @@ function openMainPropertyMenu()
                     exports['PipouUI']:CloseMenu()
                 end
             }
-        })
+        ,})
     end, propertyName)
 end
 

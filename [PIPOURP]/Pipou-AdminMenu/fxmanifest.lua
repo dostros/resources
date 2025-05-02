@@ -33,4 +33,4 @@ files {
     'html/index.js'
 }
 
-dependency 'menuv'
+

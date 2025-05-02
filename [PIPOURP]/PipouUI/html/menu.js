@@ -5,23 +5,32 @@ let menuHistory = [];
 let isInputOpen = false;
 let currentTabs = null;
 let activeTabIndex = 0;
+let currentPosition = "menu-top-right";
+
+
 
 const buttonsContainer = document.getElementById("buttons");
 const container = document.getElementById("container");
 const menuTitle = document.getElementById("menu-title");
 const menuSubtitle = document.getElementById("menu-subtitle");
 
-
 buttonsContainer.addEventListener('click', (event) => {
     if (!menuIsOpen) return;
+    if (event.target.closest('.slider-bar')) return;
+
     const target = event.target.closest('.menu-item');
     if (!target) return;
-    
+
     const id = target.id;
     if (id.startsWith('list_')) {
         const index = parseInt(id.replace('list_', ''), 10);
-        $.post(`https://${GetParentResourceName()}/selectListOption`, JSON.stringify({index}));
+        $.post(`https://${GetParentResourceName()}/selectListOption`, JSON.stringify({ index }));
         closeMenu();
+    } else {
+        const index = parseInt(id);
+        if (!isNaN(index)) {
+            sendSelectOption(index);
+        }
     }
 });
 
@@ -31,40 +40,52 @@ window.addEventListener("message", (event) => {
 
     switch (data.action) {
         case "OPEN_MENU":
-            buttonsContainer.innerHTML = "";
-            menuIsOpen = true;
-            return openMenu(data.options, data.title, data.subtitle);
+            closeMenu(true);
+            setTimeout(() => {
+                menuIsOpen = true;
+                setMenuPosition(data.position);
+                openMenu(data.options, data.title, data.subtitle, false, null, 0, data.position);
+            }, 50);
+            break;
         case "CLOSE_MENU":
             return closeMenu();
         case "OPEN_INPUT":
             return openInput(data.title, data.subtitle);
         case "OPEN_LIST_MENU":
-            buttonsContainer.innerHTML = "";
-            menuIsOpen = true;
-            openList(data.title, data.subtitle, data.options);
+            closeMenu(true);
+            setTimeout(() => {
+                menuIsOpen = true;
+                openList(data.title, data.subtitle, data.options);
+            }, 50);
             break;
         case "OPEN_TAB_MENU":
-            buttonsContainer.innerHTML = "";
-            menuIsOpen = true;
-            renderTabs(data.tabs, 0);
-            openMenu(data.tabs[0].options, data.tabs[0].label, data.subtitle, false, data.tabs, 0);
+            closeMenu(true);
+            setTimeout(() => {
+                menuIsOpen = true;
+                renderTabs(data.tabs, 0);
+                openMenu(data.tabs[0].options, data.tabs[0].label, data.subtitle, false, data.tabs, 0, data.position);
+            }, 50);
             break;
-        
+
         default:
             return;
     }
 });
 
+const openMenu = (options, title, subtitle, fromHistory = false, tabs = null, activeTab = 0, position = "menu-top-right") => {
+    setMenuPosition(position);
 
-const openMenu = (options, title, subtitle, fromHistory = false, tabs = null, activeTab = 0) => {
     if (menuIsOpen && !fromHistory && !tabs) {
         menuHistory.push({
             options: menuOptions,
             title: menuTitle.textContent,
             subtitle: menuSubtitle.textContent,
-            selectedIndex: selectedIndex
+            selectedIndex: selectedIndex,
+            position: currentPosition
         });
+        
     }
+
 
 
     menuOptions = options;
@@ -73,24 +94,26 @@ const openMenu = (options, title, subtitle, fromHistory = false, tabs = null, ac
     menuTitle.textContent = title;
     menuSubtitle.textContent = subtitle || "";
 
-
     buttonsContainer.innerHTML = options.map((opt, idx) => {
-        switch(opt.type) {
+        switch (opt.type) {
             case "checkbox":
                 return getCheckboxRender(opt.label, idx, opt.checked, idx === selectedIndex);
             case "slider":
                 return getSliderRender(opt.label, idx, opt.value, opt.min, opt.max, idx === selectedIndex);
             case "section":
                 return getSectionRender(opt.label, idx);
-
             default:
                 return getButtonRender(opt.label, idx, idx === selectedIndex);
         }
     }).join("");
 
+    document.querySelectorAll('.menu-item').forEach(el => {
+        el.replaceWith(el.cloneNode(true));
+    });
+
     container.classList.add("active");
     menuIsOpen = true;
-    
+
     if (tabs) {
         currentTabs = tabs;
         activeTabIndex = activeTab;
@@ -99,37 +122,35 @@ const openMenu = (options, title, subtitle, fromHistory = false, tabs = null, ac
         currentTabs = null;
         document.getElementById("menu-tabs").innerHTML = "";
     }
-    
 
     updateSelection();
 };
 
-
-
-
-
 function sendSelectOption(index) {
     $.post(`https://${GetParentResourceName()}/selectOption`, JSON.stringify({
         index: index,
-    }), function(response) {
+    }), function (response) {
         if (response && response.close) {
             closeMenu();
         }
     });
 }
 
-
-const closeMenu = () => {
+const closeMenu = (quick = false) => {
     container.classList.remove("active");
     menuIsOpen = false;
-    setTimeout(() => {
+    menuHistory = [];
+
+    const reset = () => {
         buttonsContainer.innerHTML = "";
         $('#imageHover').hide();
         menuOptions = [];
         selectedIndex = 0;
         menuHistory = [];
         isInputOpen = false;
-    }, 300);
+    };
+    if (quick) reset();
+    else setTimeout(reset, 300);
 };
 
 
@@ -183,19 +204,19 @@ document.addEventListener('keydown', (e) => {
             if (menuHistory.length > 0) {
                 const lastMenu = menuHistory.pop();
                 if (lastMenu && lastMenu.options && lastMenu.options.length > 0) {
-                    openMenu(lastMenu.options, lastMenu.title, lastMenu.subtitle, true); 
+                    openMenu(lastMenu.options, lastMenu.title, lastMenu.subtitle, true, null, 0, lastMenu.position || "menu-top-right");
                     selectedIndex = lastMenu.selectedIndex || 0;
                     updateSelection();
-                } else {
-                    $.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
-                    closeMenu();
                 }
             } else {
-                $.post(`https://${GetParentResourceName()}/closeMenu`, JSON.stringify({}));
-                closeMenu();
+                fetch(`https://${GetParentResourceName()}/pipou_back`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({})
+                });
             }
-            
         break;
+            
     }
 });
 
@@ -208,7 +229,11 @@ function updateSelection() {
 
         if (option.type === "slider") {
             el.querySelector('.value').textContent = option.value;
+            const percent = ((option.value - option.min) / (option.max - option.min)) * 100;
+            const fill = el.querySelector('.slider-fill');
+            if (fill) fill.style.width = `${percent}%`;
         }
+        
         if (option.type === "checkbox") {
             el.querySelector('.header').textContent = `${option.label} [${option.checked ? '✔' : '✖'}]`;
         }
@@ -267,17 +292,20 @@ function getCheckboxRender(header, id, checked, isActive = false) {
 }
 
 function getSliderRender(header, id, value, min, max, isActive = false) {
+    const percentage = ((value - min) / (max - min)) * 100;
+
     return `
         <div class="menu-item slider ${isActive ? "active" : ""}" id="${id}">
-            <div class="header">${header}</div>
-            <div class="slider-controls">
-                <span class="arrow">⬅️</span>
-                <span class="value">${value}</span>
-                <span class="arrow">➡️</span>
+            <div class="header">${header} : <span class="value">${value}</span></div>
+            <div class="slider-bar" data-index="${id}">
+                <div class="slider-fill" style="width: ${percentage}%;"></div>
             </div>
+            <div class="slider-minmax"><span>${min}</span><span>${max}</span></div>
         </div>
     `;
 }
+
+
 
 
 function getButtonWithDescription(header, description, id, isActive = false) {
@@ -356,10 +384,18 @@ function handleMenuEnter() {
         current.checked = !current.checked;
         updateSelection();
         sendSelectOption(selectedIndex);
+    } else if (current.type === "slider") {
+        if (typeof current.enter === 'function') {
+            current.enter();
+        } else {
+            sendSelectOption(selectedIndex);
+        }
     } else if (current.type === "button") {
         sendSelectOption(selectedIndex);
     }
 }
+
+
 
 function handleSliderChange(direction) {
     const current = menuOptions[selectedIndex];
@@ -412,3 +448,69 @@ function isSliderSelected() {
     const current = menuOptions[selectedIndex];
     return current && current.type === "slider";
 }
+
+
+const setMenuPosition = (position) => {
+    container.classList.remove(
+        "menu-top-left",
+        "menu-top-right",
+        "menu-bottom-left",
+        "menu-bottom-right",
+        "menu-center"
+    );
+    if (position) {
+        container.classList.add(position);
+        currentPosition = position;
+    }
+};
+
+buttonsContainer.addEventListener("click", (e) => {
+    const bar = e.target.closest(".slider-bar");
+    if (!bar || !menuIsOpen) return;
+
+    const index = parseInt(bar.getAttribute("data-index"));
+    const option = menuOptions[index];
+    if (!option || option.type !== "slider") return;
+
+    const rect = bar.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const ratio = clickX / rect.width;
+    const value = Math.round(option.min + ratio * (option.max - option.min));
+
+    option.value = Math.min(Math.max(value, option.min), option.max);
+    updateSelection();
+    sendSliderChange(index, option.value);
+});
+
+
+buttonsContainer.addEventListener("dblclick", (e) => {
+    const bar = e.target.closest(".slider-bar");
+    if (!bar || !menuIsOpen) return;
+
+    const index = parseInt(bar.getAttribute("data-index"));
+    const option = menuOptions[index];
+    if (!option || option.type !== "slider") return;
+
+    // Ouvrir le menu input
+    $.post(`https://${GetParentResourceName()}/OpenInputMenu`, JSON.stringify({
+        title: "Saisir une valeur",
+        subtitle: `Entre ${option.min} et ${option.max}`
+    }));
+
+    // Définir le listener une seule fois
+    const inputListener = function(evt) {
+        if (evt.data?.action === "inputSubmitted") {
+            window.removeEventListener("message", inputListener);
+
+            const raw = evt.data.value;
+            const num = Number(raw);
+            if (!isNaN(num)) {
+                option.value = Math.min(Math.max(num, option.min), option.max);
+                updateSelection();
+                sendSliderChange(index, option.value);
+            }
+        }
+    };
+
+    window.addEventListener("message", inputListener);
+});
