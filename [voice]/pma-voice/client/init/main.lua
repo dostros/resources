@@ -322,3 +322,13 @@ function handleRadioAndCallInit()
 		end
 	end
 end
+
+
+
+exports('getVoiceMode', function()
+    return LocalPlayer.state.proximity.index
+end)
+
+exports('isPlayerTalking', function()
+    return NetworkIsPlayerTalking(PlayerId())
+end)

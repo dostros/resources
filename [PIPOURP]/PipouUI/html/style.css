@@ -23,8 +23,8 @@ body {
     align-items: center;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
     opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    transform: translateY(20px);
+    transition: opacity 0.2s ease-out, transform 0.25s ease-out;
+    transform: translateY(10px);
 }
 
 
@@ -54,9 +54,8 @@ body {
 #container.active {
     display: flex;
     opacity: 1;
-    transform: scale(1.02) translateY(0px);
+    transform: scale(1.01) translateY(0px);
 }
-
 /* Titre */
 #menu-title {
     width: 375px;
@@ -306,6 +305,96 @@ body {
 .tab-button.active {
     background-color: rgba(255, 140, 0, 0.9);
 }
+
+
+
+
+
+.menu-item.searchinput{
+    background: transparent;
+    margin-bottom: 12px;
+    pointer-events: none;        /* la carte ne capte pas le clic       */
+}
+
+.menu-item.searchinput input{
+    width: 100%;
+    box-sizing: border-box;      /* padding & border inclus dans width  */
+    padding: 10px 14px 10px 38px;/* 38 px à gauche = place pour icône    */
+    font-size: 15px;
+    border: 1px solid rgba(255,140,0,.6);
+    border-radius: 8px;
+    background: rgba(255,255,255,.06);
+    color: #fff;
+    outline: none;
+    transition:.15s ease;
+    pointer-events: auto;        /* l’input, lui, reste cliquable       */
+
+    /* petite loupe optionnelle */
+    background-image:url('data:image/svg+xml;utf8,<svg fill="white" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M505 442.7 405.3 343C433.8 308.1 451 263.5 451 214.5 451 103.5 361 13 250 13S49 103.5 49 214.5 139 416 250 416c49 0 93.6-17.2 128.5-45.7l99.7 99.7c5.9 5.9 15.4 5.9 21.2 0l5.6-5.6c5.9-5.9 5.9-15.4 0-21.2z"/></svg>');
+    background-repeat:no-repeat;
+    background-size:16px;
+    background-position:12px center;
+}
+
+/* ---- focus / hover ---- */
+.menu-item.searchinput:hover  input,
+.menu-item.searchinput input:focus{
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255,140,0,1);
+    box-shadow: 0 0 5px 1px rgba(255,140,0,.55);
+}
+
+/* ---- placeholder ---- */
+.menu-item.searchinput input::placeholder{
+    color: rgba(255,255,255,.55);
+    font-style: italic;
+}
+
+
+
+.menu-item.clothslider {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 1rem;
+    border-radius: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.menu-item.clothslider.active {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.clothslider-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.clothslider-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.clothslider-row span {
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    color: #ccc;
+    width: 100px;
+}
+
+.clothslider-row input[type=range] {
+    flex-grow: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: #555;
+    outline: none;
+    accent-color: #fff;
+}
+
 
 
 

@@ -1,8 +1,8 @@
 fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
-author 'Kakarot'
-description 'Provides a menu for server and player management'
+author 'Dostros'
+description 'Admin Menu for QBCore with PipouUI'
 version '1.2.0'
 
 ui_page 'html/index.html'
@@ -14,7 +14,6 @@ shared_scripts {
 }
 
 client_scripts {
-    '@menuv/menuv.lua',
     'client/noclip.lua',
     'client/entity_view.lua',
     'client/blipsnames.lua',
@@ -30,7 +29,11 @@ server_scripts {
 
 files {
     'html/index.html',
-    'html/index.js'
+    'html/index.js',
+
 }
 
 
+
+dependency 'PipouUI'
+dependency 'qb-core'

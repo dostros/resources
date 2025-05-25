@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <title>PipouCloth</title>
+</head>
+<body>
+
+    <div id="titleClothMenu">
+        <h1>Menu Vêtement</h1>
+        <div class="tab-container">
+            <button class="tab-button" onclick="showTab('creation')">Création</button>
+            <button class="tab-button" onclick="showTab('barber')">Coiffeur</button>
+            <button class="tab-button" onclick="showTab('clothing')">Vêtements</button>
+        </div>
+    </div>
+    
+    <div id="contentClothMenu">
+        <!-- Section Création -->
+        <div id="tab-creation" class="tab-content">
+            <div class="menu-item section"><div class="header">Création de Personnage</div></div>
+            <!-- Contenus spécifiques à la création -->
+        </div>
+    
+        <!-- Section Coiffeur -->
+        <div id="tab-barber" class="tab-content">
+            <div class="menu-item section"><div class="header">Coiffeur</div></div>
+            <!-- Contenus spécifiques au coiffeur -->
+        </div>
+    
+        <!-- Section Vêtements -->
+        <div id="tab-clothing" class="tab-content">
+            <div class="menu-item section"><div class="header">Vêtements</div></div>
+            <!-- Contenus spécifiques aux vêtements -->
+        </div>
+    </div>
+    
+
+    <script src="script.js"></script>
+
+</body>
+</html>

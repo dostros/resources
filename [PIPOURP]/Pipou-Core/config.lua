@@ -27,6 +27,15 @@ Config.BossMenu = {
         blipName = 'Agence Immobiliere',
         blipNumber = 475,
         blipColor = 28,
+    },
+    police = {
+        label = 'Los Santos Police Department',
+        bossmenu = vector3(447.98, -973.37, 30.69),
+        shiftpoint = vector3(440.38, -975.72, 30.69),
+        blipcoords = vector3(447.98, -973.37, 30.69),
+        blipName = 'LSPD',
+        blipNumber = 60,
+        blipColor = 38,
     }
 }
 

@@ -1,0 +1,179 @@
+/* === PipouCloth - Style harmonisé PipouUI === */
+
+#clothmenu {
+    background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+    border-radius: 18px;
+    width: 450px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+    border: 1px solid #2a2a2a;
+    backdrop-filter: blur(10px);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: absolute;
+    right: 7%;
+    top: 10%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Titre et Onglets */
+#titleClothMenu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 87, 34, 0.9);
+    padding: 10px;
+    border-top-right-radius: 18px;
+    border-top-left-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+#titleClothMenu h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.tab-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.tab-button {
+    background: rgba(255, 140, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.tab-button.active, .tab-button:hover {
+    background: rgba(255, 140, 0, 1);
+}
+
+/* Conteneur du contenu */
+#contentClothMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    max-height: 55vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,140,0,0.9) rgba(255,255,255,0.05);
+}
+
+#contentClothMenu::-webkit-scrollbar {
+    width: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+#contentClothMenu::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.9);
+    border-radius: 10px;
+}
+
+.tab-content {
+    display: none;
+    transition: opacity 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Sliders */
+.menu-item.clothslider {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 1rem;
+    border-radius: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.menu-item.clothslider.active {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.clothslider-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.clothslider-row span {
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    color: #ccc;
+    width: 100px;
+}
+
+.clothslider-row input[type=range] {
+    flex-grow: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+    accent-color: #ffa726;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    height: 16px;
+    width: 16px;
+    background: #ffa726;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(255, 140, 0, 0.6);
+    transition: background 0.3s;
+}
+
+input[type="range"]::-moz-range-thumb {
+    height: 16px;
+    width: 16px;
+    background: #ffa726;
+    border-radius: 50%;
+}
+
+/* Footer / Boutons */
+#clothmenu-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 20px;
+}
+
+.clothmenu-button {
+    flex: 1;
+    padding: 10px 14px;
+    background: rgba(255, 140, 0, 0.9);
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.clothmenu-button:hover {
+    background: rgba(255, 140, 0, 1);
+}
+
+.clothmenu-button.secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ccc;
+}
+
+.clothmenu-button.secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+}

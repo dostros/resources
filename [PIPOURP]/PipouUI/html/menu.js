@@ -6,6 +6,7 @@ let isInputOpen = false;
 let currentTabs = null;
 let activeTabIndex = 0;
 let currentPosition = "menu-top-right";
+let visibleItems = [];
 
 
 
@@ -64,8 +65,10 @@ window.addEventListener("message", (event) => {
                 menuIsOpen = true;
                 renderTabs(data.tabs, 0);
                 openMenu(data.tabs[0].options, data.tabs[0].label, data.subtitle, false, data.tabs, 0, data.position);
+                
             }, 50);
             break;
+            
 
         default:
             return;
@@ -83,33 +86,37 @@ const openMenu = (options, title, subtitle, fromHistory = false, tabs = null, ac
             selectedIndex: selectedIndex,
             position: currentPosition
         });
-        
     }
-
-
 
     menuOptions = options;
     selectedIndex = 0;
-
     menuTitle.textContent = title;
     menuSubtitle.textContent = subtitle || "";
 
-    buttonsContainer.innerHTML = options.map((opt, idx) => {
+
+    // Générer les boutons HTML
+    const buttonsHTML = options.map((opt, idx) => {
         switch (opt.type) {
             case "checkbox":
-                return getCheckboxRender(opt.label, idx, opt.checked, idx === selectedIndex);
+                return getCheckboxRender(opt.label, idx, opt.checked);
             case "slider":
-                return getSliderRender(opt.label, idx, opt.value, opt.min, opt.max, idx === selectedIndex);
+                return getSliderRender(opt.label, idx, opt.value, opt.min, opt.max);
             case "section":
                 return getSectionRender(opt.label, idx);
+            case "searchinput":
+                return getSearchInputRender(opt.placeholder || "🔍 Rechercher...", idx, idx === selectedIndex);
+            case "clothslider":
+                return getClothSliderRender(opt.label, idx, opt.drawable, opt.texture, opt.drawableMin, opt.drawableMax, opt.textureMax);
+                            
             default:
-                return getButtonRender(opt.label, idx, idx === selectedIndex);
+                return getButtonRender(opt.label, idx);
         }
     }).join("");
 
-    document.querySelectorAll('.menu-item').forEach(el => {
-        el.replaceWith(el.cloneNode(true));
-    });
+    // Injecter dans le DOM
+    buttonsContainer.innerHTML = buttonsHTML;
+    refreshVisibleItems();
+
 
     container.classList.add("active");
     menuIsOpen = true;
@@ -125,6 +132,7 @@ const openMenu = (options, title, subtitle, fromHistory = false, tabs = null, ac
 
     updateSelection();
 };
+
 
 function sendSelectOption(index) {
     $.post(`https://${GetParentResourceName()}/selectOption`, JSON.stringify({
@@ -155,19 +163,24 @@ const closeMenu = (quick = false) => {
 
 
 
+
 document.addEventListener('keydown', (e) => {
-    if (!menuIsOpen || isInputOpen) return;
+    if (!menuIsOpen) return;
 
     switch(e.key) {
         case 'ArrowDown':
+            if (!menuIsOpen || isInputOpen || visibleItems.length === 0) break;
             playSound('navigate');
-            selectedIndex = (selectedIndex + 1) % menuOptions.length;
+
+            selectedIndex = (selectedIndex + 1) % visibleItems.length;
             updateSelection();
             break;
 
         case 'ArrowUp':
+            if (!menuIsOpen || isInputOpen || visibleItems.length === 0) break;
             playSound('navigate');
-            selectedIndex = (selectedIndex - 1 + menuOptions.length) % menuOptions.length;
+
+            selectedIndex = (selectedIndex - 1 + visibleItems.length) % visibleItems.length;
             updateSelection();
             break;
 
@@ -186,7 +199,7 @@ document.addEventListener('keydown', (e) => {
                 openMenu(currentTabs[activeTabIndex].options, currentTabs[activeTabIndex].label, menuSubtitle.textContent, false, currentTabs, activeTabIndex);
             }
             break;
-        
+
         case 'ArrowLeft':
             if (isSliderSelected()) {
                 playSound('navigate');
@@ -197,9 +210,10 @@ document.addEventListener('keydown', (e) => {
                 openMenu(currentTabs[activeTabIndex].options, currentTabs[activeTabIndex].label, menuSubtitle.textContent, false, currentTabs, activeTabIndex);
             }
             break;
-            
-        case 'Escape':
+
         case 'Backspace':
+            if (document.activeElement?.closest('.menu-search-input')) break;            
+        case 'Escape':
             playSound('back');
             if (menuHistory.length > 0) {
                 const lastMenu = menuHistory.pop();
@@ -215,56 +229,79 @@ document.addEventListener('keydown', (e) => {
                     body: JSON.stringify({})
                 });
             }
-        break;
-            
+            break;
     }
 });
 
 
+
 function updateSelection() {
-    document.querySelectorAll('.menu-item').forEach((el, i) => {
-        el.classList.toggle('active', i === selectedIndex);
-        const option = menuOptions[i];
+    if (!visibleItems.length) return;
+
+    visibleItems.forEach((el, i) => {
+        const isSelected = i === selectedIndex;
+
+        if (isSelected && !el.classList.contains('active')) {
+            el.classList.add('active');
+        } else if (!isSelected && el.classList.contains('active')) {
+            el.classList.remove('active');
+        }
+
+        const idx = el && el.id ? getIndexFromElementId(el.id) : null;
+        const option = idx !== null ? menuOptions[idx] : null;
         if (!option) return;
 
         if (option.type === "slider") {
-            el.querySelector('.value').textContent = option.value;
+            const valueEl = el.querySelector('.value');
+            if (valueEl) valueEl.textContent = option.value;
+
             const percent = ((option.value - option.min) / (option.max - option.min)) * 100;
             const fill = el.querySelector('.slider-fill');
             if (fill) fill.style.width = `${percent}%`;
         }
-        
+
         if (option.type === "checkbox") {
-            el.querySelector('.header').textContent = `${option.label} [${option.checked ? '✔' : '✖'}]`;
+            const header = el.querySelector('.header');
+            if (header) {
+                header.textContent = `${option.label} [${option.checked ? '✔' : '✖'}]`;
+            }
         }
+        
     });
 
-    const activeElement = document.querySelector('.menu-item.active');
+    const activeElement = visibleItems[selectedIndex];
     if (activeElement) {
-        const offsetTop = activeElement.offsetTop;
-        const offsetBottom = offsetTop + activeElement.offsetHeight;
-        const scrollTop = buttonsContainer.scrollTop;
-        const containerHeight = buttonsContainer.clientHeight;
-
-        const margin = 20;
-        const headerHeight = menuTitle.offsetHeight + menuSubtitle.offsetHeight + 20; // 20px de padding/marge extra
-
-        if (selectedIndex === 0) {
-            buttonsContainer.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-        else if (offsetTop < scrollTop + margin + headerHeight) {
-            // Prendre en compte la hauteur du titre et sous-titre
-            buttonsContainer.scrollTo({ top: offsetTop - headerHeight - margin, behavior: 'smooth' });
-        } 
-        else if (offsetBottom > scrollTop + containerHeight - margin) {
-            buttonsContainer.scrollTo({ top: offsetBottom - containerHeight + margin, behavior: 'smooth' });
-        }
+        scrollToActiveItem(activeElement);
     }
+}
+
+function scrollToActiveItem(activeElement) {
+    const offsetTop = activeElement.offsetTop;
+    const offsetBottom = offsetTop + activeElement.offsetHeight;
+    const scrollTop = buttonsContainer.scrollTop;
+    const containerHeight = buttonsContainer.clientHeight;
+
+    const margin = 50;
+    const headerHeight = menuTitle.offsetHeight + menuSubtitle.offsetHeight + 20;
+
+    if (offsetTop < scrollTop + margin + headerHeight) {
+        buttonsContainer.scrollTo({ top: offsetTop - headerHeight - margin, behavior: 'smooth' });
+    } else if (offsetBottom > scrollTop + containerHeight - margin) {
+        buttonsContainer.scrollTo({ top: offsetBottom - containerHeight + margin, behavior: 'smooth' });
+    }
+}
+
+function getIndexFromElementId(id) {
+    if (!id || typeof id !== "string") return null;
+    const match = id.match(/^item-(\d+)|^list_(\d+)$/);
+    return match ? parseInt(match[1] || match[2], 10) : null;
 }
 
 
 
-
+function refreshVisibleItems() {
+    visibleItems = Array.from(document.querySelectorAll('.menu-item')).filter(el => el.style.display !== 'none');
+}
 
 
 function sendSliderChange(index, value) {
@@ -277,7 +314,7 @@ function sendSliderChange(index, value) {
 
 function getButtonRender(header, id, isActive = false) {
     return `
-        <div class="menu-item button ${isActive ? "active" : ""}" id="${id}">
+        <div class="menu-item button ${isActive ? "active" : ""}" id="item-${id}">
             <div class="header">${header}</div>
         </div>
     `;
@@ -285,17 +322,18 @@ function getButtonRender(header, id, isActive = false) {
 
 function getCheckboxRender(header, id, checked, isActive = false) {
     return `
-        <div class="menu-item checkbox ${isActive ? "active" : ""}" id="${id}">
+        <div class="menu-item checkbox ${isActive ? "active" : ""}" id="item-${id}">
             <div class="header">${header} [${checked ? '✔' : '✖'}]</div>
         </div>
     `;
 }
 
+
 function getSliderRender(header, id, value, min, max, isActive = false) {
     const percentage = ((value - min) / (max - min)) * 100;
 
     return `
-        <div class="menu-item slider ${isActive ? "active" : ""}" id="${id}">
+        <div class="menu-item slider ${isActive ? "active" : ""}" id="item-${id}">
             <div class="header">${header} : <span class="value">${value}</span></div>
             <div class="slider-bar" data-index="${id}">
                 <div class="slider-fill" style="width: ${percentage}%;"></div>
@@ -335,6 +373,7 @@ const openInput = (title, subtitle) => {
         <input id="textInput" type="text" class="input-text" placeholder="Votre texte ici...">
         <div class="menu-item button" id="submitInput">Valider</div>
     `;
+    refreshVisibleItems();
 
     document.getElementById("submitInput").addEventListener("click", function() {
         const value = document.getElementById("textInput").value;
@@ -372,38 +411,76 @@ const openList = (title, subtitle, list) => {
     });
 
     buttonsContainer.innerHTML = html;
-
+    refreshVisibleItems();
     updateSelection();
 }
 
 function handleMenuEnter() {
-    const current = menuOptions[selectedIndex];
+    const logicalIndex = getLogicalIndexFromVisible(selectedIndex);
+    const current = menuOptions[logicalIndex];
     if (!current) return;
 
     if (current.type === "checkbox") {
         current.checked = !current.checked;
         updateSelection();
-        sendSelectOption(selectedIndex);
+        sendSelectOption(logicalIndex);
+
     } else if (current.type === "slider") {
-        if (typeof current.enter === 'function') {
-            current.enter();
+        sendSelectOption(logicalIndex);
+
+    } else if (current.type === "searchinput") {
+        const input = document.querySelector(`#item-${logicalIndex} input`);
+        if (!input) return;
+
+        if (input.disabled) {
+            input.disabled = false;
+            input.focus();
+            isInputOpen = true;
+
+            input.removeEventListener("input", input._searchListener);
+
+            input._searchListener = () => {
+                const filter = input.value.toLowerCase();
+                document.querySelectorAll(".menu-item").forEach(item => {
+                    if (item.classList.contains("searchinput")) return;
+                    const label = item.querySelector(".header")?.innerText.toLowerCase() || "";
+                    const desc = item.querySelector(".description")?.innerText.toLowerCase() || "";
+                    item.style.display = (label.includes(filter) || desc.includes(filter)) ? "flex" : "none";
+                });
+            
+                // Force mise à jour des items visibles et re-sélectionne un élément valide
+                refreshVisibleItems();
+                selectedIndex = 0;
+                updateSelection();
+            };
+            
+
+            input.addEventListener("input", input._searchListener);
         } else {
-            sendSelectOption(selectedIndex);
+            input.disabled = true;
+            input.blur();
+            isInputOpen = false;
         }
-    } else if (current.type === "button") {
-        sendSelectOption(selectedIndex);
+
+        $.post(`https://${GetParentResourceName()}/setKeyboardFocus`, JSON.stringify({ focus: !input.disabled }));
+        return;
+
+    } else {
+        sendSelectOption(logicalIndex);
     }
 }
 
 
 
+
 function handleSliderChange(direction) {
-    const current = menuOptions[selectedIndex];
+    const logicalIndex = getLogicalIndexFromVisible(selectedIndex);
+    const current = menuOptions[logicalIndex];
     if (current && current.type === "slider" && typeof current.value === "number") {
         const step = current.step || 1;
         current.value = Math.min(Math.max(current.value + direction * step, current.min), current.max);
         updateSelection();
-        sendSliderChange(selectedIndex, current.value);
+        sendSliderChange(logicalIndex, current.value);
     }
 }
 
@@ -443,9 +520,9 @@ function renderTabs(tabs, activeIndex = 0) {
     });
 }
 
-
 function isSliderSelected() {
-    const current = menuOptions[selectedIndex];
+    const logicalIndex = getLogicalIndexFromVisible(selectedIndex);
+    const current = menuOptions[logicalIndex];
     return current && current.type === "slider";
 }
 
@@ -514,3 +591,87 @@ buttonsContainer.addEventListener("dblclick", (e) => {
 
     window.addEventListener("message", inputListener);
 });
+
+function getSearchInputRender(placeholder, id, isActive = false) {
+    return `
+        <div class="menu-item searchinput ${isActive ? "active" : ""}" id="item-${id}">
+            <input type="text" class="menu-search-input" placeholder="${placeholder}" disabled />
+        </div>
+    `;
+}
+
+
+function getNextVisibleIndex(start, direction) {
+    if (!visibleItems.length) return start;
+    return (start + direction + visibleItems.length) % visibleItems.length;
+}
+
+function getLogicalIndexFromVisible(index) {
+    if (!visibleItems[index]) return null;
+    const el = visibleItems[index];
+    return getIndexFromElementId(el?.id);
+}
+
+
+function getClothSliderRender(label, id, drawable, texture, drawableMin, drawableMax, textureMax, isActive = false) {
+    const drawPercent = ((drawable - drawableMin) / (drawableMax - drawableMin)) * 100;
+    const texPercent = ((texture) / (textureMax)) * 100;
+
+    return `
+        <div class="menu-item clothslider ${isActive ? "active" : ""}" id="item-${id}">
+            <div class="header">${label}</div>
+            <div class="clothslider-group">
+                <div class="clothslider-line">
+                    <span>Modèle</span>
+                    <div class="slider-bar" data-index="${id}" data-type="draw">
+                        <div class="slider-fill" style="width: ${drawPercent}%"></div>
+                    </div>
+                    <span class="value">${drawable}</span>
+                </div>
+                <div class="clothslider-line">
+                    <span>Texture</span>
+                    <div class="slider-bar" data-index="${id}" data-type="tex">
+                        <div class="slider-fill" style="width: ${texPercent}%"></div>
+                    </div>
+                    <span class="value">${texture}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+buttonsContainer.addEventListener("input", (e) => {
+    if (!menuIsOpen) return;
+
+    const drawableInput = e.target.closest(".clothslider-drawable");
+    const textureInput = e.target.closest(".clothslider-texture");
+
+    if (drawableInput) {
+        const index = parseInt(drawableInput.dataset.index, 10);
+        const value = parseInt(drawableInput.value, 10);
+        const option = menuOptions[index];
+        if (option && option.type === "clothslider") {
+            option.drawable = value;
+            option.texture = 0; // reset texture
+            sendClothSliderChange(index, option.drawable, option.texture);
+            openMenu(menuOptions, menuTitle.textContent, menuSubtitle.textContent, true, currentTabs, activeTabIndex, currentPosition);
+        }
+    } else if (textureInput) {
+        const index = parseInt(textureInput.dataset.index, 10);
+        const value = parseInt(textureInput.value, 10);
+        const option = menuOptions[index];
+        if (option && option.type === "clothslider") {
+            option.texture = value;
+            sendClothSliderChange(index, option.drawable, option.texture);
+        }
+    }
+});
+
+
+function sendClothSliderChange(index, drawable, texture) {
+    $.post(`https://${GetParentResourceName()}/clothsliderChange`, JSON.stringify({
+        index,
+        drawable,
+        texture
+    }));
+}

@@ -29,8 +29,28 @@ function SetDisplay(bool, label)
 end
 
 RegisterCommand("agence", function()
-    SetDisplay(not display)
+    local player = QBCore.Functions.GetPlayerData()
+    if player and player.job and player.job.name == "realestate" then
+        SetDisplay(not display)
+    else
+        exports['PipouUI']:Notify("Vous n'êtes pas agent immobilier.", "error")
+    end
 end, false)
+
+CreateThread(function()
+    while true do
+        Wait(0)
+        if IsControlJustReleased(0, 167) then -- F6 key
+            local player = QBCore.Functions.GetPlayerData()
+            if player and player.job and player.job.name == "realestate" then
+                SetDisplay(not display)
+            else
+                exports['PipouUI']:Notify("Vous n'êtes pas agent immobilier.", "error")
+            end
+        end
+    end
+end)
+
 
 RegisterNUICallback('exit', function(_, cb)
     SetDisplay(false)

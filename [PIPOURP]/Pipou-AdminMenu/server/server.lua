@@ -542,3 +542,78 @@ QBCore.Commands.Add('heading', 'Copy heading to clipboard (Admin only)', {}, fal
     local src = source
     TriggerClientEvent('qb-admin:client:copyToClipboard', src, 'heading')
 end, 'admin')
+
+
+QBCore.Functions.CreateCallback('qb-admin:server:getJobsList', function(source, cb)
+    local jobs = {}
+
+    for k, v in pairs(QBCore.Shared.Jobs) do
+        table.insert(jobs, { name = k, label = v.label })
+    end
+
+    table.sort(jobs, function(a, b)
+        return a.label:lower() < b.label:lower()
+    end)
+
+    cb(jobs)
+end)
+
+
+QBCore.Functions.CreateCallback('qb-admin:server:getJobGrades', function(source, cb, jobName)
+    local job = QBCore.Shared.Jobs[jobName]
+    if not job or not job.grades then
+        cb({})
+        return
+    end
+
+    local grades = {}
+    for gradeId, data in pairs(job.grades) do
+        table.insert(grades, {
+            label = data.name or data.label,
+            grade = tonumber(gradeId)
+        })
+    end
+
+    -- Trier par grade (ordre croissant)
+    table.sort(grades, function(a, b)
+        return a.grade < b.grade
+    end)
+
+    cb(grades)
+end)
+
+
+QBCore.Functions.CreateCallback('qb-admin:server:getGangsList', function(source, cb)
+    local gangs = {}
+    for k, v in pairs(QBCore.Shared.Gangs) do
+        table.insert(gangs, { name = k, label = v.label })
+    end
+
+    table.sort(gangs, function(a, b)
+        return a.label < b.label
+    end)
+
+    cb(gangs)
+end)
+
+QBCore.Functions.CreateCallback('qb-admin:server:getGangGrades', function(source, cb, gangName)
+    local gang = QBCore.Shared.Gangs[gangName]
+    if not gang or not gang.grades then
+        return cb({})
+    end
+
+    local grades = {}
+    for k, v in pairs(gang.grades) do
+        table.insert(grades, {
+            label = v.name or k,
+            value = tonumber(k),
+            rank = v.grade or tonumber(k)
+        })
+    end
+
+    table.sort(grades, function(a, b)
+        return a.rank < b.rank
+    end)
+
+    cb(grades)
+end)

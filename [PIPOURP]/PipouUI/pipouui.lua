@@ -1,3 +1,7 @@
+--[[ ======================= ]]--
+--         MENUS            --
+--[[ ======================= ]]--
+
 PipouUI = {}
 PipouUI.__index = PipouUI
 PipouUI.menus = {}
@@ -5,7 +9,7 @@ PipouUI.navigationStack = {}
 local menuCounter = 0
 
 -- Création du menu : retourne un id (chaîne) pour identifier le menu
-function PipouUI.CreateMenu(title, subtitle, ttl, position)
+function PipouUI.CreateMenu(title, subtitle, ttl, position, blockMovement)
     local menu = {
         id = tostring(menuCounter),
         title = title or "Menu",
@@ -13,7 +17,8 @@ function PipouUI.CreateMenu(title, subtitle, ttl, position)
         position = position or "menu-top-right", -- 👈 ici
         options = {},
         callbacks = {},
-        expireAt = ttl and (GetGameTimer() + ttl) or nil 
+        expireAt = ttl and (GetGameTimer() + ttl) or nil,
+        blockMovement = blockMovement or false
     }
     setmetatable(menu, PipouUI)
     PipouUI.menus[menu.id] = menu
@@ -32,7 +37,6 @@ function PipouUI:AddOption(optionType, label, data, callback)
         data = data
     }
 
-    -- Copier les donnés utiles à la racine (pour l'affichage dans la NUI)
     if data and optionType == "slider" then
         option.value = data.value or 0
         option.min = data.min or 0
@@ -42,7 +46,15 @@ function PipouUI:AddOption(optionType, label, data, callback)
         option.checked = data.checked or false
     elseif optionType == "section" then
         callback = function() end
+    elseif data and optionType == "clothslider" then
+        option.drawable = data.drawable or 0
+        option.texture = data.texture or 0
+        option.drawableMin = data.drawableMin or 0
+        option.drawableMax = data.drawableMax or 10
+        option.textureMax = data.textureMax or 10
+        option.data = nil
     end
+
 
     table.insert(self.options, option)
     table.insert(self.callbacks, callback or function() end)
@@ -74,14 +86,14 @@ end)
 
 -- Ouvrir le menu
 function PipouUI:Open()
-    SetNuiFocus(true, false)
-    SetNuiFocusKeepInput(true)
+    SetNuiFocus(true, not self.blockMovement)
+    SetNuiFocusKeepInput(not self.blockMovement)
     SendNUIMessage({
         action = "OPEN_MENU",
         title = self.title,
         subtitle = self.subtitle,
         options = self.options,
-        position = self.position -- 👈 ici
+        position = self.position
     })
     PipouUI.currentMenu = self
 end
@@ -152,6 +164,18 @@ RegisterNUICallback("sliderChange", function(data, cb)
     end
     cb({})
 end)
+
+RegisterNUICallback("clothsliderChange", function(data, cb)
+    local index = data.index + 1
+    local drawable = data.drawable
+    local texture = data.texture
+    local menu = PipouUI.currentMenu
+    if menu and menu.callbacks[index] then
+        menu.callbacks[index](drawable, texture)
+    end
+    cb({})
+end)
+
 
 
 function PipouUI:CloseMenu(destroyAfterClose, suppressNUI)
@@ -321,10 +345,9 @@ RegisterNUICallback('playSound', function(data, cb)
     if cb then cb('ok') end
 end)
 
-function PipouUI:OpenTabbedMenu(title, subtitle, tabs)
-    SetNuiFocus(true, false)
-    SetNuiFocusKeepInput(true)
-
+function PipouUI:OpenTabbedMenu(title, subtitle, tabs, blockMovement)
+    SetNuiFocus(true, true)              
+    SetNuiFocusKeepInput(not blockMovement) 
     local tabData = {}
 
     for _, tab in ipairs(tabs) do
@@ -334,7 +357,7 @@ function PipouUI:OpenTabbedMenu(title, subtitle, tabs)
                 type = opt.type or "button",
                 label = opt.label or "Option"
             }
-
+    
             if opt.type == "slider" and opt.data then
                 optCopy.value = opt.data.value or 0
                 optCopy.min = opt.data.min or 0
@@ -342,31 +365,54 @@ function PipouUI:OpenTabbedMenu(title, subtitle, tabs)
                 optCopy.step = opt.data.step or 1
             elseif opt.type == "checkbox" and opt.data then
                 optCopy.checked = opt.data.checked or false
+            elseif opt.type == "clothslider" then
+                optCopy.drawable = opt.drawable or 0
+                optCopy.texture = opt.texture or 0
+                optCopy.drawableMin = opt.drawableMin or 0
+                optCopy.drawableMax = opt.drawableMax or 10
+                optCopy.textureMax = opt.textureMax or 10
             end
-
+    
             table.insert(optList, optCopy)
         end
-
+    
         table.insert(tabData, {
             label = tab.label or "Onglet",
             options = optList
         })
     end
+    
 
-    -- On garde les callbacks pour chaque onglet à part
+    -- Stockage du menu courant
+    local tabMenu = {
+        id = "tab_" .. tostring(GetGameTimer()),
+        title = title,
+        subtitle = subtitle,
+        options = {},
+        callbacks = {},
+        position = "menu-top-right",
+        blockMovement = blockMovement or false
+    }
+    setmetatable(tabMenu, PipouUI)
+    PipouUI.currentMenu = tabMenu
+
     PipouUI.tabbedCallbacks = tabs
 
     SendNUIMessage({
         action = "OPEN_TAB_MENU",
         title = title,
         subtitle = subtitle,
-        tabs = tabData
+        tabs = tabData,
+        position = "menu-top-right",
+        blockMovement = blockMovement
     })
 end
 
-exports('OpenTabbedMenu', function(title, subtitle, tabs)
-    PipouUI:OpenTabbedMenu(title, subtitle, tabs)
+exports('OpenTabbedMenu', function(title, subtitle, tabs, blockMovement)
+    PipouUI:OpenTabbedMenu(title, subtitle, tabs, blockMovement)
 end)
+
+
 
 function PipouUI.DestroyMenu(menuId)
     if PipouUI.menus[menuId] then
@@ -379,6 +425,36 @@ exports('DestroyMenu', function(menuId)
 end)
 
 
+function PipouUI:OpenConfirmDialog(message, callback)
+    local id = "confirm_dialog_" .. math.random(1000, 9999)
+
+    local items = {
+        {
+            label = "✅ Oui",
+            action = function()
+                callback(true)
+            end
+        },
+        {
+            label = "❌ Non",
+            action = function()
+                callback(false)
+            end
+        }
+    }
+
+    PipouUI:OpenSimpleMenu(
+        message,      -- title
+        nil,          -- subtitle
+        items,        -- items
+        nil           -- position (facultatif)
+    )
+end
+
+-- Export pour l’utiliser depuis d’autres scripts
+exports('OpenConfirmDialog', function(message, callback)
+    PipouUI:OpenConfirmDialog(message, callback)
+end)
 
 
 CreateThread(function()
@@ -431,10 +507,63 @@ exports('FlushMenus', function()
     PipouUI:FlushMenus()
 end)
 
+RegisterNUICallback("SetInputFocus", function(data, cb)
+    local focus = data.focus
+    SetNuiFocus(true, not focus) -- Si on tape, désactiver le jeu
+    cb({})
+end)
+
+RegisterNUICallback("setKeyboardFocus", function(data, cb)
+    local keepInput = data.keepInput
+    SetNuiFocus(true, not not keepInput) -- pour éviter nil
+    SetNuiFocusKeepInput(keepInput)
+    cb({})
+end)
+
+function PipouUI:UpdateSlider(index, value, max)
+    SendNUIMessage({
+        action = "sliderChange",
+        index = index,
+        value = value,
+        max = max
+    })
+end
+
+exports('UpdateSlider', function(index, value, max)
+    PipouUI:UpdateSlider(index, value, max)
+end)
+
+
+CreateThread(function()
+    while true do
+        Wait(0)
+        if PipouUI.currentMenu and PipouUI.currentMenu.blockMovement then
+            DisableControlAction(0, 1, true)   -- Look left/right
+            DisableControlAction(0, 2, true)   -- Look up/down
+            DisableControlAction(0, 30, true)  -- Move left/right
+            DisableControlAction(0, 31, true)  -- Move forward/back
+            DisableControlAction(0, 21, true)  -- Sprint
+            DisableControlAction(0, 22, true)  -- Jump
+            DisableControlAction(0, 24, true)  -- Attack
+            DisableControlAction(0, 25, true)  -- Aim
+            DisableControlAction(0, 45, true)  -- Reload
+            DisableControlAction(0, 44, true)  -- Cover
+            DisableControlAction(0, 37, true)  -- Weapon wheel
+        end
+    end
+end)
+
+
 
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+--[[ ======================= ]]--
+--        NOTIFICATIONS      --
+--[[ ======================= ]]--
+
 --                            NOTIFY
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -454,6 +583,12 @@ end)
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+--[[ ======================= ]]--
+--        PROGRESSBAR        --
+--[[ ======================= ]]--
+
 --                            PROGRESSBAR
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

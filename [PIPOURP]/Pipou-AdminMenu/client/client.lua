@@ -4,12 +4,23 @@ local showCoords = false
 local vehicleDevMode = false
 local banreason = 'Unknown'
 local kickreason = 'Unknown'
-local menuLocation = 'topright' -- e.g. topright (default), topleft, bottomright, bottomleft
+local menuLocation = 'topright'
 
 
-local function OpenMenu(title, items, callback)
-    exports['PipouUI']:OpenSimpleMenu(title, items, callback)
+
+
+function OpenMenuWithBack(title, items, location)
+    table.insert(items, {
+        label = "⬅️ Retour",
+        action = function()
+            exports['PipouUI']:Back()
+            return false
+        end
+    })
+
+    exports['PipouUI']:OpenSimpleMenu(title, "", items, location or menuLocation)
 end
+
 
 
 
@@ -80,6 +91,38 @@ function OpenServerOptionsMenu()
 end
 
 
+function OpenTimeMenu()
+    local selectedHour = GetClockHours() or 12
+
+    OpenMenuWithBack(Lang:t('menu.server_time'), {
+        {
+            type = "slider",
+            label = "Changer l'heure",
+            data = {
+                value = selectedHour,
+                min = 0,
+                max = 23,
+                step = 1
+            },
+            action = function(val)
+                selectedHour = val
+                return false
+            end
+        },
+        {
+            label = "Confirmer",
+            action = function()
+                local hourStr = string.format("%02d", selectedHour or 12)
+                TriggerServerEvent('qb-weathersync:server:setTime', hourStr, hourStr)
+                TriggerEvent('PipouUI:Notify', Lang:t('time.changed', { time = hourStr }), 'success')
+                return false
+            end
+        }
+    })
+end
+
+
+
 function OpenWeatherMenu()
     local weathers = {
         {
@@ -134,42 +177,31 @@ function OpenWeatherMenu()
 end
 
 
-function OpenTimeMenu()
-    local selectedHour = GetClockHours() or 12
-
-    exports['PipouUI']:OpenSimpleMenu(Lang:t('menu.server_time'), "", {
-        {
-            type = "slider",
-            label = "Changer l'heure",
-            data = {
-                value = selectedHour,
-                min = 0,
-                max = 23,
-                step = 1
-            },
-            action = function(val)
-                selectedHour = val
-                return false
-            end
+OpenMenuWithBack(Lang:t('menu.server_time'), {
+    {
+        type = "slider",
+        label = "Changer l'heure",
+        data = {
+            value = selectedHour,
+            min = 0,
+            max = 23,
+            step = 1
         },
-        {
-            label = "Confirmer",
-            action = function()
-                local hourStr = string.format("%02d", selectedHour or 12)
-                TriggerServerEvent('qb-weathersync:server:setTime', hourStr, hourStr)
-                TriggerEvent('PipouUI:Notify', Lang:t('time.changed', { time = hourStr }), 'success')
-                return false
-            end
-        },
-        {
-            label = "⬅️ Retour",
-            action = function()
-                exports['PipouUI']:Back()
-                return false
-            end
-        }
-    })
-end
+        action = function(val)
+            selectedHour = val
+            return false
+        end
+    },
+    {
+        label = "Confirmer",
+        action = function()
+            local hourStr = string.format("%02d", selectedHour or 12)
+            TriggerServerEvent('qb-weathersync:server:setTime', hourStr, hourStr)
+            TriggerEvent('PipouUI:Notify', Lang:t('time.changed', { time = hourStr }), 'success')
+            return false
+        end
+    }
+})
 
 
 
@@ -251,16 +283,16 @@ function OpenAdminOptionsMenu()
     end
 
     -- Appeler OpenSimpleMenu avec les options de menu
-    exports['PipouUI']:OpenSimpleMenu(Lang:t('menu.admin_options'), "", menuItems, "top-left")
+    OpenMenuWithBack(Lang:t('menu.admin_options'), menuItems, "top-left")
 end
 
 
 
 
---[[
-    General Functions
---]]
 local function LocalInput(text, number, windows)
+    exports['PipouUI']:CloseMenu() 
+    SetNuiFocus(false, false)     
+
     AddTextEntry('FMMC_MPM_NA', text)
     DisplayOnscreenKeyboard(1, 'FMMC_MPM_NA', '', windows or '', '', '', '', number or 30)
     while (UpdateOnscreenKeyboard() == 0) do
@@ -274,13 +306,18 @@ local function LocalInput(text, number, windows)
     end
 end
 
+
 local function LocalInputInt(text, number, windows)
+    exports['PipouUI']:CloseMenu()
+    SetNuiFocus(false, false)
+
     AddTextEntry('FMMC_MPM_NA', text)
     DisplayOnscreenKeyboard(1, 'FMMC_MPM_NA', '', windows or '', '', '', '', number or 30)
     while (UpdateOnscreenKeyboard() == 0) do
         DisableAllControlActions(0)
         Wait(0)
     end
+
     if (GetOnscreenKeyboardResult()) then
         local result = GetOnscreenKeyboardResult()
         return tonumber(result)
@@ -291,46 +328,30 @@ end
 
 -- Player List
 function OpenPermsMenu(player)
-    QBCore.Functions.TriggerCallback('qb-admin:server:getrank', function(rank)
-        if not rank then return end
+    QBCore.Functions.TriggerCallback('qb-admin:server:getrank', function(currentRank)
+        if not currentRank then return end
 
-        local groupIndex = 1
-        local groups = { 'user', 'admin', 'god' }
-        local groupLabels = { 'User', 'Admin', 'God' }
+        local groups = {
+            { label = 'User', value = 'user' },
+            { label = 'Admin', value = 'admin' },
+            { label = 'God', value = 'god' }
+        }
 
-        exports['PipouUI']:OpenSimpleMenu(Lang:t('menu.permissions') .. ' - ' .. player.name, "", {
+        CreateStepMenu(Lang:t('menu.permissions') .. ' - ' .. player.name, {
             {
-                type = "slider",
-                label = Lang:t('menu.set_group'),
-                data = {
-                    value = groupIndex,
-                    min = 1,
-                    max = #groups,
-                    step = 1
-                },
-                action = function(val)
-                    groupIndex = val
-                    exports['PipouUI']:Notify(Lang:t('info.group_set') .. ': ' .. groupLabels[groupIndex], 'info')
-                    return false
-                end
-            },
-            {
-                label = Lang:t('info.confirm'),
-                action = function()
-                    local selectedGroup = groups[groupIndex]
-                    TriggerServerEvent('qb-admin:server:setPermissions', player.id, selectedGroup)
-                    exports['PipouUI']:Notify(Lang:t('success.changed_perm') .. ': ' .. selectedGroup, 'success')
-                    return false
-                end
-            },
-            {
-                label = "⬅️ Retour",
-                action = function()
-                    exports['PipouUI']:Back()
-                    return false
-                end
+                type = 'list',
+                key = 'group',
+                title = Lang:t('menu.set_group'),
+                options = groups
             }
-        })
+        }, function(data)
+            if data.group then
+                TriggerServerEvent('qb-admin:server:setPermissions', player.id, data.group)
+                TriggerEvent('PipouUI:Notify', Lang:t('success.changed_perm') .. ': ' .. data.group, 'success')
+            else
+                TriggerEvent('PipouUI:Notify', Lang:t('error.invalid_group'), 'error')
+            end
+        end)
     end)
 end
 
@@ -338,106 +359,78 @@ end
 
 
 function OpenKickMenu(player)
-    local kickReason = 'Unknown'
-
-    exports['PipouUI']:OpenSimpleMenu(Lang:t('menu.kick') .. ' ' .. player.name, {
-        { label = Lang:t('info.reason'), value = 'reason' },
-        { label = Lang:t('info.confirm'), value = 'kick' },
+    CreateStepMenu(Lang:t('menu.kick') .. ' ' .. player.name, {
+        {
+            type = 'input',
+            key = 'reason',
+            prompt = Lang:t('desc.kick_reason')
+        }
     }, function(data)
-        if data.value == 'reason' then
-            local input = LocalInput(Lang:t('desc.kick_reason'), 255)
-            if input then
-                kickReason = input
-                exports['PipouUI']:Notify(Lang:t('info.reason_set') .. ': ' .. input, 'success')
-            end
-        elseif data.value == 'kick' then
-            if kickReason ~= 'Unknown' then
-                TriggerServerEvent('qb-admin:server:kick', player, kickReason)
-            else
-                exports['PipouUI']:Notify(Lang:t('error.missing_reason'), 'error')
-            end
+        if not data.reason or data.reason == '' then
+            return TriggerEvent('PipouUI:Notify', Lang:t('error.missing_reason'), 'error')
         end
+
+        TriggerServerEvent('qb-admin:server:kick', player, data.reason)
+        TriggerEvent('PipouUI:Notify', Lang:t('success.kicked_player'), 'success')
     end)
 end
+
 
 
 function OpenBanMenu(player)
-    local banReason = nil
-    local banLength = nil
-
-    local durations = {
-        { label = Lang:t('time.onehour'),      value = 3600 },
-        { label = Lang:t('time.sixhour'),      value = 21600 },
-        { label = Lang:t('time.twelvehour'),   value = 43200 },
-        { label = Lang:t('time.oneday'),       value = 86400 },
-        { label = Lang:t('time.threeday'),     value = 259200 },
-        { label = Lang:t('time.oneweek'),      value = 604800 },
-        { label = Lang:t('time.onemonth'),     value = 2678400 },
-        { label = Lang:t('time.threemonth'),   value = 8035200 },
-        { label = Lang:t('time.sixmonth'),     value = 16070400 },
-        { label = Lang:t('time.oneyear'),      value = 32140800 },
-        { label = Lang:t('time.permanent'),    value = 99999999999 },
-        { label = Lang:t('time.self'),         value = 'self' }
-    }
-
-    local function askReason()
-        local input = LocalInput(Lang:t('desc.ban_reason'), 255)
-        if input and input ~= '' then
-            banReason = input
-            exports['PipouUI']:Notify(Lang:t('info.reason_set') .. ': ' .. input, 'success')
-        end
-    end
-
-    local function askLength()
-        local items = {}
-        for _, entry in ipairs(durations) do
-            table.insert(items, { label = entry.label, value = entry.value })
-        end
-
-        exports['PipouUI']:OpenSimpleMenu(Lang:t('info.length'), items, function(choice)
-            if choice.value == 'self' then
-                local custom = LocalInputInt('Ban Length (seconds)', 11)
-                if custom then
-                    banLength = custom
-                    exports['PipouUI']:Notify(Lang:t('info.length_set') .. ': ' .. tostring(custom), 'success')
-                end
-            else
-                banLength = choice.value
-                exports['PipouUI']:Notify(Lang:t('info.length_set') .. ': ' .. choice.label, 'success')
-            end
-        end)
-    end
-
-    local function confirmBan()
-        if not banReason then
-            return exports['PipouUI']:Notify(Lang:t('error.missing_reason'), 'error')
-        end
-        if not banLength then
-            return exports['PipouUI']:Notify(Lang:t('error.invalid_reason_length_ban'), 'error')
-        end
-
-        TriggerServerEvent('qb-admin:server:ban', player, banLength, banReason)
-    end
-
-    exports['PipouUI']:OpenSimpleMenu(Lang:t('menu.ban') .. ' ' .. player.name, {
-        { label = Lang:t('info.reason'), value = 'reason' },
-        { label = Lang:t('info.length'), value = 'length' },
-        { label = Lang:t('info.confirm'), value = 'ban' },
+    CreateStepMenu(Lang:t('menu.ban') .. ' ' .. player.name, {
+        {
+            type = 'input',
+            key = 'reason',
+            prompt = Lang:t('desc.ban_reason')
+        },
+        {
+            type = 'list',
+            key = 'duration',
+            title = Lang:t('info.length'),
+            options = {
+                { label = Lang:t('time.onehour'), value = 3600 },
+                { label = Lang:t('time.sixhour'), value = 21600 },
+                { label = Lang:t('time.twelvehour'), value = 43200 },
+                { label = Lang:t('time.oneday'), value = 86400 },
+                { label = Lang:t('time.threeday'), value = 259200 },
+                { label = Lang:t('time.oneweek'), value = 604800 },
+                { label = Lang:t('time.onemonth'), value = 2678400 },
+                { label = Lang:t('time.threemonth'), value = 8035200 },
+                { label = Lang:t('time.sixmonth'), value = 16070400 },
+                { label = Lang:t('time.oneyear'), value = 32140800 },
+                { label = Lang:t('time.permanent'), value = 99999999999 },
+                { label = Lang:t('time.self'), value = 'custom' }
+            }
+        }
     }, function(data)
-        if data.value == 'reason' then
-            askReason()
-        elseif data.value == 'length' then
-            askLength()
-        elseif data.value == 'ban' then
-            confirmBan()
+        if data.duration == 'custom' then
+            local custom = LocalInputInt('Ban Length (seconds)', 11)
+            if custom then
+                data.duration = custom
+            else
+                return TriggerEvent('PipouUI:Notify', Lang:t('error.invalid_reason_length_ban'), 'error')
+            end
         end
+
+        TriggerServerEvent('qb-admin:server:ban', player, data.duration, data.reason)
+        TriggerEvent('PipouUI:Notify', Lang:t('success.banned_player'), 'success')
     end)
 end
+
 
 
 
 function OpenPlayerActionMenu(player)
     local items = {
+        {
+            label = "💼 Définir job",
+            action = function() OpenSetJobMenu(player) return false end
+        },
+        {
+            label = "🕶️ Définir gang",
+            action = function() OpenSetGangMenu(player) return false end
+        },
         {
             icon = '💀',
             label = Lang:t('menu.kill'),
@@ -500,7 +493,7 @@ function OpenPlayerActionMenu(player)
         },
     }
 
-    exports['PipouUI']:OpenSimpleMenu(player.cid .. Lang:t('info.options'), "", items)
+    exports['PipouUI']:OpenSimpleMenu(player.cid .." ".. Lang:t('info.options'), "", items)
 end
 
 
@@ -559,15 +552,7 @@ local function OpenCarModelsMenu(category)
         })
     end
 
-    table.insert(items, {
-        label = '⬅️ Retour',
-        action = function()
-            exports['PipouUI']:Back()
-            return false
-        end
-    })
-
-    exports['PipouUI']:OpenSimpleMenu(Lang:t('menu.vehicle_models'), "", items)
+    OpenMenuWithBack(Lang:t('menu.vehicle_models'), items)
 end
 
 
@@ -615,73 +600,73 @@ function OpenVehicleMenu()
         }
     }
 
-    exports['PipouUI']:OpenSimpleMenu(Lang:t('menu.vehicles'), "", items, "top-left")
+    OpenMenuWithBack(Lang:t('menu.vehicles'), items, "top-left")
 end
 
 
 
 local function CopyToClipboard(dataType)
     local ped = PlayerPedId()
+
     if dataType == 'coords2' then
         local coords = GetEntityCoords(ped)
         local x = QBCore.Shared.Round(coords.x, 2)
         local y = QBCore.Shared.Round(coords.y, 2)
-        SendNUIMessage({
-            string = string.format('vector2(%s, %s)', x, y)
-        })
-        QBCore.Functions.Notify(Lang:t('success.coords_copied'), 'success')
+        local str = string.format('vector2(%s, %s)', x, y)
+        SendNUIMessage({ string = str })
+        exports['PipouUI']:Notify('Copié : ' .. str, 'success')
+
     elseif dataType == 'coords3' then
         local coords = GetEntityCoords(ped)
         local x = QBCore.Shared.Round(coords.x, 2)
         local y = QBCore.Shared.Round(coords.y, 2)
         local z = QBCore.Shared.Round(coords.z, 2)
-        SendNUIMessage({
-            string = string.format('vector3(%s, %s, %s)', x, y, z)
-        })
-        QBCore.Functions.Notify(Lang:t('success.coords_copied'), 'success')
+        local str = string.format('vector3(%s, %s, %s)', x, y, z)
+        SendNUIMessage({ string = str })
+        exports['PipouUI']:Notify('Copié : ' .. str, 'success')
+
     elseif dataType == 'coords4' then
         local coords = GetEntityCoords(ped)
+        local heading = QBCore.Shared.Round(GetEntityHeading(ped), 2)
         local x = QBCore.Shared.Round(coords.x, 2)
         local y = QBCore.Shared.Round(coords.y, 2)
         local z = QBCore.Shared.Round(coords.z, 2)
-        local heading = GetEntityHeading(ped)
-        local h = QBCore.Shared.Round(heading, 2)
-        SendNUIMessage({
-            string = string.format('vector4(%s, %s, %s, %s)', x, y, z, h)
-        })
-        QBCore.Functions.Notify(Lang:t('success.coords_copied'), 'success')
+        local str = string.format('vector4(%s, %s, %s, %s)', x, y, z, heading)
+        SendNUIMessage({ string = str })
+        exports['PipouUI']:Notify('Copié : ' .. str, 'success')
+
     elseif dataType == 'heading' then
-        local heading = GetEntityHeading(ped)
-        local h = QBCore.Shared.Round(heading, 2)
-        SendNUIMessage({
-            string = h
-        })
-        QBCore.Functions.Notify(Lang:t('success.heading_copied'), 'success')
+        local h = QBCore.Shared.Round(GetEntityHeading(ped), 2)
+        local str = tostring(h)
+        SendNUIMessage({ string = str })
+        exports['PipouUI']:Notify('Heading copié : ' .. str, 'success')
+
     elseif dataType == 'freeaimEntity' then
         local entity = GetFreeAimEntity()
-
         if entity then
-            local entityHash = GetEntityModel(entity)
-            local entityName = Entities[entityHash] or 'Unknown'
-            local entityCoords = GetEntityCoords(entity)
-            local entityHeading = GetEntityHeading(entity)
-            local entityRotation = GetEntityRotation(entity)
-            local x = QBCore.Shared.Round(entityCoords.x, 2)
-            local y = QBCore.Shared.Round(entityCoords.y, 2)
-            local z = QBCore.Shared.Round(entityCoords.z, 2)
-            local rotX = QBCore.Shared.Round(entityRotation.x, 2)
-            local rotY = QBCore.Shared.Round(entityRotation.y, 2)
-            local rotZ = QBCore.Shared.Round(entityRotation.z, 2)
-            local h = QBCore.Shared.Round(entityHeading, 2)
-            SendNUIMessage({
-                string = string.format('Model Name:\t%s\nModel Hash:\t%s\n\nHeading:\t%s\nCoords:\t\tvector3(%s, %s, %s)\nRotation:\tvector3(%s, %s, %s)', entityName, entityHash, h, x, y, z, rotX, rotY, rotZ)
-            })
-            QBCore.Functions.Notify(Lang:t('success.entity_copy'), 'success')
+            local hash = GetEntityModel(entity)
+            local name = Entities[hash] or 'Unknown'
+            local coords = GetEntityCoords(entity)
+            local heading = GetEntityHeading(entity)
+            local rotation = GetEntityRotation(entity)
+
+            local str = string.format(
+                'Model Name:\t%s\nModel Hash:\t%s\n\nHeading:\t%.2f\nCoords:\t\tvector3(%.2f, %.2f, %.2f)\nRotation:\tvector3(%.2f, %.2f, %.2f)',
+                name, hash, heading,
+                coords.x, coords.y, coords.z,
+                rotation.x, rotation.y, rotation.z
+            )
+
+            SendNUIMessage({ string = str })
+            exports['PipouUI']:Notify('Infos entité copiées !', 'success')
         else
-            QBCore.Functions.Notify(Lang:t('error.failed_entity_copy'), 'error')
+            exports['PipouUI']:Notify('Aucune entité visée à copier.', 'error')
         end
     end
 end
+
+
+
 
 RegisterNetEvent('qb-admin:client:copyToClipboard', function(dataType)
     CopyToClipboard(dataType)
@@ -725,7 +710,7 @@ local function Round(value, decimals)
 end
 
 function ToggleDeveloperMode()
-    exports['PipouUI']:OpenSimpleMenu(Lang:t('menu.developer_options'), "", {
+    OpenMenuWithBack(Lang:t('menu.developer_options'), {
         {
             label = "📋 " .. Lang:t('menu.copy_vector3'),
             description = Lang:t('desc.vector3_desc'),
@@ -801,13 +786,7 @@ function ToggleDeveloperMode()
                 return false
             end
         },
-        {
-            label = "⬅️ Retour",
-            action = function()
-                exports['PipouUI']:Back()
-                return false
-            end
-        }
+
     })
 end
 
@@ -866,10 +845,10 @@ EntityPedView = false
 EntityViewEnabled = false
 
 function ToggleHudDevMode()
-    exports['PipouUI']:OpenSimpleMenu("Menu entités", "", {
+    OpenMenuWithBack("Menu entités", {
         {
             icon = '📋',
-            label = "📋 Copier les informations de la visée libre),
+            label = "📋 Copier les informations de la visée libre",
             description = Lang:t('desc.entity_view_freeaim_copy_desc'),
             action = function()
                 CopyToClipboard('freeaimEntity')
@@ -924,15 +903,8 @@ function ToggleHudDevMode()
                 return false
             end
         },
-        
-        {
-            label = "⬅️ Retour",
-            action = function()
-                exports['PipouUI']:Back()
-                return false
-            end
-        }
     })
+        
 end
 
 
@@ -955,7 +927,7 @@ function OpenSpawnWeaponsMenu()
         })
     end
 
-    exports['PipouUI']:OpenSimpleMenu(Lang:t('menu.spawn_weapons'), "", items, "top-left")
+    OpenMenuWithBack(Lang:t('menu.spawn_weapons'), items, "top-left")
 end
 
 
@@ -975,15 +947,166 @@ function OpenVehicleCategoryMenu ()
         })
     end
 
-    table.insert(elements, {
-        label = "⬅️ Retour",
-        action = function()
-            exports['PipouUI']:Back()
-            return false
-        end
-    })
+    OpenMenuWithBack(Lang:t('menu.spawn_vehicle'), elements)
 
-    exports['PipouUI']:OpenSimpleMenu(Lang:t('menu.spawn_vehicle'), "", elements)
 end
     
+
+function CreateStepMenu(title, steps, confirmCallback)
+    local data = {}
+    local currentStep = 1
+
+    local function nextStep()
+        local step = steps[currentStep]
+        if not step then
+            confirmCallback(data)
+            return
+        end
+
+        if step.type == 'input' then
+            local result = LocalInput(step.prompt, step.maxLength or 255)
+            if result and result ~= '' then
+                data[step.key] = step.convert and step.convert(result) or result
+                currentStep += 1
+                nextStep()
+            else
+                TriggerEvent('PipouUI:Notify', Lang:t('error.invalid_input'), 'error')
+            end
+
+        elseif step.type == 'list' then
+            local items = {}
+            for _, option in ipairs(step.options) do
+                table.insert(items, {
+                    label = option.label,
+                    value = option.value
+                })
+            end
+
+            local menuItems = {}
+            for _, option in ipairs(step.options) do
+                table.insert(menuItems, {
+                    label = option.label,
+                    value = option.value,
+                    action = function()
+                        data[step.key] = option.value
+                        currentStep += 1
+                        nextStep()
+                        return false
+                    end
+                })
+            end
+
+            OpenMenuWithBack(step.title or title, menuItems)
+
+        end
+    end
+
+    nextStep()
+end
+
+
+function OpenSetJobMenu(player)
+    QBCore.Functions.TriggerCallback('qb-admin:server:getJobsList', function(jobs)
+        if not jobs or #jobs == 0 then
+            exports['PipouUI']:Notify('Aucun job disponible.', 'error')
+            return
+        end
+
+        local jobItems = {
+            { type = "searchinput", placeholder = "Rechercher un job..." }
+        }
+
+        for _, job in ipairs(jobs) do
+            table.insert(jobItems, {
+                label = QBCore.Shared.FirstToUpper(job.name),
+                value = job.name,
+                action = function()
+                    QBCore.Functions.TriggerCallback('qb-admin:server:getJobGrades', function(grades)
+                        if not grades or #grades == 0 then
+                            exports['PipouUI']:Notify("Aucun grade trouvé pour ce job.", "error")
+                            return
+                        end
+
+                        local gradeItems = {}
+
+                        for _, grade in ipairs(grades) do
+                            table.insert(gradeItems, {
+                                label = string.format("%s (%d)", QBCore.Shared.FirstToUpper(grade.label), grade.grade),
+                                value = grade.grade,
+                                action = function()
+                                    TriggerServerEvent('qb-admin:server:setJob', player.id, job.name, grade.grade)
+                                    exports['PipouUI']:Notify(("Job défini : %s (grade %d)"):format(job.name, grade.grade), 'success')
+                                    return false
+                                end
+                            })
+                        end
+
+                        OpenMenuWithBack("Grade pour " .. QBCore.Shared.FirstToUpper(job.name), gradeItems)
+                    end, job.name)
+                    return false
+                end
+            })
+        end
+
+        OpenMenuWithBack("Choisir un job", jobItems)
+    end)
+end
+
+
+
+function OpenSetGangMenu(player)
+    QBCore.Functions.TriggerCallback('qb-admin:server:getGangsList', function(gangs)
+        if not gangs or #gangs == 0 then
+            exports['PipouUI']:Notify('Aucun gang disponible.', 'error')
+            return
+        end
+
+        -- Tri alphabétique
+        table.sort(gangs, function(a, b)
+            return a.label < b.label
+        end)
+
+        local gangItems = {
+            { type = "searchinput", placeholder = "Rechercher un gang..." } -- Ajout du champ de recherche ici
+        }
+
+        for _, gang in ipairs(gangs) do
+            table.insert(gangItems, {
+                label = gang.label,
+                value = gang.name,
+                action = function()
+                    QBCore.Functions.TriggerCallback('qb-admin:server:getGangGrades', function(grades)
+                        if not grades or #grades == 0 then
+                            exports['PipouUI']:Notify('Aucun grade pour ce gang.', 'error')
+                            return
+                        end
+
+                        -- Trier les grades par `rank`
+                        table.sort(grades, function(a, b)
+                            return a.rank < b.rank
+                        end)
+
+                        local gradeItems = {}
+
+                        for _, grade in ipairs(grades) do
+                            table.insert(gradeItems, {
+                                label = ("%s (rang %d)"):format(grade.label, grade.rank),
+                                action = function()
+                                    TriggerServerEvent('qb-admin:server:setGang', player.id, gang.name, grade.value)
+                                    exports['PipouUI']:Notify(("Gang défini : %s (grade %d)"):format(gang.label, grade.value), 'success')
+                                    return false
+                                end
+                            })
+                        end
+
+                        OpenMenuWithBack("Choisir un grade", gradeItems)
+                    end, gang.name)
+                    return false
+                end
+            })
+        end
+
+        OpenMenuWithBack("Choisir un gang", gangItems)
+    end)
+end
 

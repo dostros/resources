@@ -169,50 +169,23 @@ end
 -- NUI Calls
 
 function QBCore.Functions.Notify(text, texttype, length, icon)
-    local message = {
-        action = 'notify',
-        type = texttype or 'primary',
-        length = length or 5000,
-    }
-
-    if type(text) == 'table' then
-        message.text = text.text or 'Placeholder'
-        message.caption = text.caption or 'Placeholder'
-    else
-        message.text = text
-    end
-
-    if icon then
-        message.icon = icon
-    end
-
-    SendNUIMessage(message)
+    local msg = type(text) == 'table' and (text.text or 'Placeholder') or text
+    exports['PipouUI']:Notify(msg, texttype or 'info', length or 5000)
 end
+
+
 
 function QBCore.Functions.Progressbar(name, label, duration, useWhileDead, canCancel, disableControls, animation, prop, propTwo, onFinish, onCancel)
-    if GetResourceState('progressbar') ~= 'started' then error('progressbar needs to be started in order for QBCore.Functions.Progressbar to work') end
-    exports['progressbar']:Progress({
-        name = name:lower(),
-        duration = duration,
-        label = label,
-        useWhileDead = useWhileDead,
-        canCancel = canCancel,
-        controlDisables = disableControls,
-        animation = animation,
-        prop = prop,
-        propTwo = propTwo,
-    }, function(cancelled)
-        if not cancelled then
-            if onFinish then
-                onFinish()
-            end
+    -- animation, prop, propTwo, disableControls, useWhileDead ne sont pas gérés ici pour rester simple
+    exports['PipouUI']:ProgressBar(label or "Chargement...", duration or 3000, function(cancelled)
+        if cancelled then
+            if onCancel then onCancel() end
         else
-            if onCancel then
-                onCancel()
-            end
+            if onFinish then onFinish() end
         end
-    end)
+    end, canCancel)
 end
+
 
 -- World Getters
 

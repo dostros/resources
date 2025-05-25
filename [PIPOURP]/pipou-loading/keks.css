@@ -33,16 +33,19 @@ h1:before, h2:before {
 
 .top {
     position: absolute;
-    top: 7%;
-    left: 5%;
-    right: 5%;
-    text-align: left;
+    top: 30%;
+    left: 35%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 .top h1 {
     font-family: BankGothic;
-    font-size: 60px;
+    font-size: 200px;
     margin: 0;
+    animation: flicker 2.8s infinite linear;
 }
 
 .top h2 {
@@ -51,6 +54,47 @@ h1:before, h2:before {
     color: #ffcc99;
     margin: 0;
 }
+/* --- Effet néon vieux tube, plus subtil et plus long --- */
+@keyframes flicker {
+    /* phases normales : lumière forte */
+    0%, 4%, 6%, 8%, 10%, 60%, 100% {
+        opacity: 1;
+        text-shadow:
+            0 0 4px #fff,
+            0 0 8px  #FF6A00,
+            0 0 16px #FF6A00,
+            0 0 32px #FFB14D,
+            0 0 48px #FF6A00;
+    }
+
+    /* petits sursauts : baisse modérée de luminosité */
+    5%, 7%, 9%, 11%, 62%, 64% {
+        opacity: .70;
+        text-shadow:
+            0 0 2px #fff,
+            0 0 4px #FF6A00,
+            0 0 8px #FF6A00,
+            0 0 16px #FFB14D;
+    }
+
+    /* micro-coupures rapides mais jamais totalement éteint */
+    25%, 26%, 47%, 48%, 73%, 74%, 86%, 87% {
+        opacity: .30;
+        text-shadow:
+            0 0 1px #fff,
+            0 0 2px #FF6A00;
+    }
+}
+
+/* On applique l’animation mise à jour */
+.top h1 {
+    font-family: BankGothic;
+    font-size: 200px;
+    margin: 0;
+    animation: flicker 5s infinite linear;
+}
+
+
 
 .letni {
     position: absolute;
@@ -162,16 +206,16 @@ h1:before, h2:before {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.top h1 {
+/* .top h1 {
     text-shadow:
         0 0 5px #fff,
         0 0 10px #FF6A00,
         0 0 20px #FF6A00,
         0 0 40px #FFB14D;
-}
+} */
 
 
-.centered-title {
+/* .centered-title {
     position: absolute;
     top: 40%;
     left: 50%;
@@ -210,4 +254,4 @@ h1:before, h2:before {
             0 0 2px #fff,
             0 0 4px #FF6A00;
     }
-}
+} */
