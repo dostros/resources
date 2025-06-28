@@ -1,6 +1,6 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
--- OUVERTURE/FERMETURE DU MENU GARAGE
+-- OUVERTURE/FERMETURE DU MENU
 display = false
 
 function SetDisplay(bool, joblabel, jobid,isgang)

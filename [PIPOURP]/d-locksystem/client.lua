@@ -169,6 +169,3 @@ RegisterCommand('look', function()
     lookobject()
 end, false)
 
---58 ->179 ->-179-> -20
-
--- -98 ->-20

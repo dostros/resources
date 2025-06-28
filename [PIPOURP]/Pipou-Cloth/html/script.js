@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
             $("body").hide();
         }
     }
-    //display(false);
+    display(false);
 
     function exit () {
 

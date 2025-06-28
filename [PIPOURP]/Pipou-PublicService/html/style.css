@@ -1,0 +1,258 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#publicservicetablette {
+    width: 90%;
+    max-width: 1400px;
+    min-height: 900px;
+    margin-top: 3%;
+    background: linear-gradient(to bottom right, #3a3434, #5f2e2e);
+    border-radius: 20px;
+    display: flex;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+#header {
+    background-color: #292424;
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20%;
+    min-height: 100%;
+}
+
+#logo img {
+    max-width: 80px;
+    margin-bottom: 30px;
+}
+
+#menu {
+    width: 100%;
+}
+
+#menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+#menu li {
+    margin: 10px 0;
+}
+
+#menu a {
+    display: block;
+    padding: 12px 20px;
+    background-color: #5a4a4a;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.2s, transform 0.1s;
+    font-size: 16px;
+    text-align: center;
+}
+
+#menu a:hover {
+    background-color: #7b5d5d;
+    transform: scale(1.03);
+}
+
+#menu a.active {
+    background-color: #f0a500;
+    color: black;
+    font-weight: bold;
+}
+
+#content {
+    flex-grow: 1;
+    background: #f7f7f7;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+#title {
+    background-color: #4a3f3f;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    border-radius: 0px 20px 0px 0px;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.panel-content {
+    display: none;
+}
+
+#patientsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+#patientsTable th, #patientsTable td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+#patientsTable th {
+    background-color: #f0a500;
+    color: black;
+}
+
+#patientsTable tr:hover {
+    background-color: #f9f9f9;
+}
+
+#openModal {
+    padding: 10px 20px;
+    background-color: #f0a500;
+    color: black;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#openModal:hover {
+    background-color: #d18e00;
+}
+
+
+
+
+/* Modale générique */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex; /* ✅ Ajout clé */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex; /* ✅ Ajout clé */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+
+/* Contenu des modales */
+.modal-content {
+    background: #ffffff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.25s ease;
+    gap: 12px;
+}
+
+.modal-content h3 {
+    margin: 0 0 10px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #2c2c2c;
+    text-align: center;
+}
+
+/* Champs */
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+    padding: 10px 12px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 100%;
+    background-color: #f9f9f9;
+    transition: border 0.2s;
+}
+
+.modal-content input:focus,
+.modal-content select:focus,
+.modal-content textarea:focus {
+    border-color: #f0a500;
+    outline: none;
+}
+
+.modal-content textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* Boutons */
+.modal-content button {
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* Valider */
+.modal-content button[type="submit"] {
+    background-color: #4caf50;
+    color: white;
+}
+.modal-content button[type="submit"]:hover {
+    background-color: #43a047;
+}
+
+/* Supprimer */
+.modal-content button#deletePatientBtn {
+    background-color: #f39c12;
+    color: black;
+}
+.modal-content button#deletePatientBtn:hover {
+    background-color: #e67e22;
+}
+
+/* Annuler / Fermer */
+.modal-content button#cancelModal,
+.modal-content button#closeProfileModal {
+    background-color: #e74c3c;
+    color: white;
+}
+.modal-content button#cancelModal:hover,
+.modal-content button#closeProfileModal:hover {
+    background-color: #c0392b;
+}
+
+/* Animation d’apparition */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}

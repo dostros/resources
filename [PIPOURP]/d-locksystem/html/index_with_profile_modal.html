@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.prod.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://cfx-nui-my-resource/production.js" async></script>
+    <title>PUBLIC SERVICE</title>
+</head>
+<body>
+
+    <div id="publicservicetablette">
+        <div id="header">
+
+            <div id="logo">
+                <img src="./image/ems.png" alt="Logo">
+            </div>
+
+            <div id="menu">
+                <ul>
+                    <li><a href="index">Accueil</a></li>
+                    <li><a href="patients">Patients</a></li>
+                    <li><a href="contact">Contact</a></li>
+                    <li><a href="services">Services</a></li>
+                </ul>
+
+            </div>
+            
+
+
+        </div>
+
+        <div id="content">
+            <div id="title">
+                <h1>LOS SANTOS MEDICAL CENTER</h1>
+            </div>
+
+            <div id="panel">
+                <div class="panel-content" id="index">
+                    <h2>Bienvenue sur la page d'accueil !</h2><p>Contenu d'accueil ici.</p>
+                </div>
+
+            <div class="panel-content" id="patients">
+                <h2>Liste des patients</h2>
+
+                <button id="openModal">+ Nouveau patient</button>
+
+                <table id="patientsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Âge</th>
+                            <th>Maladie</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsList">
+                        <!-- Patients ajoutés ici dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+
+
+                <div class="panel-content" id="contact">
+                    <h2>Contactez-nous</h2><p>Email : ems@lsmc.com</p>
+                </div>
+
+                <div class="panel-content" id="services">
+                    <h2>Nos services</h2><ul><li>Soins d\'urgence</li><li>Transport médical</li></ul>
+                </div>
+                 
+
+
+
+
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Popup ajout patient -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Créer un nouveau patient</h3>
+            <form id="patientForm">
+                <input type="text" id="nom" placeholder="Nom" required>
+                <input type="text" id="prenom" placeholder="Prénom" required>
+                <input type="number" id="age" placeholder="Âge" required>
+                <select id="sexe" required>
+                    <option value="">Sexe</option>
+                    <option value="Homme">Homme</option>
+                    <option value="Femme">Femme</option>
+                    <option value="Autre">Autre</option>
+                </select>
+                <input type="text" id="maladie" placeholder="Maladie principale" required>
+                <textarea id="remarques" placeholder="Remarques médicales"></textarea>
+                <button type="submit">Enregistrer</button>
+                <button type="button" id="cancelModal">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+
+
+
+
+
+    <script src="script.js"></script>
+
+<div id="patientProfileModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>Profil du patient</h3>
+        <form id="editPatientForm">
+            <input type="hidden" id="edit_id">
+            <input type="text" id="edit_nom" placeholder="Nom" required>
+            <input type="text" id="edit_prenom" placeholder="Prénom" required>
+            <input type="number" id="edit_age" placeholder="Âge" required>
+            <select id="edit_sexe" required>
+                <option value="">Sexe</option>
+                <option value="Homme">Homme</option>
+                <option value="Femme">Femme</option>
+                <option value="Autre">Autre</option>
+            </select>
+            <input type="text" id="edit_maladie" placeholder="Maladie principale" required>
+            <textarea id="edit_remarques" placeholder="Remarques médicales"></textarea>
+            <button type="submit">Enregistrer</button>
+            <button type="button" id="deletePatientBtn">Supprimer</button>
+            <button type="button" id="closeProfileModal">Fermer</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
