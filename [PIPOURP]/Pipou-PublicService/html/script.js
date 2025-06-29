@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     display(false);
+
     $('.modal-overlay').hide();
 
     function exit() {

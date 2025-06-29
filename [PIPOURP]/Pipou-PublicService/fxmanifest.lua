@@ -8,12 +8,14 @@ version '1.0.0'
 
 -- What to run
 client_scripts {
-    'client.lua',
+    'menu.lua',
+    'client/*.lua',
 }
 
 server_scripts {
-    'server.lua',
+    'menu-server.lua',
     '@oxmysql/lib/MySQL.lua',
+    'server/*.lua',
 }
 
 ui_page 'html/index.html'
@@ -26,3 +28,10 @@ files {
     'html/**.svg',
 }
 
+
+dependencies {
+    'PipouUI',
+    'qb-core',
+    'oxmysql',
+    'qb-target',
+}
